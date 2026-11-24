@@ -1,6 +1,12 @@
 name: 同步法规并发布网站
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/sync.yml
+      - scripts/**
+      - site/**
   schedule:
     - cron: "24 11 * * *"
   workflow_dispatch:

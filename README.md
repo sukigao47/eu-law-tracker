@@ -14,7 +14,7 @@
 2. 打开仓库的 **Settings → Pages**，将发布来源选为 **GitHub Actions**。
 3. 在 **Actions → 同步法规并发布网站 → Run workflow** 手动跑一次。成功后在部署任务或 Pages 设置页查看公开网址。
 
-定时任务设为每天北京时间 19:24，由 GitHub 排队运行。任务会更新最近发布和现行状态。需要重取历史条目的标题、日期或主题时，可在手动运行时勾选「重新读取每项法规的元数据」。同步失败时，已发布的网站继续提供上次成功的快照。
+定时任务设为每天北京时间 19:24，由 GitHub 排队运行。推送网站、同步脚本或工作流的修改到 `main` 也会触发更新。任务会更新最近发布和现行状态。需要重取历史条目的标题、日期或主题时，可在手动运行时勾选「重新读取每项法规的元数据」。同步失败时，已发布的网站继续提供上次成功的快照。
 
 GitHub 会停用连续 60 天没有仓库活动的公开仓库的定时工作流。日常维护可提交并推送实际修改。GitHub 的文档没有说明单独点「Run workflow」会重置倒计时。停用后在工作流页面选择 **Enable workflow**，再运行一次更新。 [GitHub 定时规则](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule) · [启用工作流](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/disable-and-enable-workflows)
 
