@@ -1,0 +1,70 @@
+name: 同步法规并发布网站
+
+on:
+  schedule:
+    - cron: "24 11 * * *"
+  workflow_dispatch:
+    inputs:
+      rebuild:
+        description: 重新读取每项法规的元数据
+        type: boolean
+        default: false
+
+concurrency:
+  group: eu-law-pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: 同步官方数据
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/configure-pages@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: 载入最近同步的目录
+        uses: actions/cache@v5
+        with:
+          path: .catalog-cache
+          key: eu-law-catalog-v1-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: eu-law-catalog-v1-
+      - name: 核对 Cellar 法规数据
+        env:
+          REBUILD: ${{ inputs.rebuild }}
+        run: |
+          arguments=(--previous .catalog-cache/catalog.json)
+          if [[ "$REBUILD" == "true" ]]; then
+            arguments+=(--rebuild)
+          fi
+          python scripts/sync.py "${arguments[@]}"
+          mkdir -p .catalog-cache
+          cp site/data/catalog.json .catalog-cache/catalog.json
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    name: 发布到 GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.publish.outputs.page_url }}
+    steps:
+      - id: publish
+        uses: actions/deploy-pages@v4
