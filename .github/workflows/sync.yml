@@ -8,6 +8,7 @@ on:
       - scripts/**
       - site/**
   schedule:
+    # UTC 11:24 corresponds to 19:24 in Asia/Shanghai.
     - cron: "24 11 * * *"
   workflow_dispatch:
     inputs:
