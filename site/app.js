@@ -64,11 +64,16 @@ function statusFor(record, today) {
 
 function loadTopics() {
   const chosen = ui.topic.value;
-  const subjects = new Set(records.flatMap((record) => record.subjects));
-  const options = Array.from(subjects, (subject) => new Option(labelSubject(subject), subject));
-  options.sort((left, right) => topicOrder.compare(left.text, right.text));
-  if (records.some((record) => record.subjects.length === 0)) {
-    options.push(new Option("未标注主题", "__unlabelled"));
+  let options;
+  if (snapshot.profile) {
+    options = snapshot.profile.topics.map(({ id, label }) => new Option(label, id));
+  } else {
+    const subjects = new Set(records.flatMap((record) => record.subjects));
+    options = Array.from(subjects, (subject) => new Option(labelSubject(subject), subject));
+    options.sort((left, right) => topicOrder.compare(left.text, right.text));
+    if (records.some((record) => record.subjects.length === 0)) {
+      options.push(new Option("未标注主题", "__unlabelled"));
+    }
   }
   ui.topic.replaceChildren(new Option("全部主题", ""), ...options);
   ui.topic.value = Array.from(ui.topic.options).some((option) => option.value === chosen) ? chosen : "";
@@ -102,18 +107,28 @@ async function loadSnapshot(manual = false) {
     }
     if (!snapshot || data.checkedAt > snapshot.checkedAt) {
       snapshot = data;
-      records = data.documents.map((doc) => ({
-        ...doc,
-        searchText: [doc.id, doc.title, ...doc.subjects, ...doc.subjects.map(labelSubject), ...doc.keywords]
-          .join(" ").normalize("NFKC").toLowerCase(),
-      }));
+      const businessLabels = new Map((data.profile?.topics ?? []).map(({ id, label }) => [id, label]));
+      records = data.documents.map((doc) => {
+        const topicIds = data.profile ? doc.businessTopics : doc.subjects;
+        const topicNames = data.profile
+          ? topicIds.map((id) => businessLabels.get(id))
+          : doc.subjects.map(labelSubject);
+        return {
+          ...doc,
+          topicIds,
+          topicNames,
+          searchText: [doc.id, doc.title, ...topicNames, ...doc.subjects, ...doc.subjects.map(labelSubject), ...doc.keywords]
+            .join(" ").normalize("NFKC").toLowerCase(),
+        };
+      });
       loadTopics();
       ui["sync-time"].dateTime = data.checkedAt;
       ui["sync-time"].textContent = chinaTime.format(new Date(data.checkedAt));
       ui["sync-note"].textContent = "北京时间 · 公报数据截至 " + data.through;
-      ui["catalog-scope"].textContent = data.recentOnly
+      const scope = data.recentOnly
         ? "《欧盟官方公报》" + data.recentSince + " 起发布的法规、指令和决定"
         : "现行法规与近 90 天新发布文件 · 英文标题";
+      ui["catalog-scope"].textContent = data.profile ? data.profile.label + " · " + scope : scope;
     }
     refreshError = false;
   } catch (error) {
@@ -156,9 +171,12 @@ function resultRow(record, today) {
 
   const topics = row.insertCell();
   topics.className = "topics";
-  const labels = record.subjects.map(labelSubject);
+  const labels = record.topicNames;
   topics.textContent = labels.slice(0, 2).join(" · ") || "未标注";
-  if (labels.length > 2) topics.title = labels.join(" · ");
+  if (labels.length > 2) {
+    topics.textContent += " +" + (labels.length - 2);
+    topics.title = labels.join(" · ");
+  }
 
   const date = row.insertCell();
   date.className = "pub-date";
@@ -178,7 +196,7 @@ function matches(record, today, terms) {
   return (!ui.type.value || record.id[5] === ui.type.value)
     && (!ui.status.value || statusFor(record, today) === ui.status.value)
     && (!ui.topic.value || (ui.topic.value === "__unlabelled"
-      ? record.subjects.length === 0 : record.subjects.includes(ui.topic.value)))
+      ? record.topicIds.length === 0 : record.topicIds.includes(ui.topic.value)))
     && (!ui.since.value || (record.published && record.published >= ui.since.value))
     && (!ui.until.value || (record.published && record.published <= ui.until.value))
     && terms.every((term) => record.searchText.includes(term));

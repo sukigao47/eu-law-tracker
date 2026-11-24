@@ -1,0 +1,193 @@
+{
+  "id": "eu-terminal-lifecycle",
+  "label": "智能终端全生命周期",
+  "products": [
+    "smartphone", "smartphones", "mobile phone", "mobile phones",
+    "mobile telephone", "mobile telephones", "cellular phone", "cellular phones",
+    "slate tablet", "slate tablets", "tablet computer", "tablet computers",
+    "smartwatch", "smartwatches", "smart watch", "smart watches",
+    "wearable device", "wearable devices", "wearable technology", "wearable electronics",
+    "fitness tracker", "fitness trackers", "smart glasses", "smart terminal", "smart terminals",
+    "consumer terminal equipment", "headphones", "earphones", "earbuds", "wireless headset",
+    "mobile handset", "mobile handsets", "power bank", "power banks",
+    "external power supply", "external power supplies", "usb c", "usb type c",
+    "lithium ion battery", "lithium ion batteries", "lithium battery", "lithium batteries"
+  ],
+  "topics": [
+    {
+      "id": "devices",
+      "label": "终端与配件专项",
+      "product_title": true,
+      "acts": ["32022L2380", "32023R1669", "32023R1670", "32025R2006"],
+      "concepts": ["http://eurovoc.europa.eu/6776"],
+      "labels": ["mobile phone"]
+    },
+    {
+      "id": "design-ip",
+      "label": "研发与知识产权",
+      "acts": ["32004L0048", "32012R1257", "32013R0608", "31998L0071"],
+      "follow": ["32002R0006", "32009L0024", "32016L0943", "32017R1001", "32024R2822", "32024L2823", "32026R0715"],
+      "phrases": [
+        "unitary patent protection", "community designs", "european union designs",
+        "european union trade mark", "legal protection of designs",
+        "legal protection of computer programs", "trade secrets",
+        "standard essential patents", "customs enforcement of intellectual property rights"
+      ]
+    },
+    {
+      "id": "ecodesign",
+      "label": "生态设计、能效与充电",
+      "acts": ["32017R1369", "32023R0826"],
+      "follow": ["32019R1782", "32022L2380", "32023R1669", "32023R1670", "32024R1781", "32025R2006", "32025R2052"],
+      "phrases": [
+        "ecodesign for sustainable products", "sustainable products ecodesign",
+        "common charging solution", "common charger", "universal charger",
+        "digital product passport", "digital product passports",
+        "ecodesign requirements for external power supplies",
+        "networked standby energy consumption"
+      ],
+      "context": ["ecodesign", "eco design", "energy labelling", "energy labeling", "energy efficiency", "charging", "repairability"]
+    },
+    {
+      "id": "digital",
+      "label": "网络安全、数据与 AI",
+      "acts": ["32002L0058", "32016R0679", "32019R0881", "32022L2555", "32025R2518"],
+      "follow": ["32022R0030", "32023R2444", "32023R2854", "32024R1689", "32024R2847"],
+      "phrases": [
+        "cyber resilience act", "products with digital elements", "general data protection regulation",
+        "fair access to and use of data", "artificial intelligence act",
+        "personal data breaches", "cybersecurity certification",
+        "data breach notifications"
+      ],
+      "context": ["cybersecurity", "cyber security", "personal data", "privacy", "encrypted", "artificial intelligence", "security updates"]
+    },
+    {
+      "id": "sourcing",
+      "label": "采购、供应链与尽调",
+      "acts": ["32022L2464", "32024R1252", "32025L0794"],
+      "follow": ["32017R0821", "32024L1760", "32024R3015", "32025R1561", "32026L0470"],
+      "phrases": [
+        "conflict minerals", "conflict affected and high risk areas", "supply chain due diligence",
+        "corporate sustainability due diligence", "corporate sustainability reporting",
+        "products made with forced labour", "products made with forced labor",
+        "critical raw materials", "strategic raw materials"
+      ],
+      "context": ["responsible sourcing", "supplier due diligence", "forced labour", "forced labor", "due diligence"]
+    },
+    {
+      "id": "materials",
+      "label": "材料、化学品与电池",
+      "acts": ["32006R1907", "32008R1272"],
+      "follow": ["32011L0065", "32019R1021", "32023R1542", "32025R1561"],
+      "phrases": [
+        "substances of very high concern", "persistent organic pollutants",
+        "per and polyfluoroalkyl substances", "polyfluoroalkyl substances",
+        "batteries and waste batteries", "battery passport", "battery passports",
+        "hazardous substances in electrical and electronic equipment",
+        "hazardous substances in electrical equipment", "restriction of hazardous substances"
+      ],
+      "context": ["chemical substances", "hazardous substances", "reach", "rohs", "battery safety", "battery durability", "recycled content", "recycled plastic materials"]
+    },
+    {
+      "id": "factory",
+      "label": "生产、工厂环保与职业安全",
+      "acts": ["31989L0391", "31998L0024", "32004L0037", "32006L0042"],
+      "follow": ["32023R1230", "32024L1785", "32024R1244"],
+      "phrases": [
+        "industrial emissions integrated pollution prevention and control",
+        "pollutant release and transfer register", "industrial emissions portal",
+        "health and safety of workers from the risks related to chemical agents",
+        "exposure to carcinogens mutagens or reprotoxic substances at work",
+        "manufacture of batteries", "manufacturing of batteries",
+        "surface treatment of metals and plastics", "production of electronic components"
+      ],
+      "context": ["factory", "manufacturing", "industrial emissions", "industrial safety", "safety at work", "occupational safety"]
+    },
+    {
+      "id": "conformity",
+      "label": "CE、无线电与产品安全",
+      "acts": ["32008D0768", "32008R0765", "32012R1025", "32014L0035", "32017R0745", "32019R1020", "32022R0030"],
+      "follow": ["32014L0030", "32014L0053", "32022D2191", "32022L2380", "32023R0988", "32024L2853"],
+      "concepts": ["http://eurovoc.europa.eu/2176", "http://eurovoc.europa.eu/5319"],
+      "labels": ["electrical and radio equipment", "electromagnetic interference", "radio equipment"],
+      "phrases": [
+        "ce marking", "radio equipment directive", "electromagnetic compatibility",
+        "harmonised standards for radio equipment", "harmonized standards for radio equipment",
+        "general product safety", "market surveillance and compliance of products",
+        "safety gate rapid alert system", "short range radio devices",
+        "short range devices", "radio local area networks", "radio spectrum for wireless access",
+        "liability for defective products"
+      ],
+      "context": ["conformity assessment", "harmonised standards", "harmonized standards", "frequency bands", "radio spectrum", "product safety", "market surveillance", "low voltage"]
+    },
+    {
+      "id": "trade",
+      "label": "进出口、海关、税则与增值税",
+      "acts": ["31987R2658", "32006L0112", "32008L0068", "32013R0608", "32017L2455", "32019L1995", "32023R0956", "32025L0516"],
+      "follow": ["32013R0952", "32015R2446", "32015R2447", "32021R0821", "32026R2108"],
+      "phrases": [
+        "union customs code", "import one stop shop", "one stop shop for vat",
+        "low value consignments", "distance sales of goods imported from third territories",
+        "transport of lithium batteries", "carriage of lithium batteries", "dual use items"
+      ],
+      "context": ["customs", "tariff classification", "combined nomenclature", "origin of goods", "anti dumping", "import duty", "exports", "export controls", "value added tax", "dangerous goods"]
+    },
+    {
+      "id": "retail",
+      "label": "销售、电商与消费者权益",
+      "acts": ["32000L0031", "32017R2394", "32019R1150", "32020L1828", "32022R0720", "32023R0988"],
+      "follow": ["32011L0083", "32018R0302", "32019L0770", "32019L0771", "32019L0882", "32022R2065"],
+      "phrases": [
+        "contracts for the sale of goods", "consumer rights directive",
+        "provision of digital content and digital services", "supply of digital content and digital services",
+        "digital services act", "online intermediation services",
+        "online marketplaces", "online marketplace", "distance sales of goods",
+        "unjustified geo blocking", "accessibility requirements for products and services",
+        "price indication of products offered to consumers"
+      ],
+      "context": ["consumer rights", "consumer protection", "electronic commerce", "distance contracts", "accessibility", "online sales"]
+    },
+    {
+      "id": "advertising",
+      "label": "广告、促销与绿色宣称",
+      "acts": ["31998L0006", "32023R1669", "32022R2065"],
+      "follow": ["32005L0029", "32006L0114", "32024L0825"],
+      "phrases": [
+        "misleading and comparative advertising", "unfair business to consumer commercial practices",
+        "unfair commercial practices", "empowering consumers for the green transition",
+        "environmental claims", "green claims", "greenwashing",
+        "sustainability labels", "targeted advertising", "price reduction announcements"
+      ],
+      "context": ["advertising", "marketing claims", "environmental labelling", "promotional practices"]
+    },
+    {
+      "id": "service",
+      "label": "售后、维修、备件与召回",
+      "acts": ["32019L0770", "32019L0771", "32023R0988", "32023R1670", "32024R3228", "32025R1960", "32025R2006"],
+      "follow": ["32013L0011", "32024L1799", "32024R1435", "32024L2853", "32025L2647"],
+      "phrases": [
+        "right to repair", "repair of goods", "product safety recall", "product safety recalls",
+        "recall notice", "recall notices", "repairability index",
+        "warranty of conformity", "legal guarantee of conformity", "commercial guarantee of durability",
+        "alternative dispute resolution for consumer disputes"
+      ],
+      "context": ["repairability", "repairers", "spare parts", "repair and maintenance", "software updates", "battery replacement", "refurbishment", "recall"]
+    },
+    {
+      "id": "circular",
+      "label": "包装、回收与生产者责任",
+      "acts": ["31994L0062", "32008L0098", "32018L0851"],
+      "follow": ["32012L0019", "32023R1542", "32024R1157", "32025R0040"],
+      "concepts": ["http://eurovoc.europa.eu/6411"],
+      "labels": ["electronic waste"],
+      "phrases": [
+        "waste electrical and electronic equipment", "electrical and electronic waste",
+        "batteries and waste batteries", "packaging and packaging waste",
+        "extended producer responsibility", "electronic waste", "waste batteries",
+        "recycling of batteries", "used electrical and electronic equipment",
+        "electrical and electronic assemblies and scrap"
+      ],
+      "context": ["take back", "collection", "recycling", "waste shipment", "producer responsibility", "packaging waste", "reuse", "preparing for re use"]
+    }
+  ]
+}

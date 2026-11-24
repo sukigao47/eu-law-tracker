@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - .github/workflows/sync.yml
+      - config/**
       - scripts/**
       - site/**
   schedule:
@@ -46,17 +47,15 @@ jobs:
           path: .catalog-cache
           key: eu-law-catalog-v1-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: eu-law-catalog-v1-
-      - name: 核对 Cellar 法规数据
+      - name: 核对 Cellar 数据并筛选业务主题
         env:
           REBUILD: ${{ inputs.rebuild }}
         run: |
-          arguments=(--previous .catalog-cache/catalog.json)
+          arguments=(--cache .catalog-cache/catalog.json --profile config/terminal-lifecycle.json)
           if [[ "$REBUILD" == "true" ]]; then
             arguments+=(--rebuild)
           fi
           python scripts/sync.py "${arguments[@]}"
-          mkdir -p .catalog-cache
-          cp site/data/catalog.json .catalog-cache/catalog.json
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site

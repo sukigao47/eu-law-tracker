@@ -13,6 +13,8 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
+from filter_catalog import filter_catalog
+
 
 ENDPOINT = "https://publications.europa.eu/webapi/rdf/sparql"
 PREFIXES = """PREFIX cdm: <http://publications.europa.eu/ontology/cdm#>
@@ -151,6 +153,11 @@ def details(ids_and_works, in_force_range=False):
           FILTER(LANG(?value) = "en")
           BIND("keyword" AS ?field)
         }}
+        UNION {{
+          ?work cdm:work_is_about_concept_eurovoc ?concept .
+          BIND(STR(?concept) AS ?value)
+          BIND("concept" AS ?field)
+        }}
       }} LIMIT {DETAIL_LIMIT}
     """)
     if len(rows) >= DETAIL_LIMIT:
@@ -183,6 +190,7 @@ def details(ids_and_works, in_force_range=False):
                 False if in_force & {"false", "0"} else None,
                 "subjects": sorted(record.get("subject", ()), key=str.casefold),
                 "keywords": sorted(record.get("keyword", ()), key=str.casefold),
+                "concepts": sorted(record.get("concept", ())),
             }
     if ids_and_works and not any(record["title"] for record in result.values()):
         raise ValueError("Cellar returned no English titles for an entire batch")
@@ -195,7 +203,7 @@ def read_previous(paths):
         if path is not None and path.is_file():
             with path.open(encoding="utf-8") as source:
                 candidate = json.load(source)
-            if candidate.get("version") == 1 and (
+            if candidate.get("version") == 1 and "profile" not in candidate and (
                 previous is None or candidate["checkedAt"] > previous["checkedAt"]
             ):
                 previous = candidate
@@ -212,7 +220,7 @@ def write_catalog(path, catalog):
     temporary.replace(path)
 
 
-def sync(output, previous_path, rebuild, recent_only):
+def sync(output, previous_path, cache, profile, rebuild, recent_only):
     today = datetime.now(ZoneInfo("Europe/Brussels")).date()
     since = today - timedelta(days=RECENT_DAYS - 1)
     recent = recent_index(since, today)
@@ -221,7 +229,7 @@ def sync(output, previous_path, rebuild, recent_only):
         raise ValueError("Cellar found no legislation across the recent publication window")
 
     current = {} if recent_only else in_force_index()
-    previous = None if rebuild or recent_only else read_previous([output, previous_path])
+    previous = None if rebuild or recent_only else read_previous([cache, previous_path, output])
     before = {row["id"]: row for row in previous["documents"]} if previous else {}
     if not recent_only:
         old_current = sum(row["inForce"] is True for row in before.values())
@@ -238,6 +246,7 @@ def sync(output, previous_path, rebuild, recent_only):
         recent_date = recent.get(identifier, {}).get("published", "")
         if (previous_row is None or previous_row["work"] != work.rsplit("/", 1)[1]
                 or not previous_row["title"] or recent_date >= refreshed_since
+                or (identifier in recent and not (previous_row["subjects"] or previous_row["keywords"]))
                 or (previous_row["inForce"] is True) != (identifier in current)):
             to_fetch.append((identifier, work))
         else:
@@ -288,15 +297,23 @@ def sync(output, previous_path, rebuild, recent_only):
     }
     if len(documents) != len(wanted):
         raise ValueError("The number of records changed unexpectedly while building the catalogue")
-    write_catalog(output, catalog)
-    print(f"Saved {len(documents):,} acts to {output}", flush=True)
+    published = filter_catalog(catalog, profile)
+    if not recent_only:
+        write_catalog(cache, catalog)
+    write_catalog(output, published)
+    print(f"Published profile {published['profile']['id']}: "
+          f"{len(published['documents']):,} of {len(documents):,} acts", flush=True)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "site/data/catalog.json")
     parser.add_argument("--previous", type=Path)
+    parser.add_argument("--cache", type=Path, default=ROOT / ".catalog-cache/catalog.json")
+    parser.add_argument("--profile", type=Path, default=ROOT / "config/terminal-lifecycle.json")
     parser.add_argument("--rebuild", action="store_true", help="Refresh all metadata")
     parser.add_argument("--recent-only", action="store_true", help="Build a preview with recent acts")
     args = parser.parse_args()
-    sync(args.output, args.previous, args.rebuild, args.recent_only)
+    if args.output.resolve() == args.cache.resolve():
+        parser.error("--output and --cache must point to different files")
+    sync(args.output, args.previous, args.cache, args.profile, args.rebuild, args.recent_only)
