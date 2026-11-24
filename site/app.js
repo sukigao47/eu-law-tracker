@@ -241,7 +241,7 @@ function render() {
   ui["empty-title"].textContent = "没有符合条件的法规";
   ui["empty-detail"].textContent = rangeDays
     ? "当前快照的所选时间内没有匹配记录。可调整日期或到官方公报核对。"
-    : "试试其他关键词，或放宽文种、主题和日期条件。";
+    : "试试其他关键词，或放宽效力层级、主题和日期条件。";
   ui.pagination.hidden = lastPage === 1;
   ui["result-count"].textContent = "匹配 " + numbers.format(filtered.length)
     + " 项 · 全库 " + numbers.format(records.length) + " 项";
