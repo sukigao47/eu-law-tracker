@@ -16,7 +16,8 @@ class OfficialSourceRegistryTests(unittest.TestCase):
         )
         self.assertEqual(categories["soft_law"]["status"], "automated_partial")
         self.assertEqual(categories["oj_c_series"]["status"], "automated_partial")
-        for category_id in ("case_law", "commission_guidance", "technical_standards"):
+        self.assertEqual(categories["case_law"]["status"], "automated_partial")
+        for category_id in ("commission_guidance", "technical_standards"):
             self.assertEqual(categories[category_id]["status"], "reference_only")
         for category in categories.values():
             self.assertTrue(category["sources"])
