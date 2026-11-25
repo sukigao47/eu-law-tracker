@@ -152,7 +152,7 @@ function departmentIdsFor(doc) {
   return [...new Set([...existing,...taxonomy.departments.filter(d=>d.topics.some(t=>ids.has(t))).map(d=>d.id),...Object.keys(DEPARTMENT_CORE).filter(id=>DEPARTMENT_CORE[id].includes(doc.id))])];
 }
 function legalFieldIdsFor(doc) {
-  const subjects=new Set(asList(doc.subjects).map(x=>normalize(x)));
+  const subjects=new Set(asList(doc.subjects??doc.subject).map(x=>normalize(x)));
   const searchable=normalize([doc.title,doc.titleZh,...asList(doc.keywords)].filter(Boolean).join(" "));
   return (taxonomy.legalFields??[]).filter(field=>
     asList(field.subjects).some(subject=>subjects.has(normalize(subject))) ||
