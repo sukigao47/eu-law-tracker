@@ -18,7 +18,7 @@ PAGE_SIZE = 1000
 BATCH_SIZE = 80
 SOFT_LAW_DAYS = 5 * 366
 OJ_C_DAYS = 180
-SOFT_LAW_CELEX = re.compile(r"^(?:3[0-9]{4}[AHGC][0-9]{4,6}|5[0-9]{4}(?:DC|JC|SC|AA|TA|SA|AB|HB|XB|AE|IE|AC|AR|IR|XR)[0-9]{1,6})$")
+SOFT_LAW_CELEX = re.compile(r"^(3[0-9]{4}[AHGC][0-9]{4,6}|5[0-9]{4}(DC|JC|SC|AA|TA|SA|AB|HB|XB|AE|IE|AC|AR|IR|XR)[0-9]{1,6})$")
 
 
 def official_url(identifier: str) -> str:
