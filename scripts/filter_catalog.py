@@ -121,16 +121,14 @@ def filter_catalog(catalog, config_path):
     titles_path = config_path.with_name("titles-zh.json")
     taxonomy = json.loads(taxonomy_path.read_text(encoding="utf-8")) if taxonomy_path.is_file() else {"departments": [], "crossCutting": []}
     chinese_titles = json.loads(titles_path.read_text(encoding="utf-8")) if titles_path.is_file() else {}
-    department_map = {
-        topic_id: department["id"]
-        for department in taxonomy.get("departments", [])
-        for topic_id in department.get("topics", [])
-    }
-    cross_map = {
-        topic_id: topic["id"]
-        for topic in taxonomy.get("crossCutting", [])
-        for topic_id in topic.get("topics", [])
-    }
+    department_map = {}
+    for department in taxonomy.get("departments", []):
+        for topic_id in department.get("topics", []):
+            department_map.setdefault(topic_id, set()).add(department["id"])
+    cross_map = {}
+    for topic in taxonomy.get("crossCutting", []):
+        for topic_id in topic.get("topics", []):
+            cross_map.setdefault(topic_id, set()).add(topic["id"])
 
     documents = []
     for record in catalog["documents"]:
@@ -146,8 +144,8 @@ def filter_catalog(catalog, config_path):
             if topic.matches(record["id"], cited, concepts, labels, text, product, product_title)
         ]
         if matches:
-            department_ids = sorted({department_map[topic_id] for topic_id in matches if topic_id in department_map})
-            cross_cutting_ids = sorted({cross_map[topic_id] for topic_id in matches if topic_id in cross_map})
+            department_ids = sorted({department_id for topic_id in matches for department_id in department_map.get(topic_id, set())})
+            cross_cutting_ids = sorted({topic_id for matched_topic in matches for topic_id in cross_map.get(matched_topic, set())})
             kind_code = record["id"][5] if len(record["id"]) > 5 else ""
             legal_type = {"R": "Regulation", "L": "Directive", "D": "Decision"}.get(kind_code, "Other")
             instrument_class = classify_instrument(record["title"], kind_code)
