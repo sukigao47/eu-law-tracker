@@ -95,7 +95,8 @@ def _index(query_body: str, since: date, through: date, identifier_filter: str) 
 
 def fetch_soft_law(since: date, through: date) -> dict[str, dict]:
     return _index(
-        "?work cdm:resource_legal_id_celex ?id ; cdm:work_date_document ?documentDate . "
+        "?work cdm:resource_legal_id_celex ?id . "
+        "OPTIONAL { ?work cdm:work_date_document ?documentDate . } "
         "OPTIONAL { ?work cdm:official-journal-act_date_publication ?ojPublished . } "
         "BIND(COALESCE(?ojPublished, ?documentDate) AS ?published) "
         "BIND(IF(BOUND(?ojPublished), \"OJ publication date\", \"Document date\") AS ?dateType)",
