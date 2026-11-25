@@ -14,7 +14,7 @@ const chinaTime = new Intl.DateTimeFormat("zh-CN", {timeZone:"Asia/Shanghai",yea
 const collator = new Intl.Collator("zh-CN");
 const numbers = new Intl.NumberFormat("zh-CN");
 const ui = Object.fromEntries(Array.from(document.querySelectorAll("[id]"), el => [el.id,el]));
-let snapshot = null, records = [], taxonomy = {departments:[],crossCutting:[]}, zhTitles = {};
+let snapshot = null, records = [], taxonomy = {departments:[],crossCutting:[]}, zhTitles = {}, sourceRegistry = {categories:[]};
 let page = 1, refreshError = false, refreshing = false;
 
 function todayInBrussels() {
@@ -44,6 +44,30 @@ function setSelectOptions(select, items, placeholder) {
   const selected=select.value;
   select.replaceChildren(new Option(placeholder,""),...items.map(item=>new Option(item.label,item.id)));
   if (items.some(item=>item.id===selected)) select.value=selected;
+}
+function buildSourceDirectory() {
+  const grid=document.createDocumentFragment();
+  for (const category of sourceRegistry.categories ?? []) {
+    const section=document.createElement("article");
+    section.className="source-card";
+    const heading=document.createElement("h3");heading.textContent=category.label;
+    const description=document.createElement("p");description.textContent=category.description;
+    section.append(heading,description);
+    const list=document.createElement("ul");
+    for (const source of category.sources ?? []) {
+      const item=document.createElement("li");
+      const link=document.createElement("a");
+      link.href=source.url;link.target="_blank";link.rel="noopener noreferrer";
+      link.textContent=source.name;
+      const note=document.createElement("p");note.textContent=source.purpose;
+      item.append(link,note);list.append(item);
+    }
+    section.append(list);
+    const status=document.createElement("span");status.className="source-status";
+    status.textContent=category.status==="reference_only"?"官方入口 · 尚未自动收录":"数据源";
+    section.append(status);grid.append(section);
+  }
+  ui["source-grid"].replaceChildren(grid);
 }
 function buildTaxonomyUI() {
   setSelectOptions(ui.department,taxonomy.departments,"全部业务部门");
@@ -87,16 +111,16 @@ async function loadSnapshot(manual=false) {
   if(refreshing)return;refreshing=true;ui["recent-button"].disabled=true;ui["recent-button"].textContent="正在读取";
   try {
     const base=new URL("./",import.meta.url);
-    const [catalogResponse,taxonomyResponse,zhResponse]=await Promise.all([
+    const [catalogResponse,taxonomyResponse,zhResponse,sourceResponse]=await Promise.all([
       fetch(new URL("./data/catalog.json",base),{cache:manual?"no-cache":"default"}),
       fetch(new URL("./data/business-taxonomy.json",base),{cache:"no-cache"}),
-      fetch(new URL("./data/titles-zh.json",base),{cache:"no-cache"})
+      fetch(new URL("./data/titles-zh.json",base),{cache:"no-cache"}),\n      fetch(new URL("./data/source-registry.json",base),{cache:"no-cache"})
     ]);
     if(!catalogResponse.ok)throw new Error("Catalogue HTTP "+catalogResponse.status);
     const data=await catalogResponse.json();
     if(data.version!==1||!Array.isArray(data.documents)||!Number.isFinite(Date.parse(data.checkedAt)))throw new Error("Invalid catalogue payload");
     if(taxonomyResponse.ok)taxonomy=await taxonomyResponse.json();
-    if(zhResponse.ok)zhTitles=await zhResponse.json();
+    if(zhResponse.ok)zhTitles=await zhResponse.json();\n    if(sourceResponse.ok)sourceRegistry=await sourceResponse.json();
     snapshot=data;
     records=data.documents.map(doc=>{
       const enriched={...doc,titleZh:doc.titleZh||zhTitles[doc.id]||"",departments:departmentIdsFor(doc)};
@@ -106,10 +130,10 @@ async function loadSnapshot(manual=false) {
       enriched.searchText=makeSearchText(enriched);
       return enriched;
     });
-    buildTaxonomyUI();
+    buildTaxonomyUI();\n    buildSourceDirectory();
     ui["sync-time"].dateTime=data.checkedAt;ui["sync-time"].textContent=chinaTime.format(new Date(data.checkedAt));
     ui["sync-note"].textContent="北京时间 · 公报数据截至 "+(data.through??"未标注");
-    ui["catalog-scope"].textContent="Cellar现行状态目录 + 近90天官方公报L系列新增文件 · 当前 "+numbers.format(records.length)+" 条业务相关记录";
+    ui["catalog-scope"].textContent="当前收录 "+numbers.format(records.length)+" 条业务相关法律文件";
     refreshError=false;
   } catch(error) {
     console.warn("Unable to load EU law catalogue:",error);refreshError=true;
@@ -156,8 +180,8 @@ function render() {
   const start=(page-1)*PAGE_SIZE,visible=filtered.slice(start,start+PAGE_SIZE);
   ui["result-rows"].replaceChildren(...visible.map(record=>resultRow(record,today)));
   ui["result-table"].hidden=!visible.length;ui.empty.hidden=!!visible.length;
-  ui["empty-title"].textContent="没有符合条件的法规";
-  ui["empty-detail"].textContent="请尝试其他中文/英文关键词，或调整业务部门、法规主题和文件类型。";
+  ui["empty-title"].textContent="没有符合条件的文件";
+  ui["empty-detail"].textContent="请尝试其他名称或编号关键词，或调整业务部门、法规主题和文件类型。";
   ui.pagination.hidden=lastPage<=1;ui["result-count"].textContent="匹配 "+numbers.format(filtered.length)+" 项 · 当前目录 "+numbers.format(records.length)+" 项";
   ui["page-count"].textContent="第 "+page+" / "+numbers.format(lastPage)+" 页";
   ui.previous.disabled=page===1;ui.next.disabled=page===lastPage;
