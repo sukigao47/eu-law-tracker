@@ -137,67 +137,6 @@
       ]
     }
   ],
-  "crossCutting": [
-    {
-      "id": "product-market-access",
-      "label": "产品合规、CE认证与市场准入",
-      "topics": [
-        "devices",
-        "conformity",
-        "materials"
-      ]
-    },
-    {
-      "id": "cybersecurity-data-ai",
-      "label": "网络安全、数据保护与人工智能",
-      "topics": [
-        "digital"
-      ]
-    },
-    {
-      "id": "consumer-marketing",
-      "label": "消费者保护、营销与广告",
-      "topics": [
-        "retail",
-        "advertising"
-      ]
-    },
-    {
-      "id": "sustainability-circularity",
-      "label": "环境、生态设计与循环经济",
-      "topics": [
-        "ecodesign",
-        "materials",
-        "circular",
-        "factory"
-      ]
-    },
-    {
-      "id": "supply-chain",
-      "label": "采购、供应链与企业尽调",
-      "topics": [
-        "sourcing",
-        "trade",
-        "factory"
-      ]
-    },
-    {
-      "id": "ip-competition",
-      "label": "知识产权与竞争法",
-      "topics": [
-        "design-ip"
-      ]
-    },
-    {
-      "id": "after-sales",
-      "label": "售后、维修、产品责任与召回",
-      "topics": [
-        "service",
-        "retail",
-        "conformity"
-      ]
-    }
-  ],
   "legalFields": [
     {
       "id": "product-market-regulation",
@@ -459,4 +398,4 @@
       ]
     }
   ]
-}\n
+}

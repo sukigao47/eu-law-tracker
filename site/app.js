@@ -40,7 +40,7 @@ const chinaTime = new Intl.DateTimeFormat("zh-CN", {timeZone:"Asia/Shanghai",yea
 const collator = new Intl.Collator("zh-CN");
 const numbers = new Intl.NumberFormat("zh-CN");
 const ui = Object.fromEntries(Array.from(document.querySelectorAll("[id]"), el => [el.id,el]));
-let snapshot = null, records = [], taxonomy = {departments:[],crossCutting:[]}, zhTitles = {}, sourceRegistry = {categories:[]};
+let snapshot = null, records = [], taxonomy = {departments:[],legalFields:[]}, zhTitles = {}, sourceRegistry = {categories:[]};
 let page = 1, refreshError = false, refreshing = false;
 const params = new URLSearchParams(location.search);
 let departmentView = params.get("department") || "";
@@ -245,7 +245,7 @@ async function loadSnapshot(manual=false) {
       read("catalog.json",true),read("business-taxonomy.json"),read("titles-zh.json"),read("source-registry.json"),read("related-materials.json")
     ]);
     if(!Array.isArray(data.documents))throw Error("Invalid catalogue");
-    taxonomy=tax??{departments:data.profile?.departments??[],crossCutting:data.profile?.crossCutting??[]};
+    taxonomy=tax??{departments:data.profile?.departments??[],legalFields:[]};
     zhTitles=translations??{};sourceRegistry=registry??{categories:[]};
     snapshot=data;
     const unique=new Map();
@@ -391,7 +391,7 @@ function render() {
   ui["result-rows"].replaceChildren(...visible.map(record=>resultRow(record,today,[...terms,...normalize(ui["any-terms"].value).split(" ").filter(Boolean),...normalize(ui["exact-phrase"].value).split(" ").filter(Boolean)])));
   ui["result-table"].hidden=!visible.length;ui.empty.hidden=!!visible.length;
   ui["empty-title"].textContent="没有符合条件的资料";
-  ui["empty-detail"].textContent="请尝试其他名称或编号关键词，或调整文件类型、业务部门及主题。";
+  ui["empty-detail"].textContent="请尝试其他名称或编号关键词，或调整文件类型、业务部门及法律领域。";
   ui.pagination.hidden=lastPage<=1;ui["result-count"].textContent="匹配 "+numbers.format(filtered.length)+" 项 · 当前目录 "+numbers.format(records.length)+" 项";
   ui["page-count"].textContent="第 "+page+" / "+numbers.format(lastPage)+" 页";
   ui.previous.disabled=page===1;ui.next.disabled=page===lastPage;

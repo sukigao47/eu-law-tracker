@@ -53,7 +53,7 @@ with sync_playwright() as p:
     expect(rows.nth(1)).to_contain_text("32023R1669")
     expect(rows.nth(2)).to_contain_text("32023R1542")
     page.locator("#clear-button").click()
-    expect(page.locator("#sort")).to_have_value("newest")
+    expect(page.locator("#sort")).to_have_value("relevance")
     def reset():
         page.locator("#clear-button").click()
     def fill(key, value):
