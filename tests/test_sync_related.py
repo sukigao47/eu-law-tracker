@@ -43,16 +43,18 @@ class RelatedMaterialSyncTests(unittest.TestCase):
         soft = [{
             "id": "32024H0001", "title": "Commission Recommendation",
             "sourceCategory": "EU_SOFT_LAW", "published": "2024-01-01",
-            "sourceCollections": ["EU_SOFT_LAW"],
+            "sourceCollections": ["EU_SOFT_LAW"], "dateType": "Document date",
         }]
         ojc = [{
             "id": "32024H0001", "title": "Commission Recommendation",
             "sourceCategory": "OJ_C_SERIES", "published": "2024-01-01",
-            "sourceCollections": ["OJ_C_SERIES"],
+            "sourceCollections": ["OJ_C_SERIES"], "dateType": "OJ publication date", "ojSeries": "C",
         }]
         result = sync_related.deduplicate_materials(soft, ojc)
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["sourceCollections"], ["EU_SOFT_LAW", "OJ_C_SERIES"])
+        self.assertEqual(result[0]["dateType"], "OJ publication date")
+        self.assertEqual(result[0]["ojSeries"], "C")
 
     def test_hydration_tolerates_missing_title_and_metadata(self):
         index = {
