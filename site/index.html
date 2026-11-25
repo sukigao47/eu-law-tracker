@@ -187,6 +187,9 @@
           查看近 7 天发布
         </button>
       </div>
+      <div class="latest-list" id="latest-list" aria-live="polite">
+        <p class="latest-placeholder">正在读取最新法规动态……</p>
+      </div>
     </section>
 
     <section class="catalog" id="catalog">
@@ -246,23 +249,29 @@
             </select>
           </label>
 
-          <label class="date-field">
-            <span>发布日期起</span>
-            <input type="text" id="since"
-                   placeholder="YYYY年MM月DD日"
-                   autocomplete="off">
-            <input type="date" id="since-native" hidden>
-            <button type="button" data-open-date="since">选择日期</button>
-          </label>
+          <div class="date-field">
+            <label for="since">发布日期起</label>
+            <div class="date-control">
+              <input type="text" id="since"
+                     placeholder="YYYY年MM月DD日"
+                     autocomplete="off">
+              <button type="button" data-open-date="since">选择日期</button>
+              <input type="date" id="since-native"
+                     class="native-date-picker" aria-label="选择发布日期起">
+            </div>
+          </div>
 
-          <label class="date-field">
-            <span>发布日期止</span>
-            <input type="text" id="until"
-                   placeholder="YYYY年MM月DD日"
-                   autocomplete="off">
-            <input type="date" id="until-native" hidden>
-            <button type="button" data-open-date="until">选择日期</button>
-          </label>
+          <div class="date-field">
+            <label for="until">发布日期止</label>
+            <div class="date-control">
+              <input type="text" id="until"
+                     placeholder="YYYY年MM月DD日"
+                     autocomplete="off">
+              <button type="button" data-open-date="until">选择日期</button>
+              <input type="date" id="until-native"
+                     class="native-date-picker" aria-label="选择发布日期止">
+            </div>
+          </div>
         </div>
 
         <div class="filter-actions">
