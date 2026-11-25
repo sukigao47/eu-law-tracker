@@ -20,15 +20,17 @@
 
 ## 其他官方资料入口与后续数据源
 
-`config/source-registry.json` 单独登记软法、官方公报C系列、欧盟法院判例、欧盟委员会指南/FAQ及技术标准的官方检索入口。网站会展示这些官方入口，供法务人员核验和继续检索。
+`config/source-registry.json` 登记软法、官方公报C系列、欧盟法院判例、欧盟委员会指南/FAQ及技术标准的来源和覆盖状态。软法与C系列已增加 CELLAR 自动采集管线：软法按 CELEX 3A/3H/3G/3C 及 5DC 描述符、滚动五年窗口检索；C系列按 CELLAR OJ-C collection、滚动180天窗口检索。两类记录经现有业务主题规则筛选后，独立写入 `site/data/related-materials.json`，不并入有约束力法律文件目录。网站统一检索，但以不同资料类别标识。
 
-**当前这些分类均为 reference-only（官方入口参考），尚未接入自动采集，不代表相关文件已经进入法规目录。** 后续将按来源分别建立采集、去重、元数据映射和关联测试。技术标准单独建模，不作为条例/指令/决定处理；应记录标准编号、版本、协调状态及其在官方公报中的引用信息。
+**覆盖边界：** 这不是软法或C系列的全历史全量库；软法当前只覆盖上述 CELEX 描述符，C系列只覆盖最近180天且能在 CELLAR 中识别的 OJ-C 记录，且仅发布匹配当前终端业务主题的记录。判例、委员会指南/FAQ和技术标准仍为官方入口参考，尚未接入自动采集。技术标准单独建模，不作为条例/指令/决定处理；应记录标准编号、版本、协调状态及其在官方公报中的引用信息。
 
 ## 当前数据源和覆盖边界
 
-当前自动采集核心为欧盟出版局 CELLAR SPARQL 数据：
+当前自动采集使用欧盟出版局 CELLAR SPARQL 数据，分别维护法律文件目录和相关非立法资料目录：
 - CELLAR 中标记为现行有效的 CELEX 第3部门 Regulation、Directive、Decision 记录；
 - 最近90天《欧盟官方公报》L系列发布的 Regulation、Directive、Decision；
+- 软法候选：CELEX 描述符 3A、3H、3G、3C 及 5DC，滚动五年；
+- 官方公报 C 系列：CELLAR OJ-C collection 最近180天记录；
 - 英文标题、官方公报发布日期、进入效力日期、现行状态、EuroVoc主题/关键词等结构化元数据。
 
 来源： [CELLAR知识图谱与元数据](https://op.europa.eu/en/web/cellar/cellar-data/metadata/knowledge-graph) · [EUR-Lex](https://eur-lex.europa.eu/) · [欧盟官方公报](https://eur-lex.europa.eu/oj/direct-access.html?locale=en)。
@@ -61,4 +63,4 @@ python -m http.server 8000 --bind 127.0.0.1 --directory site
 
 ## 数据字段
 
-每条已收录记录保留 CELEX、Cellar work ID、官方英文标题、人工维护中文标题（如有）、法规类型、授权/实施类型、官方 EUR-Lex 链接、发布日期、生效日期、现行状态、EuroVoc主题/关键词、业务部门及跨部门专题。
+法律文件记录保留 CELEX、Cellar work ID、官方英文名称、人工维护中文名称（如有）、法规类型、授权/实施类型、官方 EUR-Lex 链接、发布日期、生效日期、现行状态、EuroVoc主题/关键词、业务部门及跨部门专题。软法及C系列记录单独保留 CELEX、CELLAR work ID、官方名称、资料类别、非立法/效力性质提示、发布日期、OJ系列及官方链接；缺失元数据明确标记，不据此推断法律效力。
