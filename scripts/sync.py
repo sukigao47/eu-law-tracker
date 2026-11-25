@@ -109,15 +109,15 @@ def recent_index(since, through):
       SELECT DISTINCT ?id ?work ?published WHERE {{
         ?work cdm:official-journal-act_date_publication ?published ;
               cdm:official-journal-act_part_of_collection_document ?collection .
-        VALUES ?collection {
+        VALUES ?collection {{
           <http://publications.europa.eu/resource/authority/document-collection/OJ-L>
           <http://publications.europa.eu/resource/authority/document-collection/OJ-C>
-        }
-        {
+        }}
+        {{
           ?work cdm:resource_legal_id_celex ?id .
-        } UNION {
+        }} UNION {{
           ?work cdm:work_id_document ?id .
-        }
+        }}
         FILTER(?published >= "{since}"^^xsd:date && ?published <= "{through}"^^xsd:date)
         FILTER(REGEX(STR(?id), "{CELEX}"))
       }} ORDER BY ?published STR(?work) LIMIT 12000
