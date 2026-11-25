@@ -73,7 +73,7 @@ jobs:
   deploy:
     name: 发布到 GitHub Pages
     # 临时允许 main 和开发分支部署到同一个网站
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/eulaw-watch-upgrade'
+    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 10
