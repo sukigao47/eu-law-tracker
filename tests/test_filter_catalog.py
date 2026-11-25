@@ -24,6 +24,7 @@ class CatalogueClassificationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             config = Path(directory) / "terminal-lifecycle.json"
             config.write_text(json.dumps({
+                "id": "test-profile", "label": "测试目录",
                 "products": ["smartphone"],
                 "topics": [{
                     "id": "digital", "label": "网络安全、数据与 AI",
