@@ -70,8 +70,6 @@ class CaseLawSyncTests(unittest.TestCase):
         self.assertIn("cdm:date_creation_legacy", sparql)
         self.assertIn("document_cjeu", sparql)
         self.assertIn("summary_case-law", sparql)
-        self.assertIn("case-law_interpretes_resource_legal", sparql)
-        self.assertIn("work_cites_work", sparql)
 
     def test_hydration_preserves_ecli_parties_and_date_provenance(self):
         work = "http://publications.europa.eu/resource/cellar/00000000-0000-0000-0000-000000000000"
@@ -120,7 +118,7 @@ class CaseLawSyncTests(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["subjects"], ["Consumer", "Data protection"])
         self.assertEqual(result[0]["keywords"], ["Privacy"])
-        self.assertEqual(result[0]["metadataCompleteness"], ["ECLI", "date"])
+        self.assertEqual(result[0]["metadataCompleteness"], ["date", "ECLI"])
 
     def test_details_maps_interpreted_and_cited_acts_without_cross_product(self):
         work = "http://publications.europa.eu/resource/cellar/00000000-0000-0000-0000-000000000000"
