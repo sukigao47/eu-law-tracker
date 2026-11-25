@@ -25,6 +25,15 @@ class RelatedMaterialSyncTests(unittest.TestCase):
             sync_related.classify_soft_law("52024DC0124", "Report from the Commission"),
             ("Commission Report", "non_legislative_document"),
         )
+        self.assertEqual(
+            sync_related.classify_soft_law("52024AE0001", "EESC Opinion"),
+            ("Institutional Opinion", "non_legislative_document"),
+        )
+        self.assertEqual(
+            sync_related.classify_soft_law("52024JC0001", "Joint Communication"),
+            ("Joint Communication", "non_legislative_document"),
+        )
+        self.assertTrue(sync_related.SOFT_LAW_CELEX.fullmatch("52024SC0001"))
 
     def test_official_url_encodes_c_series_celex(self):
         url = sync_related.official_url("C/2025/03118")
