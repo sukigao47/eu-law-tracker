@@ -92,6 +92,39 @@ class CatalogueClassificationTests(unittest.TestCase):
             self.assertEqual(document["instrumentClass"], "Commission Communication")
             self.assertEqual(document["sourceCategory"], "EU_SOFT_LAW")
 
+    def test_case_law_keeps_judicial_document_type_separate_from_legislation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config = Path(directory) / "terminal-lifecycle.json"
+            config.write_text(json.dumps({
+                "id": "test-profile", "label": "测试目录",
+                "products": ["smartphone"],
+                "topics": [{
+                    "id": "consumer", "label": "消费者保护",
+                    "acts": [], "follow": [], "concepts": [],
+                    "labels": [], "phrases": ["consumer protection"],
+                    "context": []
+                }]
+            }), encoding="utf-8")
+            source = {
+                "version": 1, "checkedAt": "2026-01-01T00:00:00+00:00",
+                "documents": [{
+                    "id": "ECLI:EU:C:2024:123",
+                    "title": "Judgment of the Court on consumer protection",
+                    "published": "2024-11-20", "entry": None, "inForce": None,
+                    "subjects": ["Consumer protection"], "keywords": [], "concepts": [],
+                    "legalType": "Judgment", "instrumentClass": "Judgment",
+                    "bindingNature": "judicial_decision", "sourceCategory": "CASE_LAW",
+                    "officialUrl": "https://curia.europa.eu/juris/liste.jsf?num=C-123%2F24&language=en"
+                }]
+            }
+            result = filter_catalog(source, config)
+            self.assertEqual(len(result["documents"]), 1)
+            document = result["documents"][0]
+            self.assertEqual(document["legalType"], "Judgment")
+            self.assertEqual(document["instrumentClass"], "Judgment")
+            self.assertEqual(document["sourceCategory"], "CASE_LAW")
+            self.assertEqual(document["id"], "ECLI:EU:C:2024:123")
+
 
 if __name__ == "__main__":
     unittest.main()
