@@ -156,7 +156,7 @@ def classify_celex(identifier: str, title: str = "") -> dict:
         elif "implementing" in title_lower:
             label = "Implementing " + label
     return {
-        "sector": sector, "documentTypeCode": descriptor or "OTHER",
+        "sector": sector, "documentTypeCode": (sector + descriptor) if descriptor else "OTHER",
         "documentTypeLabel": label, "legalEffect": effect, "legalNature": nature,
     }
 
