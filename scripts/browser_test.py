@@ -25,6 +25,11 @@ with sync_playwright() as p:
         page.locator("#"+key).fill(value)
     def titles():
         return page.locator("#result-rows .act-title").all_text_contents()
+    for query, celex in [("人工智能法案","32024R1689"),("AI Act","32024R1689"),("Artificial Intelligence Act","32024R1689"),("GDPR","32016R0679"),("网络韧性法案","32024R2847"),("CRA","32024R2847"),("2024/1689","32024R1689")]:
+        reset()
+        fill("search", query)
+        expect(rows.first).to_contain_text(celex)
+    reset()
     fill("search", "ecodesign")
     expect(rows.first).to_be_visible()
     assert all("ecodesign" in x.lower() or "eco-design" in x.lower() for x in titles()) or len(titles()) > 0
