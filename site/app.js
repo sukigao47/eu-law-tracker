@@ -101,7 +101,7 @@ function labelSubject(subject) { return SUBJECT_LABELS.get(String(subject).toLow
 function departmentIdsFor(doc) {
   const existing = asList(doc.departments);
   const ids = new Set(doc.businessTopics ?? []);
-  return [...new Set([...existing,...taxonomy.departments.filter(d=>d.topics.some(t=>ids.has(t))).map(d=>d.id)])];
+  return [...new Set([...existing,...taxonomy.departments.filter(d=>d.topics.some(t=>ids.has(t))).map(d=>d.id),...Object.keys(DEPARTMENT_CORE).filter(id=>DEPARTMENT_CORE[id].includes(doc.id))])];
 }
 function topicLabelsFor(doc) {
   const ids = doc.businessTopics ?? [];
@@ -267,7 +267,7 @@ function resultRow(record,today,terms=[]) {
     }
   }
   row.append(en);
-  row.insertCell().textContent=record.entry||"—";
+  row.insertCell().textContent=record.entry&&record.entry>="1952-01-01"?record.entry:"待核验";
   row.insertCell().append(tag(record.sourceCategory==="EU_LEGISLATION"?STATUS_LABELS[status]:"不适用","status-"+(record.sourceCategory==="EU_LEGISLATION"?status:"unknown")));
   return row;
 }
