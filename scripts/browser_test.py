@@ -15,6 +15,7 @@ with sync_playwright() as p:
     expect(page.locator("#department-grid a")).to_have_count(9)
     expect(page.locator("#catalog-title")).to_have_text("高级检索")
     expect(page.locator("#topic")).to_have_count(0)
+    expect(page.locator("#material")).to_have_count(0)
     expect(page.locator("#crosscutting-list")).to_have_count(0)
     rows = page.locator("#result-rows tr")
     expect(rows.first).to_be_visible()

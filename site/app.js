@@ -286,7 +286,6 @@ function advancedMatch(record,terms) {
 function matches(record,today,terms) {
   return (!departmentView||record.departments.includes(departmentView))&&(!favoritesView||(!!favorites[record.id]&&(!ui["folder-select"].value||favorites[record.id].folder===ui["folder-select"].value)))&&(!ui.department.value||(ui.department.value==="other"?!record.departments.length:record.departments.includes(ui.department.value)))
     &&(!ui["cross-topic"].value||(record.crossCuttingTopics??[]).includes(ui["cross-topic"].value))
-    &&(!ui.material.value||(ui.material.value==="legislation"&&record.sourceCategory==="EU_LEGISLATION")||(ui.material.value==="soft_law"&&(record.sourceCategory==="EU_SOFT_LAW"||record.sourceCollections?.includes("EU_SOFT_LAW")))||(ui.material.value==="oj_c_series"&&(record.sourceCategory==="OJ_C_SERIES"||record.sourceCollections?.includes("OJ_C_SERIES")))||(ui.material.value==="case_law"&&record.sourceCategory==="CASE_LAW"))
     &&matchesType(record,ui.type.value)
     &&(!ui.status.value||((record.sourceCategory==="EU_LEGISLATION"?statusFor(record,today):"na")===ui.status.value))
     &&advancedMatch(record,terms);
@@ -301,7 +300,7 @@ function render() {
   ui["result-rows"].replaceChildren(...visible.map(record=>resultRow(record,today,[...terms,...normalize(ui["any-terms"].value).split(" ").filter(Boolean),...normalize(ui["exact-phrase"].value).split(" ").filter(Boolean)])));
   ui["result-table"].hidden=!visible.length;ui.empty.hidden=!!visible.length;
   ui["empty-title"].textContent="没有符合条件的资料";
-  ui["empty-detail"].textContent="请尝试其他名称或编号关键词，或调整资料类别、业务部门及主题。";
+  ui["empty-detail"].textContent="请尝试其他名称或编号关键词，或调整文件类型、业务部门及主题。";
   ui.pagination.hidden=lastPage<=1;ui["result-count"].textContent="匹配 "+numbers.format(filtered.length)+" 项 · 当前目录 "+numbers.format(records.length)+" 项";
   ui["page-count"].textContent="第 "+page+" / "+numbers.format(lastPage)+" 页";
   ui.previous.disabled=page===1;ui.next.disabled=page===lastPage;
