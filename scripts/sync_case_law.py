@@ -60,7 +60,7 @@ def classify_document_type(class_uri: str | None, title: str) -> tuple[str, str]
         return "Court report", "case_law_reference_material"
     if source_class == "summary_case-law":
         return "Case-law summary", "case_law_reference_material"
-    if "opinion of the advocate general" in lowered or "opinion of advocate general" in lowered:
+    if "opinion" in lowered and "advocate general" in lowered:
         return "Advocate General's Opinion", "advocate_general_opinion"
     if "opinion of the court" in lowered:
         return "Opinion of the Court", "court_opinion"
@@ -194,7 +194,7 @@ def hydrate(index: dict[str, dict]) -> list[dict]:
         )
         identifier = ecli or ("CELLAR:" + work.rsplit("/", 1)[-1])
         subjects = sorted(meta.get("subjects", ()), key=str.casefold)
-        keywords = sorted(meta.get("keywords", ()), key=str.casefold)
+        keywords = sorted(set(meta.get("keywords", ())) | set(meta.get("digest", ())), key=str.casefold)
         digest = sorted(meta.get("digest", ()), key=str.casefold)
         completeness = [
             field for field, value in (
