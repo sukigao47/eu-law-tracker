@@ -302,3 +302,5 @@ tbody tr:hover { background: #f6f9fd; }
 .date-type { display:block; margin-top:.2rem; color:var(--muted); font-size:.7rem; }
 
 .tag.material-case-law { background:#e9eef8; color:#354e83; }
+
+.case-meta { display:block; margin-top:.2rem; color:var(--muted); font-size:.72rem; line-height:1.45; }
