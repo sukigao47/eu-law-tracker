@@ -151,7 +151,15 @@ function departmentIdsFor(doc) {
   const ids = new Set(doc.businessTopics ?? []);
   return [...new Set([...existing,...taxonomy.departments.filter(d=>d.topics.some(t=>ids.has(t))).map(d=>d.id),...Object.keys(DEPARTMENT_CORE).filter(id=>DEPARTMENT_CORE[id].includes(doc.id))])];
 }
-function legalFieldIdsFor(doc) {\n  const subjects=new Set(asList(doc.subjects).map(x=>normalize(x)));\n  const searchable=normalize([doc.title,doc.titleZh,...asList(doc.keywords)].filter(Boolean).join(" "));\n  return (taxonomy.legalFields??[]).filter(field=>\n    asList(field.subjects).some(subject=>subjects.has(normalize(subject))) ||\n    asList(field.keywords).some(term=>searchable.includes(normalize(term)))\n  ).map(field=>field.id);\n}\nfunction topicLabelsFor(doc) {
+function legalFieldIdsFor(doc) {
+  const subjects=new Set(asList(doc.subjects).map(x=>normalize(x)));
+  const searchable=normalize([doc.title,doc.titleZh,...asList(doc.keywords)].filter(Boolean).join(" "));
+  return (taxonomy.legalFields??[]).filter(field=>
+    asList(field.subjects).some(subject=>subjects.has(normalize(subject))) ||
+    asList(field.keywords).some(term=>searchable.includes(normalize(term)))
+  ).map(field=>field.id);
+}
+function topicLabelsFor(doc) {
   const ids = doc.businessTopics ?? [];
   const labels = new Map((snapshot?.profile?.topics ?? []).map(t=>[t.id,t.label]));
   return ids.filter(id=>id!=="devices").map(id=>labels.get(id) ?? id);
