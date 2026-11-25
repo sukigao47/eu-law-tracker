@@ -432,3 +432,18 @@ tbody tr:hover { background: #f6f9fd; }
 @media (max-width: 360px) {
   .stats-grid, .board-grid { grid-template-columns: 1fr; }
 }
+
+
+/* Bilingual legal catalogue columns and legal-effect labels */
+#result-table th:nth-child(1) { min-width: 10rem; }
+#result-table th:nth-child(2) { min-width: 9rem; }
+#result-table th:nth-child(3) { min-width: 22rem; }
+#result-table th:nth-child(4) { min-width: 11rem; }
+#result-table th:nth-child(5) { min-width: 8rem; }
+#result-table th:nth-child(6), #result-table th:nth-child(7) { min-width: 8rem; }
+#result-table .act-title { overflow-wrap: anywhere; }
+.effect-binding { background: #e8f3ed; color: #246344; }
+.effect-non-binding { background: #fff5df; color: #79551a; }
+.effect-preparatory { background: #edf1f8; color: #425878; }
+.effect-informational { background: #f1edfa; color: #604a87; }
+.effect-uncertain { background: #f1f2f4; color: #586272; }
