@@ -83,6 +83,15 @@ class RelatedMaterialSyncTests(unittest.TestCase):
         self.assertIn("OJ-C", query.call_args.args[0])
         self.assertIn('STR(?id) != ""', query.call_args.args[0])
 
+    def test_soft_law_query_uses_xml_schema_compatible_regex(self):
+        with patch.object(sync_related, "select", return_value=[]) as query:
+            sync_related.fetch_soft_law(
+                sync_related.date(2025, 1, 1), sync_related.date(2025, 1, 2)
+            )
+        sparql = query.call_args.args[0]
+        self.assertIn("REGEX(STR(?id)", sparql)
+        self.assertNotIn("(?:", sparql)
+
 
 if __name__ == "__main__":
     unittest.main()
