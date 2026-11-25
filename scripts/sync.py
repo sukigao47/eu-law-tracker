@@ -145,6 +145,10 @@ def details(ids_and_works, in_force_range=False):
           BIND("entry" AS ?field)
         }}
         UNION {{
+          ?work cdm:resource_legal_date_applicability ?value .
+          BIND("application" AS ?field)
+        }}
+        UNION {{
           ?work cdm:resource_legal_is_about_subject-matter/skos:prefLabel ?value .
           FILTER(LANG(?value) = "en")
           BIND("subject" AS ?field)
@@ -187,6 +191,7 @@ def details(ids_and_works, in_force_range=False):
                 "title": " ".join(title.split()),
                 "published": dates[0] if dates else None,
                 "entry": min(record.get("entry", ()), default=None),
+                "applicationDates": sorted(record.get("application", ())),
                 "inForce": True if in_force & {"true", "1"} else
                 False if in_force & {"false", "0"} else None,
                 "subjects": sorted(record.get("subject", ()), key=str.casefold),
@@ -299,6 +304,22 @@ def sync(output, previous_path, cache, profile, rebuild, recent_only):
     if len(documents) != len(wanted):
         raise ValueError("The number of records changed unexpectedly while building the catalogue")
     published = filter_catalog(catalog, profile)
+    # Enrich only the published business catalogue, including older cached acts.
+    for offset in range(0, len(published["documents"]), 80):
+        batch = published["documents"][offset:offset+80]
+        works = " ".join("cellar:" + row["work"] for row in batch if CELLAR_WORK.fullmatch("http://publications.europa.eu/resource/cellar/" + row["work"]))
+        if not works:
+            continue
+        rows = select(f"""SELECT DISTINCT ?work ?value WHERE {{
+            VALUES ?work {{ {works} }}
+            ?work cdm:resource_legal_date_applicability ?value .
+        }}""")
+        by_work = {}
+        for row in rows:
+            by_work.setdefault(row["work"].rsplit("/", 1)[-1], set()).add(row["value"])
+        for row in batch:
+            row["applicationDates"] = sorted(by_work.get(row["work"], set()))
+
     if not recent_only:
         write_catalog(cache, catalog)
     write_catalog(output, published)
