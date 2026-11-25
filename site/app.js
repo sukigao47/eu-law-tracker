@@ -178,8 +178,16 @@ function resultRow(record,today) {
   row.append(zh);
   const en=document.createElement("td");en.className="title-en";
   const link=document.createElement("a");link.className="act-title";link.href=record.officialUrl||("https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:"+encodeURIComponent(record.id));
-  link.target="_blank";link.rel="noopener noreferrer";link.lang="en";link.textContent=record.title||"Open official EUR-Lex record";
-  const celex=document.createElement("span");celex.className="celex";celex.textContent=record.sourceCategory==="CASE_LAW"?(record.ecli?"ECLI "+record.ecli:record.caseNumber?"案件号 "+record.caseNumber:"CELLAR "+record.work):"CELEX "+record.id;en.append(link,celex);row.append(en);
+  link.target="_blank";link.rel="noopener noreferrer";link.lang="en";link.textContent=record.title||(record.sourceCategory==="CASE_LAW"?"Open official CURIA case record":"Open official EUR-Lex record");
+  const celex=document.createElement("span");celex.className="celex";
+  celex.textContent=record.sourceCategory==="CASE_LAW"?(record.ecli?"ECLI "+record.ecli:record.caseNumber?"案件号 "+record.caseNumber:"CELLAR "+record.work):"CELEX "+record.id;
+  en.append(link,celex);
+  if(record.sourceCategory==="CASE_LAW"){
+    const caseMeta=document.createElement("small");caseMeta.className="case-meta";
+    caseMeta.textContent=[record.caseNumber&&record.ecli?"案件号 "+record.caseNumber:"",record.court,record.parties].filter(Boolean).join(" · ");
+    if(caseMeta.textContent)en.append(caseMeta);
+  }
+  row.append(en);
   const deptCell=row.insertCell();deptCell.className="topics";
   const deptNames=record.departments.map(id=>taxonomy.departments.find(d=>d.id===id)?.label??id);
   deptCell.textContent=deptNames.join("、")||"未分类";
