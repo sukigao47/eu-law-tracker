@@ -98,7 +98,7 @@ function makeSearchText(record) {
   const topicNames=topicLabelsFor(record);
   return normalize([
     record.id,record.work,record.title,record.titleZh,zhTitles[record.id],
-    record.legalType,record.instrumentClass,record.bindingNature,record.sourceCategory,...(record.sourceCollections??[]),TYPE_LABELS[record.id?.[5]],record.published,record.entry,
+    record.legalType,record.instrumentClass,record.bindingNature,record.dateType,record.sourceCategory,...(record.sourceCollections??[]),TYPE_LABELS[record.id?.[5]],record.published,record.entry,
     ...(record.subjects??[]),...(record.keywords??[]),...topicNames,...deptNames
   ].join(" "));
 }
@@ -182,6 +182,7 @@ function resultRow(record,today) {
   const topics=row.insertCell();topics.className="topics";
   topics.textContent=(record.topicNames??[]).join("、")||"未标注";
   const date=row.insertCell();date.className="pub-date";date.textContent=record.published||"未标注";
+  if(record.dateType){const dateNote=document.createElement("small");dateNote.className="date-type";dateNote.textContent=record.dateType==="OJ publication date"?"公报发布日期":"文件日期";date.append(dateNote);}
   row.insertCell().append(tag(materialStatus(record,today),"status-"+(record.sourceCategory==="EU_LEGISLATION"?status:"unknown")));
   return row;
 }
