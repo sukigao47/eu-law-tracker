@@ -39,7 +39,7 @@ with sync_playwright() as p:
     expect(page.locator("#topic")).to_have_count(0)
     expect(page.locator("#material")).to_have_count(0)
     expect(page.locator("#cross-topic option").first).to_have_text("全部法律领域")
-    expect(page.locator("#cross-topic option").count()).to_be_greater_than(5)
+    expect(page.locator("#cross-topic option")).to_have_count(11)
     rows = page.locator("#result-rows tr")
     expect(rows.first).to_be_visible()
     expect(page.locator("#sort")).to_have_value("relevance")
