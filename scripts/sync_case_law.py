@@ -102,11 +102,13 @@ def fetch_index(since: date, through: date) -> dict[str, dict]:
 def _details(batch: list[str]) -> dict[str, dict]:
     values = " ".join(f"cellar:{work.rsplit('/', 1)[1]}" for work in batch)
     rows = select(f"""
-      SELECT DISTINCT ?work ?class ?ecli ?created ?documentDate ?title
-        ?caseNumber ?caseTitle ?courtId ?subject ?keyword ?digest WHERE {{
+      SELECT DISTINCT ?work ?class ?ecli ?caseCelex ?created ?documentDate ?title
+        ?caseNumber ?caseTitle ?courtId ?subject ?caseSubject ?keyword ?digest
+        ?interpretedCelex ?citedCelex WHERE {{
         VALUES ?work {{ {values} }}
         OPTIONAL {{ ?work a ?class . FILTER(?class IN ({CASE_CLASS_URIS})) }}
         OPTIONAL {{ ?work cdm:case-law_ecli ?ecli . }}
+        OPTIONAL {{ ?work cdm:resource_legal_id_celex ?caseCelex . }}
         OPTIONAL {{ ?work cdm:date_creation_legacy ?created . }}
         OPTIONAL {{ ?work cdm:work_date_document ?documentDate . }}
         OPTIONAL {{
@@ -126,6 +128,19 @@ def _details(batch: list[str]) -> dict[str, dict]:
           ?work cdm:work_is_about_subject-matter ?subjectConcept .
           ?subjectConcept skos:prefLabel ?subject .
           FILTER(LANG(?subject) = "en")
+        }}
+        OPTIONAL {{
+          ?work cdm:case-law_is-about_case-law-subject-matter ?caseSubjectConcept .
+          ?caseSubjectConcept skos:prefLabel ?caseSubject .
+          FILTER(LANG(?caseSubject) = "en")
+        }}
+        OPTIONAL {{
+          ?work cdm:case-law_interpretes_resource_legal ?interpretedWork .
+          ?interpretedWork cdm:resource_legal_id_celex ?interpretedCelex .
+        }}
+        OPTIONAL {{
+          ?work cdm:work_cites_work ?citedWork .
+          ?citedWork cdm:resource_legal_id_celex ?citedCelex .
         }}
         OPTIONAL {{
           ?work cdm:work_is_about_concept_eurovoc ?eurovoc .
@@ -151,16 +166,17 @@ def _details(batch: list[str]) -> dict[str, dict]:
         if work not in batch:
             continue
         record = result.setdefault(work, {
-            "classes": set(), "eclis": set(), "created": set(), "documentDates": set(),
+            "classes": set(), "eclis": set(), "caseCelexes": set(), "created": set(), "documentDates": set(),
             "titles": set(), "caseNumbers": set(), "caseTitles": set(), "courtIds": set(),
-            "subjects": set(), "keywords": set(), "digest": set(),
+            "subjects": set(), "caseSubjects": set(), "keywords": set(), "digest": set(), "interpretedCelex": set(), "citedCelex": set(),
         })
         for source, target in (
-            ("class", "classes"), ("ecli", "eclis"), ("created", "created"),
+            ("class", "classes"), ("ecli", "eclis"), ("caseCelex", "caseCelexes"), ("created", "created"),
             ("documentDate", "documentDates"), ("title", "titles"),
             ("caseNumber", "caseNumbers"), ("caseTitle", "caseTitles"),
-            ("courtId", "courtIds"), ("subject", "subjects"),
+            ("courtId", "courtIds"), ("subject", "subjects"), ("caseSubject", "caseSubjects"),
             ("keyword", "keywords"), ("digest", "digest"),
+            ("interpretedCelex", "interpretedCelex"), ("citedCelex", "citedCelex"),
         ):
             if row.get(source):
                 record[target].add(row[source])
@@ -184,6 +200,7 @@ def hydrate(index: dict[str, dict]) -> list[dict]:
         case_title = max(meta.get("caseTitles", ()), key=lambda value: (len(value), value), default="")
         case_number = sorted(meta.get("caseNumbers", ()), key=str.casefold)[0] if meta.get("caseNumbers") else None
         ecli = sorted(meta.get("eclis", ()))[0] if meta.get("eclis") else None
+        case_celex = sorted(meta.get("caseCelexes", ()))[0] if meta.get("caseCelexes") else None
         source_class = sorted(meta.get("classes", ()))[0] if meta.get("classes") else None
         document_type, nature = classify_document_type(source_class, title or case_title)
         document_date = min(meta.get("documentDates", ()), default=None)
@@ -192,13 +209,13 @@ def hydrate(index: dict[str, dict]) -> list[dict]:
         date_type = "CELLAR document date" if document_date else (
             "CELLAR record creation date (verify against CURIA)" if created_date else "Date unavailable"
         )
-        identifier = ecli or ("CELLAR:" + work.rsplit("/", 1)[-1])
-        subjects = sorted(meta.get("subjects", ()), key=str.casefold)
-        keywords = sorted(set(meta.get("keywords", ())) | set(meta.get("digest", ())), key=str.casefold)
+        identifier = ecli or case_celex or ("CELLAR:" + work.rsplit("/", 1)[-1])
+        subjects = sorted(set(meta.get("subjects", ())) | set(meta.get("caseSubjects", ())), key=str.casefold)
+        keywords = sorted(set(meta.get("keywords", ())) | set(meta.get("digest", ())) | set(meta.get("caseSubjects", ())), key=str.casefold)
         digest = sorted(meta.get("digest", ()), key=str.casefold)
         completeness = [
             field for field, value in (
-                ("ECLI", ecli), ("case number", case_number), ("English title", title or case_title),
+                ("ECLI", ecli), ("case CELEX", case_celex), ("case number", case_number), ("English title", title or case_title),
                 ("date", date_value), ("court", court_from_identifiers(ecli, case_number, None)
                  if ecli or case_number else None),
             ) if value
@@ -206,6 +223,10 @@ def hydrate(index: dict[str, dict]) -> list[dict]:
         records.append({
             "id": identifier,
             "ecli": ecli,
+            "caseCelex": case_celex,
+            "interpretedActs": sorted(meta.get("interpretedCelex", ())),
+            "citedDocuments": sorted(meta.get("citedCelex", ())),
+            "caseSubjects": sorted(meta.get("caseSubjects", ()), key=str.casefold),
             "caseNumber": case_number,
             "parties": case_title,
             "court": court_from_identifiers(ecli, case_number, next(iter(meta.get("courtIds", ())), None)),
@@ -230,7 +251,7 @@ def hydrate(index: dict[str, dict]) -> list[dict]:
             "metadataCompleteness": completeness,
             "metadataMissing": [
                 field for field, value in (
-                    ("ECLI", ecli), ("case number", case_number), ("title", title or case_title),
+                    ("ECLI", ecli), ("case CELEX", case_celex), ("case number", case_number), ("title", title or case_title),
                     ("date", date_value), ("court", ecli or case_number or next(iter(meta.get("courtIds", ())), None)),
                 ) if not value
             ],
