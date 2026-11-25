@@ -300,3 +300,5 @@ tbody tr:hover { background: #f6f9fd; }
 .source-card .source-coverage { padding:.55rem .65rem; border-radius:8px; background:#f5f7fa; color:#4d5d70; font-size:.76rem; }
 
 .date-type { display:block; margin-top:.2rem; color:var(--muted); font-size:.7rem; }
+
+.tag.material-case-law { background:#e9eef8; color:#354e83; }
