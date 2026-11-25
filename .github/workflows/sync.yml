@@ -1,3 +1,4 @@
+
 name: 同步法规并发布网站
 
 on:
@@ -8,9 +9,12 @@ on:
       - config/**
       - scripts/**
       - site/**
+
   schedule:
-    # UTC 11:24 corresponds to 19:24 in Asia/Shanghai.
-    - cron: "24 11 * * *"
+    # 每天北京时间早上 08:00
+    - cron: "0 8 * * *"
+      timezone: "Asia/Shanghai"
+
   workflow_dispatch:
     inputs:
       rebuild:
@@ -33,20 +37,25 @@ jobs:
     permissions:
       contents: read
       pages: read
+
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
+
       - uses: actions/configure-pages@v5
+
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+
       - name: 载入最近同步的目录
         uses: actions/cache@v5
         with:
           path: .catalog-cache
           key: eu-law-catalog-v1-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: eu-law-catalog-v1-
+
       - name: 核对 Cellar 数据并筛选业务主题
         env:
           REBUILD: ${{ inputs.rebuild }}
@@ -56,21 +65,27 @@ jobs:
             arguments+=(--rebuild)
           fi
           python scripts/sync.py "${arguments[@]}"
+
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
 
   deploy:
     name: 发布到 GitHub Pages
+    # 只有 main 分支可以部署正式网站
+    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 10
+
     permissions:
       pages: write
       id-token: write
+
     environment:
       name: github-pages
       url: ${{ steps.publish.outputs.page_url }}
+
     steps:
       - id: publish
         uses: actions/deploy-pages@v4
