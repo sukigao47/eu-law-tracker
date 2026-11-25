@@ -305,7 +305,7 @@ def sync(output, previous_path, cache, profile, rebuild, recent_only):
     # The static Pages artifact contains only the site/ directory. Copy the
     # taxonomy and curated translations beside catalog.json for browser use.
     output.parent.mkdir(parents=True, exist_ok=True)
-    for filename in ("business-taxonomy.json", "titles-zh.json"):
+    for filename in ("business-taxonomy.json", "titles-zh.json", "source-registry.json"):
         source = profile.with_name(filename)
         if source.is_file():
             shutil.copyfile(source, output.parent / filename)
