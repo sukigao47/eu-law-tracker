@@ -108,9 +108,16 @@ def recent_index(since, through):
     rows = select(f"""
       SELECT DISTINCT ?id ?work ?published WHERE {{
         ?work cdm:official-journal-act_date_publication ?published ;
-              cdm:official-journal-act_part_of_collection_document
-                <http://publications.europa.eu/resource/authority/document-collection/OJ-L> ;
-              cdm:resource_legal_id_celex ?id .
+              cdm:official-journal-act_part_of_collection_document ?collection .
+        VALUES ?collection {
+          <http://publications.europa.eu/resource/authority/document-collection/OJ-L>
+          <http://publications.europa.eu/resource/authority/document-collection/OJ-C>
+        }
+        {
+          ?work cdm:resource_legal_id_celex ?id .
+        } UNION {
+          ?work cdm:work_id_document ?id .
+        }
         FILTER(?published >= "{since}"^^xsd:date && ?published <= "{through}"^^xsd:date)
         FILTER(REGEX(STR(?id), "{CELEX}"))
       }} ORDER BY ?published STR(?work) LIMIT 12000
@@ -125,7 +132,8 @@ def preparatory_index():
       SELECT DISTINCT ?id ?work ?published WHERE {{
         ?work rdf:type cdm:act_preparatory ;
               cdm:work_date_document ?published ;
-              cdm:work_id_document ?id .
+              owl:sameAs ?celex .
+        BIND(REPLACE(STR(?celex), "^.*/", "") AS ?id)
         ?expression cdm:expression_belongs_to_work ?work ;
           cdm:expression_uses_language
             <http://publications.europa.eu/resource/authority/language/ENG> ;
