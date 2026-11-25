@@ -70,6 +70,8 @@ class CaseLawSyncTests(unittest.TestCase):
         self.assertIn("cdm:date_creation_legacy", sparql)
         self.assertIn("document_cjeu", sparql)
         self.assertIn("summary_case-law", sparql)
+        self.assertIn("case-law_interpretes_resource_legal", sparql)
+        self.assertIn("work_cites_work", sparql)
 
     def test_hydration_preserves_ecli_parties_and_date_provenance(self):
         work = "http://publications.europa.eu/resource/cellar/00000000-0000-0000-0000-000000000000"
@@ -77,6 +79,10 @@ class CaseLawSyncTests(unittest.TestCase):
             work: {
                 "classes": {"http://publications.europa.eu/ontology/cdm#document_cjeu"},
                 "eclis": {"ECLI:EU:C:2024:123"},
+                "caseCelexes": {"62024CJ0123"},
+                "interpretedCelex": {"32024R1689"},
+                "citedCelex": {"32016R0679"},
+                "caseSubjects": {"Consumer protection"},
                 "created": {"2024-03-01"},
                 "documentDates": {"2024-02-29"},
                 "titles": {"Judgment of the Court in Case C-123/24"},
@@ -100,6 +106,10 @@ class CaseLawSyncTests(unittest.TestCase):
         self.assertEqual(record["dateType"], "CELLAR document date")
         self.assertEqual(record["sourceCategory"], "CASE_LAW")
         self.assertEqual(record["instrumentClass"], "Judgment")
+        self.assertEqual(record["caseCelex"], "62024CJ0123")
+        self.assertEqual(record["interpretedActs"], ["32024R1689"])
+        self.assertEqual(record["citedDocuments"], ["32016R0679"])
+        self.assertIn("Consumer protection", record["keywords"])
 
     def test_duplicate_ecli_records_are_merged(self):
         records = [
