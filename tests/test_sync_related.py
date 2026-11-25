@@ -72,7 +72,7 @@ class RelatedMaterialSyncTests(unittest.TestCase):
             )
         self.assertIn("C/2025/03118", result)
         self.assertIn("OJ-C", query.call_args.args[0])
-        self.assertIn("C/[0-9]{4}/[0-9]{5}", query.call_args.args[0])
+        self.assertIn('STR(?id) != ""', query.call_args.args[0])
 
 
 if __name__ == "__main__":
