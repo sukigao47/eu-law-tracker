@@ -37,7 +37,7 @@ jobs:
   build:
     name: 同步官方数据
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 90
     permissions:
       contents: read
       pages: read
@@ -70,6 +70,18 @@ jobs:
           python scripts/sync.py "${arguments[@]}"
       - name: 同步软法及官方公报 C 系列资料
         run: python scripts/sync_related.py --profile config/terminal-lifecycle.json --output site/data/related-materials.json
+      - name: Restore Chinese translation cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            .translation-cache
+            ~/.local/share/argos-translate/packages
+          key: eu-law-zh-v1-${{ github.run_id }}
+          restore-keys: eu-law-zh-v1-
+      - name: Translate all English titles into Chinese
+        run: |
+          python -m pip install argostranslate
+          python scripts/translate_titles.py
       # CJEU case-law ingestion is intentionally disabled per product-owner decision.
       # Official CURIA/EUR-Lex reference links remain available in the source registry.
       - uses: actions/upload-pages-artifact@v4
