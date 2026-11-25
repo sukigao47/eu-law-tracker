@@ -73,6 +73,7 @@ jobs:
           path: site
 
   deploy:
+    if: github.event_name != 'pull_request'
     name: 发布到 GitHub Pages
     needs: build
     runs-on: ubuntu-latest
