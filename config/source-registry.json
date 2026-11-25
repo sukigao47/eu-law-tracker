@@ -4,8 +4,8 @@
   "categories": [
     {
       "id": "soft_law",
-      "label": "欧盟软法",
-      "description": "Recommendations, Opinions, Communications and other non-binding EU documents.",
+      "label": "软法及机构非立法文件",
+      "description": "Recommendations, Opinions, Communications, institutional opinions, working documents and reports. Binding nature is classified by document type; not all records are soft law in the strict sense.",
       "status": "automated_partial",
       "sources": [
         {
