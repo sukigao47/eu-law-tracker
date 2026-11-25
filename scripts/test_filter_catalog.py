@@ -27,6 +27,19 @@ class DocumentClassificationTests(unittest.TestCase):
         self.assertEqual(classify_celex("C202503118")["legalEffect"], "informational")
         self.assertEqual(classify_celex("62024CJ0123")["legalEffect"], "judicial")
 
+    def test_document_type_codes_are_sector_scoped(self):
+        self.assertEqual(classify_celex("32024R1234")["documentTypeCode"], "3R")
+        self.assertEqual(classify_celex("52024PC0139")["documentTypeCode"], "5PC")
+        self.assertEqual(classify_celex("62024CJ0123")["documentTypeCode"], "6CJ")
+
+    def test_soft_law_and_delegated_implementing_labels(self):
+        soft_law = classify_celex("52024DC0139", "Commission communication on connected products")
+        self.assertEqual(soft_law["legalEffect"], "non-binding")
+        delegated = classify_celex("32024R1234", "Commission Delegated Regulation (EU) 2024/1234")
+        self.assertEqual(delegated["documentTypeLabel"], "Delegated Regulation")
+        implementing = classify_celex("32024R1235", "Commission Implementing Regulation (EU) 2024/1235")
+        self.assertEqual(implementing["documentTypeLabel"], "Implementing Regulation")
+
     def test_filter_adds_searchable_metadata(self):
         profile = {
             "id": "test-profile",
