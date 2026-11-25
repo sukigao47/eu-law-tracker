@@ -70,6 +70,8 @@ jobs:
           python scripts/sync.py "${arguments[@]}"
       - name: 同步软法及官方公报 C 系列资料
         run: python scripts/sync_related.py --profile config/terminal-lifecycle.json --output site/data/related-materials.json
+      - name: 同步欧盟法院判例
+        run: python scripts/sync_case_law.py --profile config/terminal-lifecycle.json --output site/data/case-law.json
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
