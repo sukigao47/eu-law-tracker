@@ -122,6 +122,23 @@ class CaseLawSyncTests(unittest.TestCase):
         self.assertEqual(result[0]["keywords"], ["Privacy"])
         self.assertEqual(result[0]["metadataCompleteness"], ["ECLI", "date"])
 
+    def test_details_maps_interpreted_and_cited_acts_without_cross_product(self):
+        work = "http://publications.europa.eu/resource/cellar/00000000-0000-0000-0000-000000000000"
+        rows = [
+            {"work": work, "field": "ecli", "value": "ECLI:EU:C:2024:123"},
+            {"work": work, "field": "caseNumber", "value": "C-123/24"},
+            {"work": work, "field": "interpretedCelex", "value": "32024R1689"},
+            {"work": work, "field": "citedCelex", "value": "32016R0679"},
+            {"work": work, "field": "caseSubject", "value": "Consumer protection"},
+        ]
+        with patch.object(sync_case_law, "select", return_value=rows) as query:
+            result = sync_case_law._details([work])
+        self.assertEqual(result[work]["eclis"], {"ECLI:EU:C:2024:123"})
+        self.assertEqual(result[work]["interpretedCelex"], {"32024R1689"})
+        self.assertEqual(result[work]["citedCelex"], {"32016R0679"})
+        self.assertIn("UNION", query.call_args.args[0])
+        self.assertIn("case-law_is-about_case-law-subject-matter", query.call_args.args[0])
+
 
 if __name__ == "__main__":
     unittest.main()
