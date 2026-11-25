@@ -54,7 +54,7 @@ class DocumentClassificationTests(unittest.TestCase):
         catalogue = {
             "version": 2, "checkedAt": "2026-11-25T00:00:00+00:00",
             "through": "2026-11-25", "documents": [{
-                "id": "32023R1669", "title": "Commission Regulation (EU) 2023/1669 on smartphones",
+                "id": "32023R1669", "title": "Commission Regulation (EU) 2023/1669 on smartphone",
                 "published": "2023-09-01", "inForce": True, "entry": "2023-09-21",
                 "subjects": [], "keywords": [], "concepts": [],
             }],
