@@ -140,7 +140,7 @@ def preparatory_index():
           cdm:expression_title ?title .
         FILTER(?published >= "1990-01-01"^^xsd:date)
         FILTER(REGEX(LCASE(STR(?title)), "{PREPARATORY_TITLE_PATTERN}", "i"))
-        FILTER(REGEX(STR(?id), "^5[0-9]{4}[A-Z]{{1,3}}[0-9]{{4,6}}"))
+        FILTER(REGEX(STR(?id), "^5[0-9]{{4}}[A-Z]{{1,3}}[0-9]{{4,6}}"))
       }} ORDER BY DESC(?published) STR(?id) LIMIT 12000
     """)
     if len(rows) >= 12000:
