@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta, timezone
 import json
 from pathlib import Path
@@ -88,6 +89,8 @@ def _index(query_body: str, since: date, through: date, identifier_filter: str) 
         if len(rows) < PAGE_SIZE:
             return found
         cursor = rows[-1]["id"]
+        if len(found) % (PAGE_SIZE * 5) == 0:
+            print(f"Related-material index rows: {len(found):,}", flush=True)
 
 
 def fetch_soft_law(since: date, through: date) -> dict[str, dict]:
@@ -117,9 +120,12 @@ def fetch_oj_c_series(since: date, through: date) -> dict[str, dict]:
 def hydrate(index: dict[str, dict], category: str) -> list[dict]:
     pairs = [(identifier, row["work"]) for identifier, row in sorted(index.items())]
     hydrated: dict[str, dict] = {}
-    for offset in range(0, len(pairs), BATCH_SIZE):
-        batch = pairs[offset:offset + BATCH_SIZE]
-        hydrated.update(details(batch))
+    batches = [pairs[offset:offset + BATCH_SIZE] for offset in range(0, len(pairs), BATCH_SIZE)]
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        for number, batch_result in enumerate(pool.map(details, batches), start=1):
+            hydrated.update(batch_result)
+            if number % 10 == 0 or number == len(batches):
+                print(f"{category} metadata batches: {number}/{len(batches)}", flush=True)
     records = []
     for identifier, source in index.items():
         record = hydrated.get(identifier, {})
