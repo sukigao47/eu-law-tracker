@@ -294,18 +294,10 @@ function resultRow(record,today,terms=[]) {
   const link=document.createElement("a");link.className="act-title";link.href=record.officialUrl||("https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:"+encodeURIComponent(record.id));
   link.target="_blank";link.rel="noopener noreferrer";link.lang="en";link.textContent=record.title||"Open official EUR-Lex record";
   const celex=document.createElement("span");celex.className="celex";
-  celex.textContent=record.sourceCategory==="CASE_LAW"?(record.ecli?"ECLI "+record.ecli:record.caseNumber?"案件号 "+record.caseNumber:"CELLAR "+record.work):"CELEX "+record.id;
-  en.append(link,celex); const number=referenceNumber(record.id);if(number){const n=document.createElement("small");n.className="date-type";n.textContent="编号 "+number;en.append(n);}
-  if(record.sourceCategory==="CASE_LAW"){
-    const caseMeta=document.createElement("small");caseMeta.className="case-meta";
-    caseMeta.textContent=[record.caseNumber&&record.ecli?"案件号 "+record.caseNumber:"",record.court,record.parties].filter(Boolean).join(" · ");
-    if(caseMeta.textContent)en.append(caseMeta);
-    if(record.interpretedActs?.length){
-      const acts=document.createElement("small");acts.className="case-meta";
-      acts.textContent="解释/适用法规："+record.interpretedActs.slice(0,8).join("、")+(record.interpretedActs.length>8?" 等":"");
-      en.append(acts);
-    }
-  }
+  // The identifier column intentionally exposes CELEX only; do not repeat
+  // the act number, CELLAR work UUID, ECLI or other secondary identifiers.
+  celex.textContent=record.id?"CELEX "+record.id:"CELEX编号待核验";
+  en.append(link,celex);
   row.append(en);
   row.insertCell().textContent=record.entry&&record.entry>="1952-01-01"?record.entry:"待核验";
   row.insertCell().append(tag(record.sourceCategory==="EU_LEGISLATION"?STATUS_LABELS[status]:"不适用","status-"+(record.sourceCategory==="EU_LEGISLATION"?status:"unknown")));

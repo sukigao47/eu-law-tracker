@@ -266,7 +266,7 @@ tbody tr:hover { background: #f6f9fd; }
 #result-table th,#result-table td { vertical-align:top; }
 .title-zh { min-width:190px; max-width:280px; font-weight:650; line-height:1.55; }
 .title-en { min-width:300px; max-width:440px; line-height:1.5; }
-.title-en .celex { display:block; margin-top:.28rem; }
+.title-en .celex { display:block; margin-top:.28rem; white-space:normal; overflow-wrap:anywhere; font-variant-numeric:tabular-nums; }
 .topics { min-width:150px; max-width:230px; white-space:normal; line-height:1.5; }
 .coverage-note { margin:2rem 0 3rem; padding:1rem 1.2rem; border-left:3px solid #8baedb; background:#edf2f8; border-radius:0 10px 10px 0; color:#344b68; font-size:.88rem; line-height:1.65; }
 .coverage-note p { margin:.4rem 0 0; }
