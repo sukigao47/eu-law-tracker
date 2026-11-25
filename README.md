@@ -29,7 +29,7 @@
 当前自动采集使用欧盟出版局 CELLAR SPARQL 数据，分别维护法律文件目录和相关非立法资料目录：
 - CELLAR 中标记为现行有效的 CELEX 第3部门 Regulation、Directive、Decision 记录；
 - 最近90天《欧盟官方公报》L系列发布的 Regulation、Directive、Decision；
-- 软法候选：CELEX 描述符 3A、3H、3G、3C 及 5DC，滚动五年；
+- 软法候选：CELEX 描述符 3A、3H、3G、3C，以及 5DC、5JC、5SC 和机构意见/报告类 5AA、5TA、5SA、5AB、5HB、5XB、5AE、5IE、5AC、5AR、5IR、5XR，滚动五年；
 - 官方公报 C 系列：CELLAR OJ-C collection 最近180天记录；
 - 英文标题、官方公报发布日期、进入效力日期、现行状态、EuroVoc主题/关键词等结构化元数据。
 
