@@ -64,7 +64,7 @@ function buildSourceDirectory() {
     }
     section.append(list);
     const status=document.createElement("span");status.className="source-status";
-    status.textContent=category.status==="reference_only"?"官方入口 · 尚未自动收录":"数据源";
+    status.textContent=category.status==="reference_only"?"官方入口 · 尚未自动收录":category.status==="automated_partial"?"自动采集 · 有范围限制":"数据源";
     section.append(status);grid.append(section);
   }
   ui["source-grid"].replaceChildren(grid);
@@ -97,7 +97,7 @@ function makeSearchText(record) {
   const topicNames=topicLabelsFor(record);
   return normalize([
     record.id,record.work,record.title,record.titleZh,zhTitles[record.id],
-    record.legalType,record.instrumentClass,TYPE_LABELS[record.id?.[5]],record.published,record.entry,
+    record.legalType,record.instrumentClass,record.bindingNature,record.sourceCategory,...(record.sourceCollections??[]),TYPE_LABELS[record.id?.[5]],record.published,record.entry,
     ...(record.subjects??[]),...(record.keywords??[]),...topicNames,...deptNames
   ].join(" "));
 }
@@ -111,29 +111,36 @@ async function loadSnapshot(manual=false) {
   if(refreshing)return;refreshing=true;ui["recent-button"].disabled=true;ui["recent-button"].textContent="正在读取";
   try {
     const base=new URL("./",import.meta.url);
-    const [catalogResponse,taxonomyResponse,zhResponse,sourceResponse]=await Promise.all([
+    const [catalogResponse,taxonomyResponse,zhResponse,sourceResponse,relatedResponse]=await Promise.all([
       fetch(new URL("./data/catalog.json",base),{cache:manual?"no-cache":"default"}),
       fetch(new URL("./data/business-taxonomy.json",base),{cache:"no-cache"}),
-      fetch(new URL("./data/titles-zh.json",base),{cache:"no-cache"}),\n      fetch(new URL("./data/source-registry.json",base),{cache:"no-cache"})
+      fetch(new URL("./data/titles-zh.json",base),{cache:"no-cache"}),
+      fetch(new URL("./data/source-registry.json",base),{cache:"no-cache"}),
+      fetch(new URL("./data/related-materials.json",base),{cache:manual?"no-cache":"default"}).catch(()=>null)
     ]);
     if(!catalogResponse.ok)throw new Error("Catalogue HTTP "+catalogResponse.status);
     const data=await catalogResponse.json();
     if(data.version!==1||!Array.isArray(data.documents)||!Number.isFinite(Date.parse(data.checkedAt)))throw new Error("Invalid catalogue payload");
     if(taxonomyResponse.ok)taxonomy=await taxonomyResponse.json();
-    if(zhResponse.ok)zhTitles=await zhResponse.json();\n    if(sourceResponse.ok)sourceRegistry=await sourceResponse.json();
+    if(zhResponse.ok)zhTitles=await zhResponse.json();
+    if(sourceResponse.ok)sourceRegistry=await sourceResponse.json();
+    let relatedData={documents:[],checkedAt:null};
+    if(relatedResponse?.ok)relatedData=await relatedResponse.json();
     snapshot=data;
-    records=data.documents.map(doc=>{
-      const enriched={...doc,titleZh:doc.titleZh||zhTitles[doc.id]||"",departments:departmentIdsFor(doc)};
+    records=[...data.documents,...(relatedData.documents??[])].map(doc=>{
+      const enriched={...doc,titleZh:doc.titleZh||zhTitles[doc.id]||"",departments:departmentIdsFor(doc),legalTypeCode:doc.sourceCategory==="EU_LEGISLATION"?(doc.id?.[5]??""):""};
       enriched.crossCuttingTopics=Array.isArray(doc.crossCuttingTopics)?doc.crossCuttingTopics:
         taxonomy.crossCutting.filter(t=>t.topics.some(topic=>(doc.businessTopics??[]).includes(topic))).map(t=>t.id);
       enriched.topicNames=topicLabelsFor(enriched);
       enriched.searchText=makeSearchText(enriched);
       return enriched;
     });
-    buildTaxonomyUI();\n    buildSourceDirectory();
-    ui["sync-time"].dateTime=data.checkedAt;ui["sync-time"].textContent=chinaTime.format(new Date(data.checkedAt));
+    buildTaxonomyUI();
+    buildSourceDirectory();
+    const checkedAt=[data.checkedAt,relatedData.checkedAt].filter(Boolean).sort().at(-1)??data.checkedAt;
+    ui["sync-time"].dateTime=checkedAt;ui["sync-time"].textContent=chinaTime.format(new Date(checkedAt));
     ui["sync-note"].textContent="北京时间 · 公报数据截至 "+(data.through??"未标注");
-    ui["catalog-scope"].textContent="当前收录 "+numbers.format(records.length)+" 条业务相关法律文件";
+    ui["catalog-scope"].textContent="当前收录 "+numbers.format(records.length)+" 条法律及相关官方资料";
     refreshError=false;
   } catch(error) {
     console.warn("Unable to load EU law catalogue:",error);refreshError=true;
@@ -146,7 +153,11 @@ async function loadSnapshot(manual=false) {
 function tag(text,className) { const el=document.createElement("span");el.className="tag "+className;el.textContent=text;return el; }
 function resultRow(record,today) {
   const row=document.createElement("tr"),code=record.id?.[5]??"",status=statusFor(record,today);
-  row.insertCell().append(tag(record.instrumentClass??TYPE_LABELS[code]??record.legalType??"其他","type-"+code));
+  const kindCell=row.insertCell();
+  kindCell.append(tag(record.instrumentClass??TYPE_LABELS[code]??record.legalType??"其他","type-"+code));
+  if(record.sourceCategory==="EU_SOFT_LAW")kindCell.append(tag("软法","material-soft"));
+  else if(record.sourceCategory==="OJ_C_SERIES"||record.sourceCollections?.includes("OJ_C_SERIES"))kindCell.append(tag("OJ C系列","material-ojc"));
+  else if(record.sourceCategory==="EU_LEGISLATION")kindCell.append(tag("法律文件","material-law"));
   const zh=document.createElement("td");zh.className="title-zh";
   zh.textContent=record.titleZh||"暂未维护中文标题";
   row.append(zh);
@@ -167,7 +178,8 @@ function matches(record,today,terms) {
   return (!ui.department.value||record.departments.includes(ui.department.value))
     &&(!ui["cross-topic"].value||(record.crossCuttingTopics??[]).includes(ui["cross-topic"].value))
     &&(!ui.topic.value||(record.businessTopics??[]).includes(ui.topic.value))
-    &&(!ui.type.value||record.id?.[5]===ui.type.value)
+    &&(!ui.material.value||(ui.material.value==="legislation"&&record.sourceCategory==="EU_LEGISLATION")||(ui.material.value==="soft_law"&&(record.sourceCategory==="EU_SOFT_LAW"||record.sourceCollections?.includes("EU_SOFT_LAW")))||(ui.material.value==="oj_c_series"&&(record.sourceCategory==="OJ_C_SERIES"||record.sourceCollections?.includes("OJ_C_SERIES"))))
+    &&(!ui.type.value||record.legalTypeCode===ui.type.value)
     &&(!ui.status.value||statusFor(record,today)===ui.status.value)
     &&terms.every(term=>record.searchText.includes(term));
 }
@@ -180,8 +192,8 @@ function render() {
   const start=(page-1)*PAGE_SIZE,visible=filtered.slice(start,start+PAGE_SIZE);
   ui["result-rows"].replaceChildren(...visible.map(record=>resultRow(record,today)));
   ui["result-table"].hidden=!visible.length;ui.empty.hidden=!!visible.length;
-  ui["empty-title"].textContent="没有符合条件的文件";
-  ui["empty-detail"].textContent="请尝试其他名称或编号关键词，或调整业务部门、法规主题和文件类型。";
+  ui["empty-title"].textContent="没有符合条件的资料";
+  ui["empty-detail"].textContent="请尝试其他名称或编号关键词，或调整资料类别、业务部门及主题。";
   ui.pagination.hidden=lastPage<=1;ui["result-count"].textContent="匹配 "+numbers.format(filtered.length)+" 项 · 当前目录 "+numbers.format(records.length)+" 项";
   ui["page-count"].textContent="第 "+page+" / "+numbers.format(lastPage)+" 页";
   ui.previous.disabled=page===1;ui.next.disabled=page===lastPage;
