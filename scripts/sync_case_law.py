@@ -102,55 +102,73 @@ def fetch_index(since: date, through: date) -> dict[str, dict]:
 def _details(batch: list[str]) -> dict[str, dict]:
     values = " ".join(f"cellar:{work.rsplit('/', 1)[1]}" for work in batch)
     rows = select(f"""
-      SELECT DISTINCT ?work ?class ?ecli ?caseCelex ?created ?documentDate ?title
-        ?caseNumber ?caseTitle ?courtId ?subject ?caseSubject ?keyword ?digest
-        ?interpretedCelex ?citedCelex WHERE {{
+      SELECT DISTINCT ?work ?field ?value WHERE {{
         VALUES ?work {{ {values} }}
-        OPTIONAL {{ ?work a ?class . FILTER(?class IN ({CASE_CLASS_URIS})) }}
-        OPTIONAL {{ ?work cdm:case-law_ecli ?ecli . }}
-        OPTIONAL {{ ?work cdm:resource_legal_id_celex ?caseCelex . }}
-        OPTIONAL {{ ?work cdm:date_creation_legacy ?created . }}
-        OPTIONAL {{ ?work cdm:work_date_document ?documentDate . }}
-        OPTIONAL {{
+        {{
+          ?work a ?value .
+          FILTER(?value IN ({CASE_CLASS_URIS}))
+          BIND("class" AS ?field)
+        }} UNION {{
+          ?work cdm:case-law_ecli ?value .
+          BIND("ecli" AS ?field)
+        }} UNION {{
+          ?work cdm:resource_legal_id_celex ?value .
+          BIND("caseCelex" AS ?field)
+        }} UNION {{
+          ?work cdm:date_creation_legacy ?value .
+          BIND("created" AS ?field)
+        }} UNION {{
+          ?work cdm:work_date_document ?value .
+          BIND("documentDate" AS ?field)
+        }} UNION {{
           ?expression cdm:expression_belongs_to_work ?work ;
             cdm:expression_uses_language
               <http://publications.europa.eu/resource/authority/language/ENG> ;
-            cdm:expression_title ?title .
-        }}
-        OPTIONAL {{
+            cdm:expression_title ?value .
+          BIND("title" AS ?field)
+        }} UNION {{
           ?case a cdm:case_court ;
             cdm:dossier_contains_work ?work ;
-            cdm:dossier_identifier ?caseNumber .
-          OPTIONAL {{ ?case cdm:dossier_title ?caseTitle . }}
-          OPTIONAL {{ ?case cdm:case_court_identifier_court ?courtId . }}
-        }}
-        OPTIONAL {{
-          ?work cdm:work_is_about_subject-matter ?subjectConcept .
-          ?subjectConcept skos:prefLabel ?subject .
-          FILTER(LANG(?subject) = "en")
-        }}
-        OPTIONAL {{
-          ?work cdm:case-law_is-about_case-law-subject-matter ?caseSubjectConcept .
-          ?caseSubjectConcept skos:prefLabel ?caseSubject .
-          FILTER(LANG(?caseSubject) = "en")
-        }}
-        OPTIONAL {{
-          ?work cdm:case-law_interpretes_resource_legal ?interpretedWork .
-          ?interpretedWork cdm:resource_legal_id_celex ?interpretedCelex .
-        }}
-        OPTIONAL {{
-          ?work cdm:work_cites_work ?citedWork .
-          ?citedWork cdm:resource_legal_id_celex ?citedCelex .
-        }}
-        OPTIONAL {{
-          ?work cdm:work_is_about_concept_eurovoc ?eurovoc .
-          ?eurovoc skos:prefLabel ?keyword .
-          FILTER(LANG(?keyword) = "en")
-        }}
-        OPTIONAL {{
-          ?work cdm:case-law_is_about_concept_case-law ?digestConcept .
-          ?digestConcept skos:prefLabel ?digest .
-          FILTER(LANG(?digest) = "en")
+            cdm:dossier_identifier ?value .
+          BIND("caseNumber" AS ?field)
+        }} UNION {{
+          ?case a cdm:case_court ;
+            cdm:dossier_contains_work ?work ;
+            cdm:dossier_title ?value .
+          BIND("caseTitle" AS ?field)
+        }} UNION {{
+          ?case a cdm:case_court ;
+            cdm:dossier_contains_work ?work ;
+            cdm:case_court_identifier_court ?value .
+          BIND("courtId" AS ?field)
+        }} UNION {{
+          ?work cdm:work_is_about_subject-matter ?concept .
+          ?concept skos:prefLabel ?value .
+          FILTER(LANG(?value) = "en")
+          BIND("subject" AS ?field)
+        }} UNION {{
+          ?work cdm:case-law_is-about_case-law-subject-matter ?concept .
+          ?concept skos:prefLabel ?value .
+          FILTER(LANG(?value) = "en")
+          BIND("caseSubject" AS ?field)
+        }} UNION {{
+          ?work cdm:work_is_about_concept_eurovoc ?concept .
+          ?concept skos:prefLabel ?value .
+          FILTER(LANG(?value) = "en")
+          BIND("keyword" AS ?field)
+        }} UNION {{
+          ?work cdm:case-law_is_about_concept_case-law ?concept .
+          ?concept skos:prefLabel ?value .
+          FILTER(LANG(?value) = "en")
+          BIND("digest" AS ?field)
+        }} UNION {{
+          ?work cdm:case-law_interpretes_resource_legal ?relatedWork .
+          ?relatedWork cdm:resource_legal_id_celex ?value .
+          BIND("interpretedCelex" AS ?field)
+        }} UNION {{
+          ?work cdm:work_cites_work ?relatedWork .
+          ?relatedWork cdm:resource_legal_id_celex ?value .
+          BIND("citedCelex" AS ?field)
         }}
       }} LIMIT {DETAIL_LIMIT}
     """)
@@ -161,25 +179,24 @@ def _details(batch: list[str]) -> dict[str, dict]:
         return _details(batch[:middle]) | _details(batch[middle:])
 
     result: dict[str, dict] = {}
+    targets = {
+        "class": "classes", "ecli": "eclis", "caseCelex": "caseCelexes",
+        "created": "created", "documentDate": "documentDates", "title": "titles",
+        "caseNumber": "caseNumbers", "caseTitle": "caseTitles", "courtId": "courtIds",
+        "subject": "subjects", "caseSubject": "caseSubjects", "keyword": "keywords",
+        "digest": "digest", "interpretedCelex": "interpretedCelex", "citedCelex": "citedCelex",
+    }
     for row in rows:
-        work = row.get("work")
-        if work not in batch:
+        work, field, value = row.get("work"), row.get("field"), row.get("value")
+        if work not in batch or field not in targets or not value:
             continue
         record = result.setdefault(work, {
             "classes": set(), "eclis": set(), "caseCelexes": set(), "created": set(), "documentDates": set(),
             "titles": set(), "caseNumbers": set(), "caseTitles": set(), "courtIds": set(),
-            "subjects": set(), "caseSubjects": set(), "keywords": set(), "digest": set(), "interpretedCelex": set(), "citedCelex": set(),
+            "subjects": set(), "caseSubjects": set(), "keywords": set(), "digest": set(),
+            "interpretedCelex": set(), "citedCelex": set(),
         })
-        for source, target in (
-            ("class", "classes"), ("ecli", "eclis"), ("caseCelex", "caseCelexes"), ("created", "created"),
-            ("documentDate", "documentDates"), ("title", "titles"),
-            ("caseNumber", "caseNumbers"), ("caseTitle", "caseTitles"),
-            ("courtId", "courtIds"), ("subject", "subjects"), ("caseSubject", "caseSubjects"),
-            ("keyword", "keywords"), ("digest", "digest"),
-            ("interpretedCelex", "interpretedCelex"), ("citedCelex", "citedCelex"),
-        ):
-            if row.get(source):
-                record[target].add(row[source])
+        record[targets[field]].add(value)
     return result
 
 
