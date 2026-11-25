@@ -48,7 +48,7 @@ class DocumentClassificationTests(unittest.TestCase):
             "topics": [{
                 "id": "devices", "label": "终端产品",
                 "acts": [], "follow": [], "concepts": [], "labels": [],
-                "phrases": ["smartphone"], "context": ["product safety"],
+                "phrases": ["smartphone"], "context": ["product safety"], "product_title": True,
             }],
         }
         catalogue = {
