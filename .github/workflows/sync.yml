@@ -28,7 +28,7 @@ on:
 
 concurrency:
   group: eu-law-pages-${{ github.event_name }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -67,9 +67,16 @@ jobs:
           if [[ "$REBUILD" == "true" ]]; then
             arguments+=(--rebuild)
           fi
-          python scripts/sync.py "${arguments[@]}"
+          if ! python scripts/sync.py "${arguments[@]}"; then
+            echo "::warning::CELLAR sync failed; retaining previous catalogue snapshot"
+            python -c 'import json; d=json.load(open("site/data/catalog.json")); assert d["documents"] and d["checkedAt"]'
+          fi
       - name: 同步软法及官方公报 C 系列资料
-        run: python scripts/sync_related.py --profile config/terminal-lifecycle.json --output site/data/related-materials.json
+        run: |
+          if ! python scripts/sync_related.py --profile config/terminal-lifecycle.json --output site/data/related-materials.json; then
+            echo "::warning::Related materials sync failed; retaining previous snapshot"
+            python -c 'import json; d=json.load(open("site/data/related-materials.json")); assert d["documents"] and d["checkedAt"]'
+          fi
       - name: Restore Chinese translation cache
         uses: actions/cache@v5
         with:
