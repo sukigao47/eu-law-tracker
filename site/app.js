@@ -281,15 +281,6 @@ function materialStatus(record,today) {
 }
 function tag(text,className) { const el=document.createElement("span");el.className="tag "+className;el.textContent=text;return el; }
 const KEY_TERMS = /\b(?:eco[- ]?design|energy labell?ing|energy efficiency|smartphones?|slate tablets?|cybersecurity|cyber resilience|artificial intelligence|data protection|digital services|digital markets|digital product passports?|radio equipment|harmoni[sz]ed standards?|electromagnetic compatibility|batter(?:y|ies)|waste batteries|consumer protection|product safety|market surveillance|due diligence|forced labour|right to repair|packaging|persistent organic pollutants|customs|intellectual property|accessibility|dual-use items|personal data|recycling|repair|recall|charging|USB Type-C)\b/gi;
-function highlightTitle(el,title,terms){
-  const spans=[];
-  for(const m of title.matchAll(KEY_TERMS))spans.push([m.index,m.index+m[0].length]);
-  const lower=title.toLowerCase();
-  for(const term of terms.filter(t=>/[a-z0-9]/i.test(t))){let p=0;while((p=lower.indexOf(term,p))!==-1){spans.push([p,p+term.length]);p+=term.length;}}
-  spans.sort((a,b)=>a[0]-b[0]);const merged=[];
-  for(const s of spans){const last=merged[merged.length-1];if(last&&s[0]<=last[1])last[1]=Math.max(last[1],s[1]);else merged.push(s);}
-  let pos=0;for(const [a,b] of merged){el.append(document.createTextNode(title.slice(pos,a)));const mark=document.createElement("mark");mark.textContent=title.slice(a,b);mark.style.backgroundColor="#fff0a3";mark.style.color="#172b4d";el.append(mark);pos=b;}el.append(document.createTextNode(title.slice(pos)));
-}
 function resultRow(record,today,terms=[]) {
   const row=document.createElement("tr"),code=record.id?.[5]??"",status=statusFor(record,today);
   row.dataset.published=record.published||"";row.dataset.celex=record.id;
@@ -301,7 +292,7 @@ function resultRow(record,today,terms=[]) {
   const detail=document.createElement("button");detail.type="button";detail.className="text-button record-detail";detail.textContent="详情与备注";detail.addEventListener("click",()=>openRecord(record));zh.append(detail);row.append(zh);
   const en=document.createElement("td");en.className="title-en";
   const link=document.createElement("a");link.className="act-title";link.href=record.officialUrl||("https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:"+encodeURIComponent(record.id));
-  link.target="_blank";link.rel="noopener noreferrer";link.lang="en";highlightTitle(link,record.title||"Open official EUR-Lex record",terms);
+  link.target="_blank";link.rel="noopener noreferrer";link.lang="en";link.textContent=record.title||"Open official EUR-Lex record";
   const celex=document.createElement("span");celex.className="celex";
   celex.textContent=record.sourceCategory==="CASE_LAW"?(record.ecli?"ECLI "+record.ecli:record.caseNumber?"案件号 "+record.caseNumber:"CELLAR "+record.work):"CELEX "+record.id;
   en.append(link,celex); const number=referenceNumber(record.id);if(number){const n=document.createElement("small");n.className="date-type";n.textContent="编号 "+number;en.append(n);}

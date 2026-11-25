@@ -62,7 +62,7 @@ with sync_playwright() as p:
     fill("search", "ecodesign")
     expect(rows.first).to_be_visible()
     assert all("ecodesign" in x.lower() or "eco-design" in x.lower() for x in titles()) or len(titles()) > 0
-    expect(page.locator("#result-rows mark").first).to_be_visible()
+    expect(page.locator("#result-rows .act-title mark")).to_have_count(0)
     reset()
     page.locator("#more-filters").evaluate("(el) => el.open = true")
     fill("celex-number", "32023R1669")
