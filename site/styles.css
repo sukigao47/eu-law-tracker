@@ -447,3 +447,5 @@ tbody tr:hover { background: #f6f9fd; }
 .effect-preparatory { background: #edf1f8; color: #425878; }
 .effect-informational { background: #f1edfa; color: #604a87; }
 .effect-uncertain { background: #f1f2f4; color: #586272; }
+
+.effect-judicial { background: #e8eef8; color: #294c78; }
