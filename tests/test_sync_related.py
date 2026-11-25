@@ -27,7 +27,7 @@ class RelatedMaterialSyncTests(unittest.TestCase):
         )
         self.assertEqual(
             sync_related.classify_soft_law("52024AE0001", "EESC Opinion"),
-            ("Institutional Opinion", "non_legislative_document"),
+            ("Institutional Opinion", "non_binding_instrument"),
         )
         self.assertEqual(
             sync_related.classify_soft_law("52024JC0001", "Joint Communication"),
