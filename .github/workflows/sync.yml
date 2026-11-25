@@ -59,6 +59,14 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: 检查前端 JavaScript 语法
         run: node --check site/app.js
+      - name: Restore published snapshot for fallback
+        run: |
+          mkdir -p site/data
+          for file in catalog.json related-materials.json; do
+            if curl --fail --silent --show-error --location --max-time 30 "https://sukigao47.github.io/eu-law-tracker/data/$file" -o "/tmp/$file"; then
+              python -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["documents"] and d["checkedAt"]' "/tmp/$file" && cp "/tmp/$file" "site/data/$file"
+            fi
+          done
       - name: 核对 Cellar 数据并筛选业务主题
         env:
           REBUILD: ${{ inputs.rebuild }}
@@ -73,7 +81,7 @@ jobs:
           fi
       - name: 同步软法及官方公报 C 系列资料
         run: |
-          if ! python scripts/sync_related.py --profile config/terminal-lifecycle.json --output site/data/related-materials.json; then
+          if ! timeout 180 python scripts/sync_related.py --profile config/terminal-lifecycle.json --output site/data/related-materials.json; then
             echo "::warning::Related materials sync failed; retaining previous snapshot"
             python -c 'import json; d=json.load(open("site/data/related-materials.json")); assert d["documents"] and d["checkedAt"]'
           fi
