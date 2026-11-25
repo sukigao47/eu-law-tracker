@@ -138,7 +138,7 @@ async function loadSnapshot(manual=false){
         const topicIds=data.profile?(r.businessTopics||[]):(r.subjects||[]);
         const topicNames=data.profile?topicIds.map(id=>topicLabels.get(id)||id):(r.subjects||[]).map(labelSubject);
         const titleEn=r.titleEn||r.title||"",titleZh=r.titleZh||r.shortTitleZh||"";
-        const searchText=[r.id,titleEn,r.title,titleZh,r.documentTypeLabel,r.documentTypeCode,
+        const searchText=[r.id,titleEn,r.title,titleZh,shortName(r),r.documentTypeLabel,r.documentTypeCode,
           r.legalEffect,r.issuer,...(r.subjects||[]),...(r.keywords||[]),...topicNames]
           .filter(Boolean).join(" ").normalize("NFKC").toLocaleLowerCase();
         return {...r,titleEn,titleZh,topicIds,topicNames,searchText};
