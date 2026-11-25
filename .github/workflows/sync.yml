@@ -47,6 +47,8 @@ jobs:
           path: .catalog-cache
           key: eu-law-catalog-v1-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: eu-law-catalog-v1-
+      - name: 运行法规分类回归测试
+        run: python -m unittest discover -s tests -v
       - name: 核对 Cellar 数据并筛选业务主题
         env:
           REBUILD: ${{ inputs.rebuild }}
