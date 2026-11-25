@@ -181,7 +181,7 @@
         <div>
           <p class="eyebrow">LATEST PUBLICATIONS</p>
           <h2>最新法规动态</h2>
-          <p>查看当前目录中近期发布的法规文件，并可进一步按发布日期筛选。</p>
+          <p>查看当前目录中近期发布的相关欧盟法律文件。</p>
         </div>
         <button class="outline-button" id="recent-button" type="button">
           查看近 7 天发布
@@ -198,7 +198,7 @@
           <p class="eyebrow">EU LAW CATALOGUE</p>
           <h2>法规数据库</h2>
           <p id="catalog-scope">
-            智能终端相关欧盟法规 · 按业务主题、法规类型及效力状态检索
+            智能终端出海相关欧盟法律文件 · 按文件类型、法律效力及业务板块检索
           </p>
         </div>
         <a class="source-link"
@@ -207,6 +207,7 @@
       </div>
 
       <div class="notice" id="notice" role="status" hidden></div>
+      <p class="section-note">收录范围包括欧盟具有约束力的立法及非立法行为、授权和实施行为、建议与意见、立法准备文件及官方说明材料。不同文件的法律效力以其法律依据和具体内容为准；非约束性文件不等同于法规。</p>
 
       <div class="active-board" id="active-board" hidden>
         <span id="active-board-label"></span>
@@ -217,18 +218,13 @@
         <label class="search-box">
           <span class="sr-only">搜索法规名称、关键词或 CELEX 编号</span>
           <input type="search" id="search"
-                 placeholder="搜索法规名称、关键词或 CELEX 编号">
+                 placeholder="搜索法规名称、英文名称、文件编号或关键词">
         </label>
 
         <div class="filter-fields">
           <label>
             <span>效力层级</span>
-            <select id="type">
-              <option value="">全部效力层级</option>
-              <option value="R">法规</option>
-              <option value="L">指令</option>
-              <option value="D">决定</option>
-            </select>
+            <select id="type"><option value="">全部文件类型</option></select>
           </label>
 
           <label>
@@ -239,7 +235,18 @@
           </label>
 
           <label>
-            <span>有效状态</span>
+            <span>法律效力</span>
+            <select id="effect">
+              <option value="">全部法律效力</option>
+              <option value="binding">具有约束力</option>
+              <option value="non-binding">不具有约束力</option>
+              <option value="preparatory">立法准备文件</option>
+              <option value="informational">信息或说明文件</option>
+              <option value="uncertain">需个案核验</option>
+            </select>
+          </label>
+          <label>
+            <span>现行状态</span>
             <select id="status">
               <option value="">全部状态</option>
               <option value="active">现行有效</option>
@@ -249,40 +256,9 @@
             </select>
           </label>
 
-          <div class="date-field">
-            <label for="since">发布日期起</label>
-            <div class="date-control">
-              <input type="text" id="since"
-                     placeholder="YYYY年MM月DD日"
-                     autocomplete="off">
-              <button type="button" data-open-date="since">选择日期</button>
-              <input type="date" id="since-native"
-                     class="native-date-picker" aria-label="选择发布日期起">
-            </div>
           </div>
-
-          <div class="date-field">
-            <label for="until">发布日期止</label>
-            <div class="date-control">
-              <input type="text" id="until"
-                     placeholder="YYYY年MM月DD日"
-                     autocomplete="off">
-              <button type="button" data-open-date="until">选择日期</button>
-              <input type="date" id="until-native"
-                     class="native-date-picker" aria-label="选择发布日期止">
-            </div>
-          </div>
-        </div>
-
         <div class="filter-actions">
-          <div class="quick-filters">
-            <button class="chip" type="button" data-days="7">近 7 天</button>
-            <button class="chip" type="button" data-days="30">近 30 天</button>
-            <button class="chip" type="button" data-days="90">近 90 天</button>
-          </div>
-          <button class="text-button" id="clear-button" type="button">
-            清除筛选
-          </button>
+          <button class="text-button" id="clear-button" type="button">清除筛选</button>
         </div>
       </form>
 
@@ -301,11 +277,13 @@
         <table id="result-table" hidden>
           <thead>
             <tr>
-              <th>效力层级</th>
-              <th>法规标题</th>
-              <th>业务主题</th>
+              <th>文件类型</th>
+              <th>法规名称</th>
+              <th>法规名称（英文原文）</th>
+              <th>业务板块</th>
               <th>发布日期</th>
-              <th>有效状态</th>
+              <th>法律效力</th>
+              <th>现行状态</th>
             </tr>
           </thead>
           <tbody id="result-rows"></tbody>
