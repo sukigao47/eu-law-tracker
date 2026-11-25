@@ -20,7 +20,7 @@
 
 ## 其他官方资料入口与后续数据源
 
-`config/source-registry.json` 登记软法、官方公报C系列、欧盟法院判例、欧盟委员会指南/FAQ及技术标准的来源和覆盖状态。软法、C系列及欧盟法院判例已增加 CELLAR 自动采集管线：软法按 CELEX 3A/3H/3G/3C、5DC/5JC/5SC 及机构意见/报告类 5AA/5TA/5SA/5AB/5HB/5XB/5AE/5IE/5AC/5AR/5IR/5XR 描述符、滚动五年窗口检索；C系列按 CELLAR OJ-C collection、滚动180天窗口检索（包括该公报系列中具有 CELEX 标识的文件，不限于 CELEX 的 C/年份/编号子类）。软法及C系列记录经现有业务主题规则筛选后，独立写入 `site/data/related-materials.json`；欧盟法院判例按 CELLAR 的 `document_cjeu`、`case-law`、`summary_case-law` 和 `court-report` 类型识别，滚动十年窗口筛选，独立写入 `site/data/case-law.json`。判决、命令、总法律顾问意见、法院意见、判例摘要和法院报告分别标识，不并入有约束力法律文件目录。网站统一检索，但以不同资料类别标识。
+`config/source-registry.json` 登记软法、官方公报C系列、欧盟法院判例、欧盟委员会指南/FAQ及技术标准的来源和覆盖状态。软法、C系列及欧盟法院判例已增加 CELLAR 自动采集管线：软法按 CELEX 3A/3H/3G/3C、5DC/5JC/5SC 及机构意见/报告类 5AA/5TA/5SA/5AB/5HB/5XB/5AE/5IE/5AC/5AR/5IR/5XR 描述符、滚动五年窗口检索；C系列按 CELLAR OJ-C collection、滚动180天窗口检索（包括该公报系列中具有 CELEX 标识的文件，不限于 CELEX 的 C/年份/编号子类）。软法及C系列记录经现有业务主题规则筛选后，独立写入 `site/data/related-materials.json`；欧盟法院判例按 CELLAR 的 `document_cjeu`、`case-law`、`summary_case-law` 和 `court-report` 类型识别，滚动十年窗口筛选，独立写入 `site/data/case-law.json`。判决、命令、总法律顾问意见、法院意见、判例摘要和法院报告分别标识；在 CELLAR 有明确关系数据时，同时保存该判例解释的欧盟法规 CELEX 和引用文书 CELEX，便于从判例反查法规。不并入有约束力法律文件目录。网站统一检索，但以不同资料类别标识。
 
 **覆盖边界：** 这不是软法或C系列的全历史全量库；软法当前只覆盖上述 CELEX 描述符，C系列只覆盖最近180天且能在 CELLAR OJ-C collection 中识别并具有 CELEX 标识的记录，且仅发布匹配当前终端业务主题的记录。判例、委员会指南/FAQ和技术标准仍为官方入口参考，尚未接入自动采集。技术标准单独建模，不作为条例/指令/决定处理；应记录标准编号、版本、协调状态及其在官方公报中的引用信息。
 
