@@ -132,8 +132,7 @@ def preparatory_index():
       SELECT DISTINCT ?id ?work ?published WHERE {{
         ?work rdf:type cdm:act_preparatory ;
               cdm:work_date_document ?published ;
-              owl:sameAs ?celex .
-        BIND(REPLACE(STR(?celex), "^.*/", "") AS ?id)
+              cdm:work_id_document ?id .
         ?expression cdm:expression_belongs_to_work ?work ;
           cdm:expression_uses_language
             <http://publications.europa.eu/resource/authority/language/ENG> ;
