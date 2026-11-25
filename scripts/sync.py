@@ -359,6 +359,12 @@ def sync(output, previous_path, cache, profile, rebuild, recent_only):
         "through": today.isoformat(),
         "recentSince": since.isoformat(),
         "recentOnly": recent_only,
+        "coverage": {
+            "currentLegalActs": "EUR-Lex CELEX sector 3 acts marked in force, including descriptors beyond R/L/D",
+            "recentOfficialJournal": "OJ L and OJ C documents published in the last 90 days",
+            "preparatoryDocuments": "Relevant CELEX sector 5 preparatory documents since 1990, selected by English-title keywords",
+            "limitations": "Keyword-based selection is not exhaustive. Some non-binding guidance is published outside EUR-Lex legal-act collections or uses titles without matching the configured terms. Verify the original document and its legal basis."
+        },
         "documents": documents,
     }
     if len(documents) != len(wanted):
