@@ -194,7 +194,7 @@ function matches(record,today,terms) {
   return (!ui.department.value||record.departments.includes(ui.department.value))
     &&(!ui["cross-topic"].value||(record.crossCuttingTopics??[]).includes(ui["cross-topic"].value))
     &&(!ui.topic.value||(record.businessTopics??[]).includes(ui.topic.value))
-    &&(!ui.material.value||(ui.material.value==="legislation"&&record.sourceCategory==="EU_LEGISLATION")||(ui.material.value==="soft_law"&&(record.sourceCategory==="EU_SOFT_LAW"||record.sourceCollections?.includes("EU_SOFT_LAW")))||(ui.material.value==="oj_c_series"&&(record.sourceCategory==="OJ_C_SERIES"||record.sourceCollections?.includes("OJ_C_SERIES"))))
+    &&(!ui.material.value||(ui.material.value==="legislation"&&record.sourceCategory==="EU_LEGISLATION")||(ui.material.value==="soft_law"&&(record.sourceCategory==="EU_SOFT_LAW"||record.sourceCollections?.includes("EU_SOFT_LAW")))||(ui.material.value==="oj_c_series"&&(record.sourceCategory==="OJ_C_SERIES"||record.sourceCollections?.includes("OJ_C_SERIES")))||(ui.material.value==="case_law"&&record.sourceCategory==="CASE_LAW"))
     &&(!ui.type.value||record.legalTypeCode===ui.type.value)
     &&(!ui.status.value||record.sourceCategory!=="EU_LEGISLATION"||statusFor(record,today)===ui.status.value)
     &&terms.every(term=>record.searchText.includes(term));
