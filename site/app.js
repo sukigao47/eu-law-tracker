@@ -151,7 +151,7 @@ function departmentIdsFor(doc) {
   const ids = new Set(doc.businessTopics ?? []);
   return [...new Set([...existing,...taxonomy.departments.filter(d=>d.topics.some(t=>ids.has(t))).map(d=>d.id),...Object.keys(DEPARTMENT_CORE).filter(id=>DEPARTMENT_CORE[id].includes(doc.id))])];
 }
-function topicLabelsFor(doc) {
+function legalFieldIdsFor(doc) {\n  const subjects=new Set(asList(doc.subjects).map(x=>normalize(x)));\n  const searchable=normalize([doc.title,doc.titleZh,...asList(doc.keywords)].filter(Boolean).join(" "));\n  return (taxonomy.legalFields??[]).filter(field=>\n    asList(field.subjects).some(subject=>subjects.has(normalize(subject))) ||\n    asList(field.keywords).some(term=>searchable.includes(normalize(term)))\n  ).map(field=>field.id);\n}\nfunction topicLabelsFor(doc) {
   const ids = doc.businessTopics ?? [];
   const labels = new Map((snapshot?.profile?.topics ?? []).map(t=>[t.id,t.label]));
   return ids.filter(id=>id!=="devices").map(id=>labels.get(id) ?? id);
@@ -188,7 +188,7 @@ function buildSourceDirectory() {
 }
 function buildTaxonomyUI() {
   setSelectOptions(ui.department,[...taxonomy.departments,{id:"other",label:"其他／通用法规"}],"全部业务部门");
-  setSelectOptions(ui["cross-topic"],taxonomy.crossCutting,"全部跨部门专题");
+  setSelectOptions(ui["cross-topic"],taxonomy.legalFields??[],"全部法律领域");
   const grid=document.createDocumentFragment();
   taxonomy.departments.forEach(d=>{
     const button=document.createElement("a");
@@ -246,7 +246,7 @@ async function loadSnapshot(manual=false) {
       const id=String(doc.id).toUpperCase();
       const curated=zhTitles[id]||doc.titleZhFull||doc.titleZh||"";
       const enriched={...doc,id,sourceCategory:doc.sourceCategory||"EU_LEGISLATION",titleZh:curated,departments:departmentIdsFor(doc),legalTypeCode:id[5]??""};
-      enriched.crossCuttingTopics=[...new Set([...asList(doc.crossCuttingTopics),...taxonomy.crossCutting.filter(t=>t.topics.some(topic=>asList(doc.businessTopics).includes(topic))).map(t=>t.id)])];
+      enriched.legalFields=legalFieldIdsFor(enriched);
       enriched.topicNames=topicLabelsFor(enriched);
       enriched.searchText=makeSearchText(enriched);
       unique.set(id,enriched);
@@ -319,7 +319,7 @@ function advancedMatch(record,terms) {
 }
 function matches(record,today,terms) {
   return (!departmentView||record.departments.includes(departmentView))&&(!favoritesView||(!!favorites[record.id]&&(!ui["folder-select"].value||favorites[record.id].folder===ui["folder-select"].value)))&&(!ui.department.value||(ui.department.value==="other"?!record.departments.length:record.departments.includes(ui.department.value)))
-    &&(!ui["cross-topic"].value||(record.crossCuttingTopics??[]).includes(ui["cross-topic"].value))
+    &&(!ui["cross-topic"].value||(record.legalFields??[]).includes(ui["cross-topic"].value))
     &&matchesType(record,ui.type.value)
     &&(!ui.status.value||((record.sourceCategory==="EU_LEGISLATION"?statusFor(record,today):"na")===ui.status.value))
     &&advancedMatch(record,terms);
@@ -372,7 +372,7 @@ function businessRank(record,today){
  return Math.max(0,...Object.keys(DEPARTMENT_CORE).map(id=>departmentRank(record,today,id)));
 }
 let sortExplicit=false;
-function defaultSort(){return departmentView||ui.search.value.trim()?"relevance":"newest";}
+function defaultSort(){return "relevance";}
 function render() {
   if(!snapshot){ui["result-table"].hidden=true;ui.pagination.hidden=true;ui.empty.hidden=true;ui["result-count"].textContent=refreshError?"法规数据暂不可用":"正在载入法规数据";return;}
   const today=todayInBrussels(),terms=normalize(ui.search.value).split(" ").filter(Boolean);

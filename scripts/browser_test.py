@@ -38,10 +38,10 @@ with sync_playwright() as p:
     expect(page.locator("#catalog-title")).to_have_text("高级检索")
     expect(page.locator("#topic")).to_have_count(0)
     expect(page.locator("#material")).to_have_count(0)
-    expect(page.locator("#crosscutting-list")).to_have_count(0)
+    expect(page.locator("#cross-topic option").first).to_have_text("全部法律领域")\n    expect(page.locator("#cross-topic option").count()).to_be_greater_than(5)
     rows = page.locator("#result-rows tr")
     expect(rows.first).to_be_visible()
-    expect(page.locator("#sort")).to_have_value("newest")
+    expect(page.locator("#sort")).to_have_value("relevance")
     dates=rows.evaluate_all("(rs) => rs.map(r => r.dataset.published)")
     assert dates == sorted(dates, reverse=True), dates
     page.locator("#department").select_option("smartphone")

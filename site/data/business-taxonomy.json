@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "description": "Department and cross-functional taxonomy. A document may belong to multiple departments; mappings are maintained as legal-topic associations, not a definitive applicability opinion.",
+  "description": "Business departments are maintained separately from legal fields. Legal fields classify documents by legal subject matter using EUR-Lex subject metadata, keywords and title terms; one document may belong to multiple legal fields.",
   "departments": [
     {
       "id": "smartphone",
@@ -197,5 +197,266 @@
         "conformity"
       ]
     }
+  ],
+  "legalFields": [
+    {
+      "id": "product-market-regulation",
+      "label": "产品合规、技术法规与市场监管",
+      "subjects": [
+        "Internal market - Principles",
+        "Approximation of laws",
+        "Technical barriers",
+        "Goods – general provisions",
+        "Electrical and radio equipment",
+        "Information and verification",
+        "Construction products, machinery, cableways, personal protective equipment"
+      ],
+      "keywords": [
+        "product safety",
+        "market surveillance",
+        "conformity assessment",
+        "ce marking",
+        "technical standards",
+        "harmonised standards",
+        "harmonized standards",
+        "radio equipment",
+        "electromagnetic compatibility",
+        "product compliance",
+        "type approval",
+        "placing on the market"
+      ]
+    },
+    {
+      "id": "digital-telecom-data-ai",
+      "label": "数字、通信、数据保护与人工智能",
+      "subjects": [
+        "Telecommunications",
+        "Technology",
+        "Data protection",
+        "Electronic data processing",
+        "Research and technological development",
+        "Scientific and technical information and documentation"
+      ],
+      "keywords": [
+        "artificial intelligence",
+        "artificial intelligence act",
+        "data protection",
+        "personal data",
+        "cybersecurity",
+        "cyber security",
+        "digital services",
+        "digital markets",
+        "electronic communications",
+        "telecommunications",
+        "digital product",
+        "software",
+        "network security",
+        "cyber resilience",
+        "data act"
+      ]
+    },
+    {
+      "id": "consumer-commercial-law",
+      "label": "消费者保护、广告与商业行为",
+      "subjects": [
+        "Consumer protection",
+        "Competition",
+        "Freedom to provide services",
+        "Freedom of establishment"
+      ],
+      "keywords": [
+        "consumer protection",
+        "consumer rights",
+        "unfair commercial practices",
+        "misleading advertising",
+        "comparative advertising",
+        "advertising",
+        "commercial practices",
+        "distance selling",
+        "online marketplace",
+        "consumer contracts",
+        "green claims",
+        "price indication"
+      ]
+    },
+    {
+      "id": "environment-chemicals-circularity",
+      "label": "环境保护、化学品与循环经济",
+      "subjects": [
+        "Environment",
+        "Chemicals and related",
+        "Waste",
+        "Pollution",
+        "Environment, energy efficiency",
+        "Energy"
+      ],
+      "keywords": [
+        "environmental protection",
+        "chemical substances",
+        "hazardous substances",
+        "reach",
+        "rohs",
+        "persistent organic pollutants",
+        "battery",
+        "batteries",
+        "waste electrical",
+        "waste electronic",
+        "packaging waste",
+        "recycling",
+        "circular economy",
+        "ecodesign",
+        "energy efficiency",
+        "energy labelling",
+        "energy labeling",
+        "carbon emissions"
+      ]
+    },
+    {
+      "id": "customs-trade",
+      "label": "海关、国际贸易与货物跨境流通",
+      "subjects": [
+        "Common customs tariff",
+        "General customs aspects",
+        "Customs Union",
+        "Customs procedures",
+        "Commercial policy",
+        "External relations",
+        "Free movement of goods",
+        "Preferential systems",
+        "Harmonisation of customs law: origin of goods",
+        "Rules of origin",
+        "Common foreign and security policy",
+        "General trade related aspects"
+      ],
+      "keywords": [
+        "customs",
+        "tariff",
+        "import",
+        "export",
+        "origin of goods",
+        "dual-use",
+        "trade defence",
+        "trade restriction",
+        "customs duty",
+        "customs code",
+        "cross-border movement",
+        "preferential origin"
+      ]
+    },
+    {
+      "id": "taxation-finance",
+      "label": "税收、增值税与财政",
+      "subjects": [
+        "Taxation",
+        "Value added tax",
+        "Value Added Tax",
+        "Customs duties: suspensions",
+        "Financial provisions",
+        "Budget"
+      ],
+      "keywords": [
+        "value added tax",
+        "vat",
+        "taxation",
+        "tax reporting",
+        "tax liability",
+        "excise duty",
+        "tax exemption",
+        "financial provisions"
+      ]
+    },
+    {
+      "id": "intellectual-property-innovation",
+      "label": "知识产权、创新与技术研发",
+      "subjects": [
+        "Intellectual, industrial and commercial property",
+        "Intellectual property",
+        "Research and technological development",
+        "Industry"
+      ],
+      "keywords": [
+        "intellectual property",
+        "patent",
+        "trade mark",
+        "trademark",
+        "design rights",
+        "copyright",
+        "trade secrets",
+        "standard essential patents",
+        "research and development",
+        "innovation",
+        "licensing"
+      ]
+    },
+    {
+      "id": "supply-chain-corporate-due-diligence",
+      "label": "企业治理、供应链与可持续尽职调查",
+      "subjects": [
+        "Social provisions",
+        "Human rights",
+        "Development cooperation",
+        "Employment",
+        "International agreements",
+        "Industry"
+      ],
+      "keywords": [
+        "supply chain",
+        "due diligence",
+        "corporate sustainability",
+        "sustainability reporting",
+        "conflict minerals",
+        "forced labour",
+        "forced labor",
+        "responsible sourcing",
+        "supplier",
+        "human rights",
+        "corporate governance",
+        "business and human rights"
+      ]
+    },
+    {
+      "id": "employment-occupational-health",
+      "label": "劳动用工、职业安全与公共健康",
+      "subjects": [
+        "Safety at work and elsewhere",
+        "Social provisions",
+        "Employment",
+        "Public health",
+        "Health and safety"
+      ],
+      "keywords": [
+        "occupational safety",
+        "health and safety",
+        "worker protection",
+        "working conditions",
+        "employment",
+        "labour law",
+        "labor law",
+        "carcinogens",
+        "workplace exposure",
+        "public health",
+        "worker safety"
+      ]
+    },
+    {
+      "id": "transport-automotive",
+      "label": "交通运输、汽车与道路安全",
+      "subjects": [
+        "Transport"
+      ],
+      "keywords": [
+        "motor vehicle",
+        "motor vehicles",
+        "vehicle safety",
+        "vehicle type approval",
+        "automotive",
+        "road safety",
+        "road transport",
+        "vehicle emissions",
+        "vehicle registration",
+        "driver assistance",
+        "vehicle systems"
+      ]
+    }
   ]
-}
+}\n
