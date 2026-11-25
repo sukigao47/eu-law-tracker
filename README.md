@@ -1,6 +1,6 @@
 # 欧盟法规库｜终端业务法务
 
-本项目是面向终端消费电子及相关业务的欧盟法规检索目录。网站按九大业务部门和跨部门专题建立导航，支持法规编号、CELEX、中文标题、英文标题及关键词组合检索。
+本项目是面向终端消费电子及相关业务的欧盟法规检索目录。网站按九大业务部门和跨部门专题建立导航，支持法规编号、CELEX、中文名称、官方名称及关键词组合检索。
 
 ## 业务分类
 
@@ -14,9 +14,15 @@
 
 - `config/titles-zh.json` 保存经人工维护的 CELEX—中文标题映射。
 - 未收录中文译名的文件会显示「暂未维护中文标题」，不会自动编造翻译。
-- 搜索支持中文标题、英文标题、CELEX、Cellar work ID、文件类型、EuroVoc关键词、法规主题及部门名称；多个词按 AND 关系匹配。
+- 搜索支持中文名称、官方名称、CELEX、Cellar work ID、文件类型、EuroVoc关键词、法规主题及部门名称；多个词按 AND 关系匹配。
 - 日期筛选已移除，保留发布日期展示和排序。
 - 法规原文链接始终指向 EUR-Lex。
+
+## 其他官方资料入口与后续数据源
+
+`config/source-registry.json` 单独登记软法、官方公报C系列、欧盟法院判例、欧盟委员会指南/FAQ及技术标准的官方检索入口。网站会展示这些官方入口，供法务人员核验和继续检索。
+
+**当前这些分类均为 reference-only（官方入口参考），尚未接入自动采集，不代表相关文件已经进入法规目录。** 后续将按来源分别建立采集、去重、元数据映射和关联测试。技术标准单独建模，不作为条例/指令/决定处理；应记录标准编号、版本、协调状态及其在官方公报中的引用信息。
 
 ## 当前数据源和覆盖边界
 
@@ -27,9 +33,9 @@
 
 来源： [CELLAR知识图谱与元数据](https://op.europa.eu/en/web/cellar/cellar-data/metadata/knowledge-graph) · [EUR-Lex](https://eur-lex.europa.eu/) · [欧盟官方公报](https://eur-lex.europa.eu/oj/direct-access.html?locale=en)。
 
-系统会在目录记录中区分 Regulation、Directive、Decision，并根据官方英文标题识别 Delegated Regulation/Directive/Decision 和 Implementing Regulation/Directive/Decision。授权/实施法案仍是相应条例、指令或决定的子类型，并非新的基本 CELEX 法律类型。
+系统会在目录记录中区分 Regulation、Directive、Decision，并根据官方英文名称识别 Delegated Regulation/Directive/Decision 和 Implementing Regulation/Directive/Decision。授权/实施法案仍是相应条例、指令或决定的子类型，并非新的基本 CELEX 法律类型。
 
-**目前不应将本目录理解为欧盟全部法律文件的穷尽抓取。** 软法（如 Recommendation、Opinion、Communication）、C系列文件、欧盟法院判例、成员国转化措施、委员会FAQ/指南及技术标准尚未形成完整的自动采集链路；技术标准也不属于法律文件，需与法规分库管理，并通过协调标准引用/实施决定关联。对这些资料应通过 EUR-Lex、CURIA、委员会及相关标准组织官方页面另行核验。现有采集范围及局限会在网站页面提示。
+**目前不应将本目录理解为欧盟全部法律文件的穷尽抓取。** 软法（如 Recommendation、Opinion、Communication）、C系列文件、欧盟法院判例、委员会FAQ/指南及技术标准尚未形成自动采集链路；成员国转化措施也不在当前采集范围。技术标准不属于法律文件，需与法规分库管理，并通过协调标准引用/实施决定关联。对这些资料可先通过 source registry 中的 EUR-Lex、CURIA、委员会及标准组织官方入口核验。现有采集范围及局限会在网站页面提示。
 
 ## 自动更新与部署
 
