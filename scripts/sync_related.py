@@ -170,9 +170,11 @@ def deduplicate_materials(*collections: list[dict]) -> list[dict]:
             existing["sourceCollections"] = sorted(
                 set(existing["sourceCollections"]) | {record["sourceCategory"]}
             )
-            for field in ("title", "published", "officialUrl", "subjects", "keywords", "concepts"):
+            for field in ("title", "published", "officialUrl", "subjects", "keywords", "concepts", "ojSeries"):
                 if not existing.get(field) and record.get(field):
                     existing[field] = record[field]
+            if record.get("dateType") == "OJ publication date":
+                existing["dateType"] = record["dateType"]
     return sorted(merged.values(), key=lambda row: (row.get("published") or "", row["id"]), reverse=True)
 
 
