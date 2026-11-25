@@ -19,7 +19,6 @@ BATCH_SIZE = 80
 SOFT_LAW_DAYS = 5 * 366
 OJ_C_DAYS = 180
 SOFT_LAW_CELEX = re.compile(r"^(?:3[0-9]{4}[AHGC][0-9]{4,6}|5[0-9]{4}DC[0-9]{4,6})$")
-OJ_C_CELEX = re.compile(r"^C/[0-9]{4}/[0-9]{5}$")
 
 
 def official_url(identifier: str) -> str:
@@ -92,7 +91,7 @@ def fetch_oj_c_series(since: date, through: date) -> dict[str, dict]:
         "cdm:resource_legal_id_celex ?id .",
         since,
         through,
-        f'REGEX(STR(?id), "^{OJ_C_CELEX.pattern[1:-1]}$")',
+        'STR(?id) != ""',
     )
 
 
