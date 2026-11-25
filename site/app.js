@@ -151,6 +151,16 @@ async function loadSnapshot(manual=false) {
     renderNotice();render();
   }
 }
+function materialStatus(record,today) {
+  if(record.sourceCategory==="EU_LEGISLATION")return STATUS_LABELS[statusFor(record,today)];
+  return ({
+    non_binding_instrument:"非约束性文件",
+    generally_non_binding_instrument:"通常不具约束力",
+    non_legislative_document:"非立法文件",
+    not_determined_from_series:"未根据C系列判断效力",
+    not_assessed:"性质待核验"
+  })[record.bindingNature]??"性质待核验";
+}
 function tag(text,className) { const el=document.createElement("span");el.className="tag "+className;el.textContent=text;return el; }
 function resultRow(record,today) {
   const row=document.createElement("tr"),code=record.id?.[5]??"",status=statusFor(record,today);
@@ -172,7 +182,7 @@ function resultRow(record,today) {
   const topics=row.insertCell();topics.className="topics";
   topics.textContent=(record.topicNames??[]).join("、")||"未标注";
   const date=row.insertCell();date.className="pub-date";date.textContent=record.published||"未标注";
-  row.insertCell().append(tag(STATUS_LABELS[status],"status-"+status));
+  row.insertCell().append(tag(materialStatus(record,today),"status-"+(record.sourceCategory==="EU_LEGISLATION"?status:"unknown")));
   return row;
 }
 function matches(record,today,terms) {
