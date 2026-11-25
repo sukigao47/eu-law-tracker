@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 import json
 from pathlib import Path
 import re
+import shutil
 import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
@@ -301,6 +302,13 @@ def sync(output, previous_path, cache, profile, rebuild, recent_only):
     if not recent_only:
         write_catalog(cache, catalog)
     write_catalog(output, published)
+    # The static Pages artifact contains only the site/ directory. Copy the
+    # taxonomy and curated translations beside catalog.json for browser use.
+    output.parent.mkdir(parents=True, exist_ok=True)
+    for filename in ("business-taxonomy.json", "titles-zh.json", "source-registry.json"):
+        source = profile.with_name(filename)
+        if source.is_file():
+            shutil.copyfile(source, output.parent / filename)
     print(f"Published profile {published['profile']['id']}: "
           f"{len(published['documents']):,} of {len(documents):,} acts", flush=True)
 

@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "description": "Department and cross-functional taxonomy. A document may belong to multiple departments; mappings are maintained as legal-topic associations, not a definitive applicability opinion.",
+  "departments": [
+    {
+      "id": "smartphone",
+      "label": "智能手机产品线",
+      "labelEn": "Smartphone Product Line",
+      "topics": [
+        "devices",
+        "design-ip",
+        "ecodesign",
+        "digital",
+        "materials",
+        "conformity",
+        "trade",
+        "retail",
+        "advertising",
+        "service",
+        "circular"
+      ]
+    },
+    {
+      "id": "wearables",
+      "label": "智能穿戴设备产品线",
+      "labelEn": "Smart Wearables Product Line",
+      "topics": [
+        "devices",
+        "design-ip",
+        "ecodesign",
+        "digital",
+        "materials",
+        "conformity",
+        "retail",
+        "service",
+        "circular"
+      ]
+    },
+    {
+      "id": "tablet-pc",
+      "label": "平板与PC产品线",
+      "labelEn": "Tablet & PC Product Line",
+      "topics": [
+        "devices",
+        "design-ip",
+        "ecodesign",
+        "digital",
+        "materials",
+        "conformity",
+        "trade",
+        "retail",
+        "service",
+        "circular"
+      ]
+    },
+    {
+      "id": "marketing-services",
+      "label": "营销服",
+      "labelEn": "Marketing & Customer Services",
+      "topics": [
+        "digital",
+        "retail",
+        "advertising",
+        "service",
+        "trade"
+      ]
+    },
+    {
+      "id": "iot",
+      "label": "IoT产品线",
+      "labelEn": "IoT Product Line",
+      "topics": [
+        "devices",
+        "ecodesign",
+        "digital",
+        "materials",
+        "conformity",
+        "retail",
+        "service",
+        "circular"
+      ]
+    },
+    {
+      "id": "smart-vehicle",
+      "label": "智选车产品线",
+      "labelEn": "Smart Vehicle Product Line",
+      "topics": [
+        "design-ip",
+        "digital",
+        "materials",
+        "conformity",
+        "trade",
+        "retail",
+        "service",
+        "sourcing"
+      ]
+    },
+    {
+      "id": "integrated-delivery",
+      "label": "集成交付（含服务及采购）",
+      "labelEn": "Integrated Delivery & Procurement",
+      "topics": [
+        "sourcing",
+        "trade",
+        "factory",
+        "materials",
+        "conformity",
+        "digital",
+        "circular",
+        "service"
+      ]
+    },
+    {
+      "id": "hardware-engineering",
+      "label": "硬件工程",
+      "labelEn": "Hardware Engineering",
+      "topics": [
+        "devices",
+        "design-ip",
+        "ecodesign",
+        "materials",
+        "factory",
+        "conformity",
+        "circular"
+      ]
+    },
+    {
+      "id": "software-engineering",
+      "label": "软件工程",
+      "labelEn": "Software Engineering",
+      "topics": [
+        "design-ip",
+        "digital",
+        "retail",
+        "service",
+        "advertising"
+      ]
+    }
+  ],
+  "crossCutting": [
+    {
+      "id": "product-market-access",
+      "label": "产品合规、CE认证与市场准入",
+      "topics": [
+        "devices",
+        "conformity",
+        "materials"
+      ]
+    },
+    {
+      "id": "cybersecurity-data-ai",
+      "label": "网络安全、数据保护与人工智能",
+      "topics": [
+        "digital"
+      ]
+    },
+    {
+      "id": "consumer-marketing",
+      "label": "消费者保护、营销与广告",
+      "topics": [
+        "retail",
+        "advertising"
+      ]
+    },
+    {
+      "id": "sustainability-circularity",
+      "label": "环境、生态设计与循环经济",
+      "topics": [
+        "ecodesign",
+        "materials",
+        "circular",
+        "factory"
+      ]
+    },
+    {
+      "id": "supply-chain",
+      "label": "采购、供应链与企业尽调",
+      "topics": [
+        "sourcing",
+        "trade",
+        "factory"
+      ]
+    },
+    {
+      "id": "ip-competition",
+      "label": "知识产权与竞争法",
+      "topics": [
+        "design-ip"
+      ]
+    },
+    {
+      "id": "after-sales",
+      "label": "售后、维修、产品责任与召回",
+      "topics": [
+        "service",
+        "retail",
+        "conformity"
+      ]
+    }
+  ]
+}

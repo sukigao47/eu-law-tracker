@@ -244,3 +244,63 @@ tbody tr:hover { background: #f6f9fd; }
   td:nth-child(4) { grid-row: 1; grid-column: 2; }
   td:nth-child(5) { grid-row: 1; grid-column: 3; }
 }
+
+
+/* Business taxonomy and bilingual catalogue */
+.eyebrow { margin:0 0 .65rem; color:#b9d0f0; font-size:.76rem; font-weight:750; letter-spacing:.13em; }
+.department-section { margin:2.5rem 0 3rem; }
+.department-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.8rem; margin-top:1.2rem; }
+.department-card { display:flex; flex-direction:column; align-items:flex-start; gap:.35rem; min-height:86px; padding:1rem 1.1rem; border:1px solid var(--line); border-radius:14px; background:#fff; color:var(--ink); text-align:left; transition:border-color .15s,transform .15s,box-shadow .15s; }
+.department-card:hover { border-color:#8baedb; transform:translateY(-2px); box-shadow:0 8px 24px #17365b12; }
+.department-card strong { font-size:.98rem; }
+.department-card span { color:var(--muted); font-size:.78rem; }
+.crosscutting-wrap { margin-top:1.5rem; }
+.crosscutting-wrap h3 { margin:0 0 .7rem; font-size:1rem; }
+.crosscutting-list { display:flex; flex-wrap:wrap; gap:.55rem; }
+.cross-chip { padding:.48rem .8rem; border:1px solid #cbd8e8; border-radius:999px; background:#eef3fa; color:#23466f; font-size:.82rem; }
+.cross-chip:hover { border-color:#7e9fc9; background:#e3edf9; }
+.filter-fields { grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); }
+.filter-hint { color:var(--muted); font-size:.82rem; align-self:center; }
+.table-scroll { width:100%; overflow-x:auto; }
+#result-table { min-width:1120px; }
+#result-table th,#result-table td { vertical-align:top; }
+.title-zh { min-width:190px; max-width:280px; font-weight:650; line-height:1.55; }
+.title-en { min-width:300px; max-width:440px; line-height:1.5; }
+.title-en .celex { display:block; margin-top:.28rem; }
+.topics { min-width:150px; max-width:230px; white-space:normal; line-height:1.5; }
+.coverage-note { margin:2rem 0 3rem; padding:1rem 1.2rem; border-left:3px solid #8baedb; background:#edf2f8; border-radius:0 10px 10px 0; color:#344b68; font-size:.88rem; line-height:1.65; }
+.coverage-note p { margin:.4rem 0 0; }
+@media (max-width:760px) {
+  .department-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .department-card { min-height:78px; padding:.8rem; }
+}
+@media (max-width:440px) {
+  .department-grid { grid-template-columns:1fr; }
+}
+
+
+/* Official related-material source directory */
+.official-sources { margin:2.5rem 0 3rem; }
+.source-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1rem; margin-top:1.1rem; }
+.source-card { position:relative; display:flex; flex-direction:column; gap:.55rem; padding:1.1rem; border:1px solid var(--line); border-radius:14px; background:#fff; }
+.source-card h3 { margin:0; font-size:1rem; }
+.source-card>p { margin:0; color:var(--muted); font-size:.84rem; line-height:1.55; }
+.source-card ul { display:grid; gap:.7rem; margin:.2rem 0 .5rem; padding-left:1.15rem; }
+.source-card li { padding-left:.1rem; }
+.source-card li a { color:#1e5791; font-weight:650; font-size:.9rem; }
+.source-card li p { margin:.18rem 0 0; color:var(--muted); font-size:.8rem; line-height:1.5; }
+.source-status { align-self:flex-start; margin-top:auto; padding:.25rem .55rem; border-radius:999px; background:#f1f3f6; color:#5d6878; font-size:.72rem; }
+
+
+/* Distinguish binding acts from non-legislative and OJ C-series materials */
+.tag.material-law { background:#e8f0fb; color:#244d7c; }
+.tag.material-soft { background:#f1eafa; color:#68418b; }
+.tag.material-ojc { background:#edf1f4; color:#4c5d6b; }
+
+.source-card .source-coverage { padding:.55rem .65rem; border-radius:8px; background:#f5f7fa; color:#4d5d70; font-size:.76rem; }
+
+.date-type { display:block; margin-top:.2rem; color:var(--muted); font-size:.7rem; }
+
+.tag.material-case-law { background:#e9eef8; color:#354e83; }
+
+.case-meta { display:block; margin-top:.2rem; color:var(--muted); font-size:.72rem; line-height:1.45; }

@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "description": "Official source directory for related EU legal materials. Items marked reference_only are discovery links, not automatically ingested records.",
+  "categories": [
+    {
+      "id": "soft_law",
+      "label": "软法及机构非立法文件",
+      "description": "Recommendations, Opinions, Communications, institutional opinions, working documents and reports. Binding nature is classified by document type; not all records are soft law in the strict sense.",
+      "status": "automated_partial",
+      "sources": [
+        {
+          "id": "eurlex_search",
+          "name": "EUR-Lex 官方文件检索",
+          "url": "https://eur-lex.europa.eu/advanced-search-form.html?locale=en",
+          "owner": "Publications Office of the European Union",
+          "purpose": "检索 Recommendation、Opinion、Communication 等文件并核对 CELEX、发布日期及文件类型。"
+        },
+        {
+          "id": "commission_register",
+          "name": "欧盟委员会文件登记册",
+          "url": "https://ec.europa.eu/transparency/documents-register/",
+          "owner": "European Commission",
+          "purpose": "检索委员会正式文件、Communication 及相关工作文件。"
+        }
+      ],
+      "coverage": "CELLAR CELEX descriptors 3A/3H/3G/3C; 5DC/5JC/5SC; institutional opinion/report descriptors 5AA/5TA/5SA/5AB/5HB/5XB/5AE/5IE/5AC/5AR/5IR/5XR. Rolling five-year document-date window; only records matching the configured terminal-business profile are published."
+    },
+    {
+      "id": "oj_c_series",
+      "label": "《欧盟官方公报》C系列",
+      "description": "Notices, information and other publications in the C series; not all items are legislation.",
+      "status": "automated_partial",
+      "sources": [
+        {
+          "id": "oj_direct_access",
+          "name": "欧盟官方公报检索",
+          "url": "https://eur-lex.europa.eu/oj/direct-access.html?locale=en",
+          "owner": "Publications Office of the European Union",
+          "purpose": "按系列、日期及期号核对 C 系列发布内容。"
+        }
+      ],
+      "coverage": "CELLAR records linked to the OJ-C collection; rolling 180-day publication window; only records matching the configured terminal-business profile are published. This is not the full C-series archive."
+    },
+    {
+      "id": "case_law",
+      "label": "欧盟法院判例",
+      "description": "Court of Justice and General Court case-law documents, including judgments, orders, Advocate General Opinions, court opinions, summaries and reports. Document types are shown separately and must not be confused with legislation.",
+      "status": "automated_partial",
+      "sources": [
+        {
+          "id": "curia_infocuria",
+          "name": "CURIA InfoCuria 判例数据库",
+          "url": "https://infocuria.curia.europa.eu/tabs/advanced_search",
+          "owner": "Court of Justice of the European Union",
+          "purpose": "核验案件、判决、命令、总法律顾问意见、案件分类、引用法规及ECLI。"
+        },
+        {
+          "id": "cellar_case_law",
+          "name": "CELLAR 判例结构化元数据",
+          "url": "https://op.europa.eu/en/web/cellar/cellar-data/metadata/knowledge-graph",
+          "owner": "Publications Office of the European Union",
+          "purpose": "通过公开 SPARQL 知识图谱获取案件文书、ECLI、英文标题、案件编号及主题元数据。"
+        },
+        {
+          "id": "eurlex_case_law",
+          "name": "EUR-Lex 判例入口",
+          "url": "https://eur-lex.europa.eu/collection/eu-law/eu-case-law.html?locale=en",
+          "owner": "Publications Office of the European Union",
+          "purpose": "交叉核对判例及其与欧盟法规的关联。"
+        }
+      ],
+      "coverage": "CELLAR Common Data Model classes document_cjeu, case-law, summary_case-law and court-report; rolling ten-year record-creation window; only records matching the configured terminal-business profile are published. CELLAR metadata is linked to CURIA case pages where a docket number is available. This is not a complete historical case-law archive; metadata and translations vary by case and language."
+    },
+    {
+      "id": "commission_guidance",
+      "label": "欧盟委员会指南与FAQ",
+      "description": "Guidance, notices, FAQs and implementation materials published by Commission services and Directorates-General.",
+      "status": "reference_only",
+      "sources": [
+        {
+          "id": "commission_documents",
+          "name": "欧盟委员会文件登记册",
+          "url": "https://ec.europa.eu/transparency/documents-register/",
+          "owner": "European Commission",
+          "purpose": "查找正式登记的委员会文件；部门专题网页及FAQ仍需按主管DG逐项核验。"
+        },
+        {
+          "id": "commission_law",
+          "name": "欧盟法律实施与执行",
+          "url": "https://commission.europa.eu/law/application-eu-law/implementation-eu-law_en",
+          "owner": "European Commission",
+          "purpose": "查找欧盟法律实施与执行相关的委员会说明和官方材料。"
+        }
+      ]
+    },
+    {
+      "id": "technical_standards",
+      "label": "技术标准与协调标准",
+      "description": "Standards are technical specifications, not EU legislation. Record standard identifiers, edition, harmonisation status and OJ citation separately.",
+      "status": "reference_only",
+      "sources": [
+        {
+          "id": "harmonised_standards",
+          "name": "欧盟协调标准官方入口",
+          "url": "https://single-market-economy.ec.europa.eu/single-market/european-standards/harmonised-standards_en",
+          "owner": "European Commission",
+          "purpose": "核对协调标准、对应法规、官方公报引用及适用日期。"
+        },
+        {
+          "id": "etsi_standards",
+          "name": "ETSI 标准检索",
+          "url": "https://www.etsi.org/standards",
+          "owner": "European Telecommunications Standards Institute",
+          "purpose": "检索通信、无线电、网络安全等领域标准；需另行核对其是否被欧盟官方公报引用。"
+        },
+        {
+          "id": "cen_cenelec",
+          "name": "CEN-CENELEC 标准入口",
+          "url": "https://www.cencenelec.eu/",
+          "owner": "CEN and CENELEC",
+          "purpose": "查找欧洲标准目录及标准状态；标准全文可能受版权和访问限制。"
+        }
+      ]
+    }
+  ]
+}

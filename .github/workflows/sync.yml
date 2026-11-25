@@ -8,6 +8,14 @@ on:
       - config/**
       - scripts/**
       - site/**
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/sync.yml
+      - config/**
+      - scripts/**
+      - site/**
+      - tests/**
   schedule:
     # UTC 11:24 corresponds to 19:24 in Asia/Shanghai.
     - cron: "24 11 * * *"
@@ -47,6 +55,10 @@ jobs:
           path: .catalog-cache
           key: eu-law-catalog-v1-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: eu-law-catalog-v1-
+      - name: 运行法规分类回归测试
+        run: python -m unittest discover -s tests -v
+      - name: 检查前端 JavaScript 语法
+        run: node --check site/app.js
       - name: 核对 Cellar 数据并筛选业务主题
         env:
           REBUILD: ${{ inputs.rebuild }}
@@ -56,11 +68,16 @@ jobs:
             arguments+=(--rebuild)
           fi
           python scripts/sync.py "${arguments[@]}"
+      - name: 同步软法及官方公报 C 系列资料
+        run: python scripts/sync_related.py --profile config/terminal-lifecycle.json --output site/data/related-materials.json
+      # CJEU case-law ingestion is intentionally disabled per product-owner decision.
+      # Official CURIA/EUR-Lex reference links remain available in the source registry.
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
 
   deploy:
+    if: github.event_name != 'pull_request'
     name: 发布到 GitHub Pages
     needs: build
     runs-on: ubuntu-latest
