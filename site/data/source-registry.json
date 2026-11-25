@@ -44,24 +44,32 @@
     {
       "id": "case_law",
       "label": "欧盟法院判例",
-      "description": "Court of Justice and General Court case law; case metadata and judgments must be modelled separately from legislation.",
-      "status": "reference_only",
+      "description": "Court of Justice and General Court case-law documents, including judgments, orders, Advocate General Opinions, court opinions, summaries and reports. Document types are shown separately and must not be confused with legislation.",
+      "status": "automated_partial",
       "sources": [
         {
-          "id": "curia_search",
-          "name": "CURIA 判例检索",
-          "url": "https://curia.europa.eu/juris/recherche.jsf?language=en",
+          "id": "curia_infocuria",
+          "name": "CURIA InfoCuria 判例数据库",
+          "url": "https://infocuria.curia.europa.eu/tabs/advanced_search",
           "owner": "Court of Justice of the European Union",
-          "purpose": "检索案件编号、当事方、法院、判决日期、程序类型及判决文本。"
+          "purpose": "核验案件、判决、命令、总法律顾问意见、案件分类、引用法规及ECLI。"
+        },
+        {
+          "id": "cellar_case_law",
+          "name": "CELLAR 判例结构化元数据",
+          "url": "https://op.europa.eu/en/web/cellar/cellar-data/metadata/knowledge-graph",
+          "owner": "Publications Office of the European Union",
+          "purpose": "通过公开 SPARQL 知识图谱获取案件文书、ECLI、英文标题、案件编号及主题元数据。"
         },
         {
           "id": "eurlex_case_law",
           "name": "EUR-Lex 判例入口",
           "url": "https://eur-lex.europa.eu/collection/eu-law/eu-case-law.html?locale=en",
           "owner": "Publications Office of the European Union",
-          "purpose": "交叉核对欧盟法院判例及其与相关法规的关联。"
+          "purpose": "交叉核对判例及其与欧盟法规的关联。"
         }
-      ]
+      ],
+      "coverage": "CELLAR Common Data Model classes document_cjeu, case-law, summary_case-law and court-report; rolling ten-year record-creation window; only records matching the configured terminal-business profile are published. CELLAR metadata is linked to CURIA case pages where a docket number is available. This is not a complete historical case-law archive; metadata and translations vary by case and language."
     },
     {
       "id": "commission_guidance",
