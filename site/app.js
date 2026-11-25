@@ -166,7 +166,7 @@ function resultRow(record,today) {
   const row=document.createElement("tr"),code=record.id?.[5]??"",status=statusFor(record,today);
   const kindCell=row.insertCell();
   kindCell.append(tag(record.instrumentClass??TYPE_LABELS[code]??record.legalType??"其他","type-"+code));
-  if(record.sourceCategory==="EU_SOFT_LAW")kindCell.append(tag("软法","material-soft"));
+  if(record.sourceCategory==="EU_SOFT_LAW")kindCell.append(tag(["non_binding_instrument","generally_non_binding_instrument"].includes(record.bindingNature)?"软法":"非立法文件","material-soft"));
   else if(record.sourceCategory==="OJ_C_SERIES"||record.sourceCollections?.includes("OJ_C_SERIES"))kindCell.append(tag("OJ C系列","material-ojc"));
   else if(record.sourceCategory==="EU_LEGISLATION")kindCell.append(tag("法律文件","material-law"));
   const zh=document.createElement("td");zh.className="title-zh";
