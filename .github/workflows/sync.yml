@@ -3,7 +3,7 @@ name: 同步法规并发布网站
 
 on:
   push:
-    branches: [main]
+    branches: [main, eulaw-watch-upgrade]
     paths:
       - .github/workflows/sync.yml
       - config/**
@@ -48,6 +48,16 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: 检查前端 JavaScript 语法
+        run: node --input-type=module --check < site/app.js
+
+      - name: 检查 Python 脚本语法
+        run: python -m compileall -q scripts
 
       - name: 载入最近同步的目录
         uses: actions/cache@v5
