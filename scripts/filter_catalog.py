@@ -86,6 +86,27 @@ class Topic:
         )
 
 
+def classify_instrument(title, kind_code):
+    normalized = title.casefold()
+    for marker, label in (
+        ("commission delegated regulation", "Delegated Regulation"),
+        ("delegated regulation", "Delegated Regulation"),
+        ("commission delegated directive", "Delegated Directive"),
+        ("delegated directive", "Delegated Directive"),
+        ("commission delegated decision", "Delegated Decision"),
+        ("delegated decision", "Delegated Decision"),
+        ("commission implementing regulation", "Implementing Regulation"),
+        ("implementing regulation", "Implementing Regulation"),
+        ("commission implementing directive", "Implementing Directive"),
+        ("implementing directive", "Implementing Directive"),
+        ("commission implementing decision", "Implementing Decision"),
+        ("implementing decision", "Implementing Decision"),
+    ):
+        if normalized.startswith(marker):
+            return label
+    return {"R": "Regulation", "L": "Directive", "D": "Decision"}.get(kind_code, "Other")
+
+
 def filter_catalog(catalog, config_path):
     with config_path.open(encoding="utf-8") as source:
         profile = json.load(source)
@@ -129,10 +150,13 @@ def filter_catalog(catalog, config_path):
             cross_cutting_ids = sorted({cross_map[topic_id] for topic_id in matches if topic_id in cross_map})
             kind_code = record["id"][5] if len(record["id"]) > 5 else ""
             legal_type = {"R": "Regulation", "L": "Directive", "D": "Decision"}.get(kind_code, "Other")
+            instrument_class = classify_instrument(record["title"], kind_code)
             documents.append({
                 **record,
                 "titleZh": chinese_titles.get(record["id"], ""),
                 "legalType": legal_type,
+                "instrumentClass": instrument_class,
+                "sourceCategory": "EU_LEGISLATION",
                 "officialUrl": f"https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:{record['id']}",
                 "businessTopics": matches,
                 "departments": department_ids,
