@@ -72,7 +72,7 @@ jobs:
 
   deploy:
     name: 发布到 GitHub Pages
-    # 临时允许 main 和开发分支部署到同一个网站
+    # 正式网站仅允许 main 分支部署；开发分支只构建，不发布
     if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
