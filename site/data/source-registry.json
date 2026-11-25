@@ -6,7 +6,7 @@
       "id": "soft_law",
       "label": "欧盟软法",
       "description": "Recommendations, Opinions, Communications and other non-binding EU documents.",
-      "status": "reference_only",
+      "status": "automated_partial",
       "sources": [
         {
           "id": "eurlex_search",
@@ -22,13 +22,14 @@
           "owner": "European Commission",
           "purpose": "检索委员会正式文件、Communication 及相关工作文件。"
         }
-      ]
+      ],
+      "coverage": "CELLAR CELEX descriptors 3A, 3H, 3G, 3C and 5DC; rolling five-year document-date window; only records matching the configured terminal-business profile are published."
     },
     {
       "id": "oj_c_series",
       "label": "《欧盟官方公报》C系列",
       "description": "Notices, information and other publications in the C series; not all items are legislation.",
-      "status": "reference_only",
+      "status": "automated_partial",
       "sources": [
         {
           "id": "oj_direct_access",
@@ -37,7 +38,8 @@
           "owner": "Publications Office of the European Union",
           "purpose": "按系列、日期及期号核对 C 系列发布内容。"
         }
-      ]
+      ],
+      "coverage": "CELLAR records linked to the OJ-C collection; rolling 180-day publication window; only records matching the configured terminal-business profile are published. This is not the full C-series archive."
     },
     {
       "id": "case_law",
