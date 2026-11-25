@@ -296,3 +296,5 @@ tbody tr:hover { background: #f6f9fd; }
 .tag.material-law { background:#e8f0fb; color:#244d7c; }
 .tag.material-soft { background:#f1eafa; color:#68418b; }
 .tag.material-ojc { background:#edf1f4; color:#4c5d6b; }
+
+.source-card .source-coverage { padding:.55rem .65rem; border-radius:8px; background:#f5f7fa; color:#4d5d70; font-size:.76rem; }
