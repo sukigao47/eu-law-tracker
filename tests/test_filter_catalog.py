@@ -60,6 +60,38 @@ class CatalogueClassificationTests(unittest.TestCase):
             self.assertEqual(document["instrumentClass"], "Regulation")
             self.assertTrue(document["officialUrl"].endswith("CELEX:32024R2847"))
 
+    def test_non_legislative_celex_is_not_misclassified_as_directive(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config = Path(directory) / "terminal-lifecycle.json"
+            config.write_text(json.dumps({
+                "id": "test-profile", "label": "测试目录",
+                "products": ["smartphone"],
+                "topics": [{
+                    "id": "marketing", "label": "营销与数字政策",
+                    "acts": [], "follow": [], "concepts": [],
+                    "labels": [], "phrases": ["Commission Communication"],
+                    "context": []
+                }]
+            }), encoding="utf-8")
+            source = {
+                "version": 1, "checkedAt": "2026-01-01T00:00:00+00:00",
+                "documents": [{
+                    "id": "52024DC0123", "title": "Commission Communication on smartphone security",
+                    "published": "2024-11-20", "entry": None, "inForce": None,
+                    "subjects": [], "keywords": [], "concepts": [],
+                    "legalType": "Commission Communication",
+                    "instrumentClass": "Commission Communication",
+                    "sourceCategory": "EU_SOFT_LAW",
+                    "officialUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A52024DC0123"
+                }]
+            }
+            result = filter_catalog(source, config)
+            self.assertEqual(len(result["documents"]), 1)
+            document = result["documents"][0]
+            self.assertEqual(document["legalType"], "Commission Communication")
+            self.assertEqual(document["instrumentClass"], "Commission Communication")
+            self.assertEqual(document["sourceCategory"], "EU_SOFT_LAW")
+
 
 if __name__ == "__main__":
     unittest.main()
