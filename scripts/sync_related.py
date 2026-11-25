@@ -42,11 +42,11 @@ def classify_soft_law(identifier: str, title: str) -> tuple[str, str]:
         return "Declaration", "generally_non_binding_instrument"
     if identifier.startswith("5"):
         if descriptor in {"AA", "AB", "AE", "AC", "AR"}:
-            return "Institutional Opinion", "non_legislative_document"
+            return "Institutional Opinion", "non_binding_instrument"
         if descriptor in {"IE", "IR"}:
-            return "Own-initiative Opinion", "non_legislative_document"
+            return "Own-initiative Opinion", "non_binding_instrument"
         if descriptor == "HB":
-            return "ECB Recommendation", "non_legislative_document"
+            return "ECB Recommendation", "non_binding_instrument"
         if descriptor in {"TA", "SA"}:
             return "Audit / Special Report", "non_legislative_document"
         if descriptor == "SC":
