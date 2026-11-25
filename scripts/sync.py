@@ -27,7 +27,7 @@ PREFIX cellar: <http://publications.europa.eu/resource/cellar/>
 # CELEX sectors 3/4/5 plus identified OJ C-series records. Sector 3 includes
 # legal-act descriptors beyond R/L/D (recommendations, opinions, guidelines,
 # resolutions and other document classes).
-CELEX = r"^(?:[345][0-9]{4}[A-Z]{1,3}[0-9]{4,6}|C[0-9]{9})(?:R[(][0-9]+[)])?$"
+CELEX = r"^(?:[2345][0-9]{4}[A-Z]{1,3}[0-9]{4,6}|C[0-9]{9})(?:R[(][0-9]+[)])?$"
 LEGAL_ACT_CELEX = r"^3[0-9]{4}[A-Z]{1,3}[0-9]{4,6}(?:R[(][0-9]+[)])?$"
 PREPARATORY_TITLE_PATTERN = (
     r"smart.?phone|mobile phone|mobile device|tablet|wearable|smart watch|"
