@@ -20,9 +20,32 @@ ENDPOINT = "https://publications.europa.eu/webapi/rdf/sparql"
 PREFIXES = """PREFIX cdm: <http://publications.europa.eu/ontology/cdm#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX cellar: <http://publications.europa.eu/resource/cellar/>
 """
-CELEX = r"^3[0-9]{4}[RLD][0-9]+(P|[(][0-9]+[)])?$"
+# CELEX sectors 3/4/5 plus identified OJ C-series records. Sector 3 includes
+# legal-act descriptors beyond R/L/D (recommendations, opinions, guidelines,
+# resolutions and other document classes).
+CELEX = r"^(?:[345][0-9]{4}[A-Z]{1,3}[0-9]{4,6}|C[0-9]{9})(?:R[(][0-9]+[)])?$"
+LEGAL_ACT_CELEX = r"^3[0-9]{4}[A-Z]{1,3}[0-9]{4,6}(?:R[(][0-9]+[)])?$"
+PREPARATORY_TITLE_PATTERN = (
+    r"smart.?phone|mobile phone|mobile device|tablet|wearable|smart watch|"
+    r"radio equipment|wireless equipment|electromagnetic compatibility|"
+    r"cyber.?security|personal data|data protection|artificial intelligence|"
+    r"battery|batteries|waste electrical|electronic equipment|ecodesign|"
+    r"energy labelling|energy labeling|right to repair|repairability|"
+    r"product safety|market surveillance|consumer protection|consumer rights|"
+    r"distance selling|e.?commerce|digital services|digital content|"
+    r"unfair commercial practices|environmental claims|green claims|"
+    r"hazardous substances|chemicals|rohs|reach|packaging waste|"
+    r"extended producer responsibility|supply chain due diligence|"
+    r"forced labour|forced labor|conflict minerals|critical raw materials|"
+    r"customs|dual.?use|export control|trade defence|trade defense|"
+    r"intellectual property|trade mark|trademark|industrial design|"
+    r"harmoni[sz]ed standards|conformity assessment|ce marking|"
+    r"electrical safety|low voltage|connected products|internet of things"
+)
 CELLAR_WORK = re.compile(r"https?://publications[.]europa[.]eu/resource/cellar/[0-9a-f-]+")
 RECENT_DAYS = 90
 PAGE_SIZE = 5000
@@ -69,7 +92,7 @@ def in_force_index():
           SELECT DISTINCT ?id ?work WHERE {{
             ?work cdm:resource_legal_in-force true ;
                   cdm:resource_legal_id_celex ?id .
-            FILTER(REGEX(STR(?id), "{CELEX}"))
+            FILTER(REGEX(STR(?id), "{LEGAL_ACT_CELEX}"))
             FILTER(STR(?id) > "{cursor}")
           }} ORDER BY STR(?id) STR(?work) LIMIT {PAGE_SIZE}
         """)
@@ -90,10 +113,30 @@ def recent_index(since, through):
               cdm:resource_legal_id_celex ?id .
         FILTER(?published >= "{since}"^^xsd:date && ?published <= "{through}"^^xsd:date)
         FILTER(REGEX(STR(?id), "{CELEX}"))
-      }} ORDER BY ?published STR(?work) LIMIT 8000
+      }} ORDER BY ?published STR(?work) LIMIT 12000
     """)
-    if len(rows) >= 8000:
-        raise ValueError("Recent-publication query reached its result limit")
+    if len(rows) >= 12000:
+        raise ValueError("Recent OJ L/C query reached its result limit")
+    return {row["id"]: row for row in rows}
+
+
+def preparatory_index():
+    rows = select(f"""
+      SELECT DISTINCT ?id ?work ?published WHERE {{
+        ?work rdf:type cdm:act_preparatory ;
+              cdm:work_date_document ?published ;
+              cdm:work_id_document ?id .
+        ?expression cdm:expression_belongs_to_work ?work ;
+          cdm:expression_uses_language
+            <http://publications.europa.eu/resource/authority/language/ENG> ;
+          cdm:expression_title ?title .
+        FILTER(?published >= "1990-01-01"^^xsd:date)
+        FILTER(REGEX(LCASE(STR(?title)), "{PREPARATORY_TITLE_PATTERN}", "i"))
+        FILTER(REGEX(STR(?id), "^5[0-9]{4}[A-Z]{{1,3}}[0-9]{{4,6}}"))
+      }} ORDER BY DESC(?published) STR(?id) LIMIT 12000
+    """)
+    if len(rows) >= 12000:
+        raise ValueError("Preparatory-document query reached its safety limit; narrow or paginate the query")
     return {row["id"]: row for row in rows}
 
 
@@ -134,6 +177,15 @@ def details(ids_and_works, in_force_range=False):
         UNION {{
           ?work cdm:resource_legal_published_in_official-journal/cdm:work_date_document ?value .
           BIND("oldPublished" AS ?field)
+        }}
+        UNION {{
+          ?work cdm:work_date_document ?value .
+          BIND("documentDate" AS ?field)
+        }}
+        UNION {{
+          ?work cdm:work_created_by_agent/skos:prefLabel ?value .
+          FILTER(LANG(?value) = "en")
+          BIND("issuer" AS ?field)
         }}
         UNION {{
           ?work cdm:resource_legal_in-force ?value .
@@ -185,6 +237,8 @@ def details(ids_and_works, in_force_range=False):
                 "work": work.rsplit("/", 1)[1],
                 "title": " ".join(title.split()),
                 "published": dates[0] if dates else None,
+                "documentDate": min(record.get("documentDate", ()), default=None),
+                "issuer": min(record.get("issuer", ()), default=None),
                 "entry": min(record.get("entry", ()), default=None),
                 "inForce": True if in_force & {"true", "1"} else
                 False if in_force & {"false", "0"} else None,
@@ -203,7 +257,7 @@ def read_previous(paths):
         if path is not None and path.is_file():
             with path.open(encoding="utf-8") as source:
                 candidate = json.load(source)
-            if candidate.get("version") == 1 and "profile" not in candidate and (
+            if candidate.get("version") in (1, 2) and "profile" not in candidate and (
                 previous is None or candidate["checkedAt"] > previous["checkedAt"]
             ):
                 previous = candidate
@@ -224,9 +278,11 @@ def sync(output, previous_path, cache, profile, rebuild, recent_only):
     today = datetime.now(ZoneInfo("Europe/Brussels")).date()
     since = today - timedelta(days=RECENT_DAYS - 1)
     recent = recent_index(since, today)
-    print(f"Recent OJ L acts identified: {len(recent):,}", flush=True)
+    preparatory = preparatory_index()
+    recent.update(preparatory)
+    print(f"Recent OJ L/C and relevant preparatory documents identified: {len(recent):,}", flush=True)
     if not recent:
-        raise ValueError("Cellar found no legislation across the recent publication window")
+        raise ValueError("Cellar found no relevant documents across the publication queries")
 
     current = {} if recent_only else in_force_index()
     previous = None if rebuild or recent_only else read_previous([cache, previous_path, output])
@@ -284,11 +340,13 @@ def sync(output, previous_path, cache, profile, rebuild, recent_only):
             elif record["inForce"] is True:
                 record["inForce"] = None
         if identifier in recent:
-            record["published"] = recent[identifier]["published"]
+            record["published"] = recent[identifier].get("published") or record.get("published")
+        if identifier in preparatory:
+            record["documentDate"] = preparatory[identifier].get("published")
 
     documents = sorted(kept.values(), key=lambda row: (row["published"] or "", row["id"]), reverse=True)
     catalog = {
-        "version": 1,
+        "version": 2,
         "checkedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "through": today.isoformat(),
         "recentSince": since.isoformat(),
@@ -302,7 +360,7 @@ def sync(output, previous_path, cache, profile, rebuild, recent_only):
         write_catalog(cache, catalog)
     write_catalog(output, published)
     print(f"Published profile {published['profile']['id']}: "
-          f"{len(published['documents']):,} of {len(documents):,} acts", flush=True)
+          f"{len(published['documents']):,} of {len(documents):,} relevant documents", flush=True)
 
 
 if __name__ == "__main__":
