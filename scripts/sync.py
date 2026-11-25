@@ -74,8 +74,12 @@ def select(query):
             rows = payload["results"]["bindings"]
             return [{key: term["value"] for key, term in row.items()} for row in rows]
         except HTTPError as error:
+            detail = error.read().decode("utf-8", errors="replace").strip()[:1200]
             if error.code not in (429, 500, 502, 503, 504) or attempt == 3:
-                raise
+                raise RuntimeError(
+                    f"Cellar SPARQL HTTP {error.code}: {detail or 'no response body'}; "
+                    f"query preview: {query[:500]}"
+                ) from error
             retry_after = error.headers.get("Retry-After", "")
             time.sleep(min(120, int(retry_after)) if retry_after.isdigit() else 3 ** (attempt + 1))
         except (URLError, TimeoutError, ValueError):
@@ -105,25 +109,38 @@ def in_force_index():
 
 
 def recent_index(since, through):
+    # Keep the original OJ L query shape: CELLAR is sensitive to broad UNION
+    # scans across multiple journal collections and may return HTTP 500.
     rows = select(f"""
       SELECT DISTINCT ?id ?work ?published WHERE {{
         ?work cdm:official-journal-act_date_publication ?published ;
-              cdm:official-journal-act_part_of_collection_document ?collection .
-        VALUES ?collection {{
-          <http://publications.europa.eu/resource/authority/document-collection/OJ-L>
-          <http://publications.europa.eu/resource/authority/document-collection/OJ-C>
-        }}
-        {{
-          ?work cdm:resource_legal_id_celex ?id .
-        }} UNION {{
-          ?work cdm:work_id_document ?id .
-        }}
+              cdm:official-journal-act_part_of_collection_document
+                <http://publications.europa.eu/resource/authority/document-collection/OJ-L> ;
+              cdm:resource_legal_id_celex ?id .
         FILTER(?published >= "{since}"^^xsd:date && ?published <= "{through}"^^xsd:date)
         FILTER(REGEX(STR(?id), "{CELEX}"))
-      }} ORDER BY ?published STR(?work) LIMIT 12000
+      }} ORDER BY ?published STR(?work) LIMIT 8000
     """)
-    if len(rows) >= 12000:
-        raise ValueError("Recent OJ L/C query reached its result limit")
+    if len(rows) >= 8000:
+        raise ValueError("Recent OJ L query reached its result limit")
+    return {row["id"]: row for row in rows}
+
+
+def recent_ojc_index(since, through):
+    # OJ C documents also expose their CELEX identifier through the same CDM
+    # property; query the collection separately to avoid an expensive UNION.
+    rows = select(f"""
+      SELECT DISTINCT ?id ?work ?published WHERE {{
+        ?work cdm:official-journal-act_date_publication ?published ;
+              cdm:official-journal-act_part_of_collection_document
+                <http://publications.europa.eu/resource/authority/document-collection/OJ-C> ;
+              cdm:resource_legal_id_celex ?id .
+        FILTER(?published >= "{since}"^^xsd:date && ?published <= "{through}"^^xsd:date)
+        FILTER(REGEX(STR(?id), "^C[0-9]{{9}}$"))
+      }} ORDER BY ?published STR(?work) LIMIT 8000
+    """)
+    if len(rows) >= 8000:
+        raise ValueError("Recent OJ C query reached its result limit")
     return {row["id"]: row for row in rows}
 
 
@@ -285,6 +302,7 @@ def sync(output, previous_path, cache, profile, rebuild, recent_only):
     today = datetime.now(ZoneInfo("Europe/Brussels")).date()
     since = today - timedelta(days=RECENT_DAYS - 1)
     recent = recent_index(since, today)
+    recent.update(recent_ojc_index(since, today))
     preparatory = preparatory_index()
     recent.update(preparatory)
     print(f"Recent OJ L/C and relevant preparatory documents identified: {len(recent):,}", flush=True)
