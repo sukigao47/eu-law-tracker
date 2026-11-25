@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "description": "Official source directory for related EU legal materials. Items marked reference_only are discovery links, not automatically ingested records.",
+  "categories": [
+    {
+      "id": "soft_law",
+      "label": "欧盟软法",
+      "description": "Recommendations, Opinions, Communications and other non-binding EU documents.",
+      "status": "reference_only",
+      "sources": [
+        {
+          "id": "eurlex_search",
+          "name": "EUR-Lex 官方文件检索",
+          "url": "https://eur-lex.europa.eu/advanced-search-form.html?locale=en",
+          "owner": "Publications Office of the European Union",
+          "purpose": "检索 Recommendation、Opinion、Communication 等文件并核对 CELEX、发布日期及文件类型。"
+        },
+        {
+          "id": "commission_register",
+          "name": "欧盟委员会文件登记册",
+          "url": "https://ec.europa.eu/transparency/documents-register/",
+          "owner": "European Commission",
+          "purpose": "检索委员会正式文件、Communication 及相关工作文件。"
+        }
+      ]
+    },
+    {
+      "id": "oj_c_series",
+      "label": "《欧盟官方公报》C系列",
+      "description": "Notices, information and other publications in the C series; not all items are legislation.",
+      "status": "reference_only",
+      "sources": [
+        {
+          "id": "oj_direct_access",
+          "name": "欧盟官方公报检索",
+          "url": "https://eur-lex.europa.eu/oj/direct-access.html?locale=en",
+          "owner": "Publications Office of the European Union",
+          "purpose": "按系列、日期及期号核对 C 系列发布内容。"
+        }
+      ]
+    },
+    {
+      "id": "case_law",
+      "label": "欧盟法院判例",
+      "description": "Court of Justice and General Court case law; case metadata and judgments must be modelled separately from legislation.",
+      "status": "reference_only",
+      "sources": [
+        {
+          "id": "curia_search",
+          "name": "CURIA 判例检索",
+          "url": "https://curia.europa.eu/juris/recherche.jsf?language=en",
+          "owner": "Court of Justice of the European Union",
+          "purpose": "检索案件编号、当事方、法院、判决日期、程序类型及判决文本。"
+        },
+        {
+          "id": "eurlex_case_law",
+          "name": "EUR-Lex 判例入口",
+          "url": "https://eur-lex.europa.eu/collection/eu-law/eu-case-law.html?locale=en",
+          "owner": "Publications Office of the European Union",
+          "purpose": "交叉核对欧盟法院判例及其与相关法规的关联。"
+        }
+      ]
+    },
+    {
+      "id": "commission_guidance",
+      "label": "欧盟委员会指南与FAQ",
+      "description": "Guidance, notices, FAQs and implementation materials published by Commission services and Directorates-General.",
+      "status": "reference_only",
+      "sources": [
+        {
+          "id": "commission_documents",
+          "name": "欧盟委员会文件登记册",
+          "url": "https://ec.europa.eu/transparency/documents-register/",
+          "owner": "European Commission",
+          "purpose": "查找正式登记的委员会文件；部门专题网页及FAQ仍需按主管DG逐项核验。"
+        },
+        {
+          "id": "commission_law",
+          "name": "欧盟法律实施与执行",
+          "url": "https://commission.europa.eu/law/application-eu-law/implementation-eu-law_en",
+          "owner": "European Commission",
+          "purpose": "查找欧盟法律实施与执行相关的委员会说明和官方材料。"
+        }
+      ]
+    },
+    {
+      "id": "technical_standards",
+      "label": "技术标准与协调标准",
+      "description": "Standards are technical specifications, not EU legislation. Record standard identifiers, edition, harmonisation status and OJ citation separately.",
+      "status": "reference_only",
+      "sources": [
+        {
+          "id": "harmonised_standards",
+          "name": "欧盟协调标准官方入口",
+          "url": "https://single-market-economy.ec.europa.eu/single-market/european-standards/harmonised-standards_en",
+          "owner": "European Commission",
+          "purpose": "核对协调标准、对应法规、官方公报引用及适用日期。"
+        },
+        {
+          "id": "etsi_standards",
+          "name": "ETSI 标准检索",
+          "url": "https://www.etsi.org/standards",
+          "owner": "European Telecommunications Standards Institute",
+          "purpose": "检索通信、无线电、网络安全等领域标准；需另行核对其是否被欧盟官方公报引用。"
+        },
+        {
+          "id": "cen_cenelec",
+          "name": "CEN-CENELEC 标准入口",
+          "url": "https://www.cencenelec.eu/",
+          "owner": "CEN and CENELEC",
+          "purpose": "查找欧洲标准目录及标准状态；标准全文可能受版权和访问限制。"
+        }
+      ]
+    }
+  ]
+}
