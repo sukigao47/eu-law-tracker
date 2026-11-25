@@ -27,7 +27,7 @@ on:
         default: false
 
 concurrency:
-  group: eu-law-pages
+  group: eu-law-pages-${{ github.event_name }}
   cancel-in-progress: false
 
 permissions:
