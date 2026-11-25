@@ -1,143 +1,65 @@
-<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0e274d">
-  <meta name="description" content="检索手机、平板、智能穿戴及其他智能终端全生命周期相关的欧盟法规，追踪《欧盟官方公报》的近期发布。">
-  <title>欧盟法规库</title>
-  <link rel="stylesheet" href="./styles.css">
-  <script type="module" src="./app.js"></script>
-</head>
-<body>
-  <a class="skip-link" href="#catalog">跳到法规检索</a>
-  <header class="topbar">
-    <div class="shell topbar-inner">
-      <a class="brand" href="./" aria-label="欧盟法规库首页">
-        <span class="brand-icon" aria-hidden="true"><span></span></span>
-        <span>欧盟法规库</span>
-      </a>
-      <nav class="topbar-links" aria-label="网站导航">
-        <a href="#catalog">法规目录</a>
-        <a href="https://eur-lex.europa.eu/oj/direct-access.html?locale=en" target="_blank" rel="noopener">官方公报</a>
-      </nav>
-    </div>
-  </header>
+跳到法规检索
+EULaw Watch 智能终端欧盟法规数据库
+法规数据库 业务板块 最新动态 官方公报
+EU REGULATORY INTELLIGENCE FOR SMART DEVICES
 
-  <main class="shell">
-    <section class="hero" aria-labelledby="page-title">
-      <div class="hero-orbit" aria-hidden="true"></div>
-      <div class="hero-intro">
-        <h1 id="page-title">欧盟法规检索</h1>
-        <p>追踪手机、平板、智能穿戴及其他智能终端从研发到回收的欧盟法规。</p>
-        <button class="primary-button" id="recent-button" type="button">查最新发布</button>
-      </div>
-      <div class="hero-status">
-        <span class="sync-label">上次成功同步</span>
-        <time id="sync-time">正在读取</time>
-        <span class="sync-note" id="sync-note">数据来源 EUR-Lex / Cellar</span>
-      </div>
-    </section>
+智能终端欧盟法规数据库
+智能终端全生命周期法规检索与动态监测
 
-    <section class="catalog" id="catalog" aria-labelledby="catalog-title">
-      <div class="section-head">
-        <div>
-          <h2 id="catalog-title">法规目录</h2>
-          <p id="catalog-scope">智能终端全生命周期 · 现行法规与近 90 天新发布文件</p>
-        </div>
-        <a class="source-link" href="https://eur-lex.europa.eu/oj/direct-access.html?locale=en" target="_blank" rel="noopener">到官方公报核对</a>
-      </div>
-      <div class="notice" id="notice" role="status" hidden></div>
+汇集智能终端相关欧盟法规及立法动态，覆盖产品研发、生产制造、市场销售、数据保护、网络安全、维修及回收等业务环节，为部门日常合规查询与法规跟踪提供支持。
 
-      <form class="filters" id="filters" aria-label="法规筛选">
-        <label class="search-box">
-          <span class="sr-only">搜索关键词、标题或 CELEX 编号</span>
-          <span class="search-icon" aria-hidden="true"></span>
-          <input type="search" id="search" placeholder="搜索英文标题、关键词或 CELEX 编号">
-        </label>
+进入法规数据库 核对欧盟官方公报 ↗
+数据最近核验时间 正在读取 数据来源：EUR-Lex / CELLAR 数据范围 现行文件及近 90 天新发布文件 具体收录范围以数据说明为准
+DATABASE OVERVIEW
 
-        <div class="filter-fields">
-          <label>
-            <span>效力层级</span>
-            <select id="type">
-              <option value="">全部效力层级</option>
-              <option value="R">法规</option>
-              <option value="L">指令</option>
-              <option value="D">决定</option>
-            </select>
-          </label>
-          <label>
-            <span>业务主题</span>
-            <select id="topic"><option value="">全部主题</option></select>
-          </label>
-          <label>
-            <span>有效状态</span>
-            <select id="status">
-              <option value="">全部状态</option>
-              <option value="active">现行有效</option>
-              <option value="pending">尚未生效</option>
-              <option value="inactive">非现行</option>
-              <option value="unknown">状态未标注</option>
-            </select>
-          </label>
-          <label>
-            <span>发布日期起</span>
-            <input type="date" id="since" aria-label="发布日期起">
-          </label>
-          <label>
-            <span>发布日期止</span>
-            <input type="date" id="until" aria-label="发布日期止">
-          </label>
-        </div>
-        <div class="filter-actions">
-          <div class="quick-filters" aria-label="发布日期快捷筛选">
-            <button class="chip" type="button" data-days="7" aria-pressed="false">近 7 天</button>
-            <button class="chip" type="button" data-days="30" aria-pressed="false">近 30 天</button>
-            <button class="chip" type="button" data-days="90" aria-pressed="false">近 90 天</button>
-          </div>
-          <button class="text-button" id="clear-button" type="button">清除筛选</button>
-        </div>
-      </form>
+法规数据概览
+根据当前已载入的公开法规目录统计
 
-      <div class="results">
-        <div class="results-head">
-          <p id="result-count" aria-live="polite">正在载入法规数据</p>
-          <label class="sort-control">
-            <span class="sr-only">排序方式</span>
-            <select id="sort">
-              <option value="newest">发布日期从新到旧</option>
-              <option value="oldest">发布日期从旧到新</option>
-            </select>
-          </label>
-        </div>
-        <table id="result-table" hidden>
-          <thead><tr>
-            <th scope="col">效力层级</th>
-            <th scope="col">法规标题</th>
-            <th scope="col">业务主题</th>
-            <th scope="col">发布日期</th>
-            <th scope="col">有效状态</th>
-          </tr></thead>
-          <tbody id="result-rows"></tbody>
-        </table>
-        <div class="empty" id="empty" hidden>
-          <h3 id="empty-title"></h3>
-          <p id="empty-detail"></p>
-        </div>
-        <div class="pagination" id="pagination" aria-label="结果分页" hidden>
-          <span id="page-count"></span>
-          <div>
-            <button class="outline-button" id="previous" type="button">上一页</button>
-            <button class="outline-button" id="next" type="button">下一页</button>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-  <footer class="footer shell">
-    <span>欧盟法规库</span>
-    <a href="https://op.europa.eu/en/web/eu-vocabularies/cellar" target="_blank" rel="noopener">数据来源 欧盟出版局 Cellar</a>
-  </footer>
-  <noscript>启用 JavaScript 后即可在本页搜索和筛选法规。</noscript>
-</body>
-</html>
+收录文件—当前公开目录
+现行有效—依据当前数据状态字段
+近 90 天发布—按官方公报发布日期
+主题标签—当前目录配置的主题数
+BUSINESS AREAS
+
+业务板块
+选择业务领域，快速筛选相关法规。板块统计为关联收录，跨板块文件可能重复计数。
+
+01消费者与产品合规产品安全、能效、充电、电池、维修与回收— 项关联文件 02数据隐私与网络安全个人数据、网络安全、数字规则与人工智能— 项关联文件 03商事合规与竞争消费者权益、数字内容、电商与商业行为— 项关联文件 04出口管制与贸易合规海关、两用物项、贸易措施与原产地— 项关联文件 05专利与知识产权专利、商标、外观设计与知识产权执法— 项关联文件 06电信、频谱与连接无线电设备、频谱、连接及电磁兼容— 项关联文件 07可持续与供应链生态设计、供应链尽调、材料与循环经济— 项关联文件 08综合与其他查看当前智能终端法规目录中的全部文件— 项目录文件
+说明：以上为首页业务快捷入口，依据现有目录主题配置进行初步归组；正式主板块及次板块归属仍需逐条法律语义复核。
+
+LATEST PUBLICATIONS
+
+最新法规动态
+查看当前目录中近期发布的法规文件，并可进一步按发布日期筛选。
+
+查看近 7 天发布
+EU LAW CATALOGUE
+
+法规数据库
+智能终端相关欧盟法规 · 按业务主题、法规类型及效力状态检索
+
+到官方公报核对 ↗
+搜索关键词、标题或 CELEX 编号 
+搜索法规英文标题、关键词或 CELEX 编号
+效力层级
+全部效力层级
+ 业务主题
+全部主题
+ 有效状态
+全部状态
+ 发布日期起
+YYYY年MM月DD日
+日历
+yyyy/mm/日
+ 发布日期止
+YYYY年MM月DD日
+日历
+yyyy/mm/日
+近 7 天近 30 天近 90 天
+清除筛选
+正在载入法规数据
+
+排序方式
+发布日期从新到旧
+EULaw Watch智能终端欧盟法规数据库
+数据来源：欧盟出版局 CELLAR ↗
