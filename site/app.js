@@ -72,7 +72,7 @@ function inferDocumentType(record){
     else if(sector==="5")effect="preparatory";
     else if(sector==="C")effect="informational";
   }
-  return {...record,documentTypeCode:record.documentTypeCode||code||"OTHER",
+  return {...record,documentTypeCode:record.documentTypeCode||(sector+code)||"OTHER",
     documentTypeLabel:label,legalEffect:effect};
 }
 function shortName(record){
