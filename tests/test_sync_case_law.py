@@ -59,6 +59,7 @@ class CaseLawSyncTests(unittest.TestCase):
         self.assertTrue(url.startswith("https://curia.europa.eu/juris/liste.jsf?"))
         self.assertIn("num=C-123%2F24", url)
         self.assertIn("language=en", url)
+        self.assertEqual(sync_case_law.case_url(None), sync_case_law.INFOCURIA_SEARCH)
 
     def test_index_query_uses_official_cjeu_classes_and_date_window(self):
         work = "http://publications.europa.eu/resource/cellar/00000000-0000-0000-0000-000000000000"
