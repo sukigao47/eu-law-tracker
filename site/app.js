@@ -21,19 +21,20 @@ function todayInBrussels() {
   const p = Object.fromEntries(dateParts.formatToParts(new Date()).map(x=>[x.type,x.value]));
   return [p.year,p.month,p.day].join("-");
 }
+function asList(value){return Array.isArray(value)?value:value==null?[]:[value];}
 function normalize(value) {
   return String(value ?? "").normalize("NFKC").toLocaleLowerCase("zh-CN").replace(/[\u200B-\u200D\uFEFF]/g," ").replace(/\s+/g," ").trim();
 }
 function statusFor(record,today) {
-  if (record.inForce === true) return "active";
   if (record.entry && record.entry > today) return "pending";
+  if (record.inForce === true) return "active";
   return record.inForce === false ? "inactive" : "unknown";
 }
 function labelSubject(subject) { return SUBJECT_LABELS.get(String(subject).toLowerCase()) ?? subject; }
 function departmentIdsFor(doc) {
-  if (Array.isArray(doc.departments)) return doc.departments;
+  const existing = asList(doc.departments);
   const ids = new Set(doc.businessTopics ?? []);
-  return taxonomy.departments.filter(d=>d.topics.some(t=>ids.has(t))).map(d=>d.id);
+  return [...new Set([...existing,...taxonomy.departments.filter(d=>d.topics.some(t=>ids.has(t))).map(d=>d.id)])];
 }
 function topicLabelsFor(doc) {
   const ids = doc.businessTopics ?? [];
@@ -81,7 +82,7 @@ function buildTaxonomyUI() {
     const name=document.createElement("strong"); name.textContent=d.label;
     const en=document.createElement("span"); en.textContent=d.labelEn;
     button.append(name,en);
-    button.addEventListener("click",()=>{ui.department.value=d.id;page=1;render();ui.catalog.scrollIntoView({behavior:"smooth",block:"start"});});
+    button.addEventListener("click",()=>{ui.filters.reset();ui.department.value=d.id;page=1;render();ui.catalog.scrollIntoView({behavior:"smooth",block:"start"});});
     grid.append(button);
   });
   ui["department-grid"].replaceChildren(grid);
@@ -93,13 +94,22 @@ function buildTaxonomyUI() {
   });
   ui["crosscutting-list"].replaceChildren(cross);
 }
+function referenceNumber(id){const m=/^3(\d{4})[RLD](\d+)$/.exec(id);return m?m[1]+"/"+Number(m[2]):"";}
+function matchesType(record,value){
+ if(!value)return true;
+ const title=String(record.title??"").toLowerCase(), kind=String(record.instrumentClass??"").toLowerCase();
+ if(value==="delegated"||value==="implementing")return kind.includes(value)||title.startsWith("commission "+value);
+ if(value==="guidance")return record.sourceCategory!=="EU_LEGISLATION"&&/guidance|guidelines|guideline|interpretative notice/.test(title);
+ if(value==="standards")return /harmonised standard|harmonized standard|common specification/.test(title);
+ return record.sourceCategory==="EU_LEGISLATION"&&record.legalTypeCode===value;
+}
 function makeSearchText(record) {
   const deptNames=departmentIdsFor(record).map(id=>taxonomy.departments.find(d=>d.id===id)?.label ?? id);
   const topicNames=topicLabelsFor(record);
   return normalize([
-    record.id,record.ecli,record.caseCelex,record.caseNumber,record.parties,record.court,record.work,record.title,record.titleZh,zhTitles[record.id],...(record.interpretedActs??[]),...(record.citedDocuments??[]),...(record.caseSubjects??[]),
-    record.legalType,record.instrumentClass,record.bindingNature,record.dateType,record.sourceCategory,...(record.caseLawDigest??[]),...(record.sourceCollections??[]),TYPE_LABELS[record.id?.[5]],record.published,record.entry,
-    ...(record.subjects??[]),...(record.keywords??[]),...topicNames,...deptNames
+    record.id,record.ecli,record.caseCelex,record.caseNumber,record.parties,record.court,record.work,record.title,record.titleZh,zhTitles[record.id],referenceNumber(record.id),record.titleZh?.replace(/能源/g,"能效"),...asList(record.interpretedActs),...asList(record.citedDocuments),...asList(record.caseSubjects),
+    record.legalType,record.instrumentClass,record.bindingNature,record.dateType,record.sourceCategory,...asList(record.caseLawDigest),...asList(record.sourceCollections),TYPE_LABELS[record.id?.[5]],record.published,record.entry,
+    ...asList(record.subjects),...asList(record.keywords),...topicNames,...deptNames
   ].join(" "));
 }
 function renderNotice() {
@@ -111,37 +121,34 @@ function renderNotice() {
 async function loadSnapshot(manual=false) {
   if(refreshing)return;refreshing=true;ui["recent-button"].disabled=true;ui["recent-button"].textContent="正在读取";
   try {
-    const base=new URL("./",import.meta.url);
-    const [catalogResponse,taxonomyResponse,zhResponse,sourceResponse,relatedResponse,caseLawResponse]=await Promise.all([
-      fetch(new URL("./data/catalog.json",base),{cache:manual?"no-cache":"default"}),
-      fetch(new URL("./data/business-taxonomy.json",base),{cache:"no-cache"}),
-      fetch(new URL("./data/titles-zh.json",base),{cache:"no-cache"}),
-      fetch(new URL("./data/source-registry.json",base),{cache:"no-cache"}),
-      fetch(new URL("./data/related-materials.json",base),{cache:manual?"no-cache":"default"}).catch(()=>null),
-      fetch(new URL("./data/case-law.json",base),{cache:manual?"no-cache":"default"}).catch(()=>null)
+    const base=new URL("./",document.baseURI);
+    async function read(name,required=false){
+      try {const response=await fetch(new URL("data/"+name,base),{cache:"no-cache"});if(!response.ok)throw Error("HTTP "+response.status);return await response.json();}
+      catch(error){if(required)throw error;console.warn(name,error);return null;}
+    }
+    const [data,tax,translations,registry,relatedData]=await Promise.all([
+      read("catalog.json",true),read("business-taxonomy.json"),read("titles-zh.json"),read("source-registry.json"),read("related-materials.json")
     ]);
-    if(!catalogResponse.ok)throw new Error("Catalogue HTTP "+catalogResponse.status);
-    const data=await catalogResponse.json();
-    if(data.version!==1||!Array.isArray(data.documents)||!Number.isFinite(Date.parse(data.checkedAt)))throw new Error("Invalid catalogue payload");
-    if(taxonomyResponse.ok)taxonomy=await taxonomyResponse.json();
-    if(zhResponse.ok)zhTitles=await zhResponse.json();
-    if(sourceResponse.ok)sourceRegistry=await sourceResponse.json();
-    let relatedData={documents:[],checkedAt:null},caseLawData={documents:[],checkedAt:null};
-    if(relatedResponse?.ok)relatedData=await relatedResponse.json();
-    if(caseLawResponse?.ok)caseLawData=await caseLawResponse.json();
+    if(!Array.isArray(data.documents))throw Error("Invalid catalogue");
+    taxonomy=tax??{departments:data.profile?.departments??[],crossCutting:data.profile?.crossCutting??[]};
+    zhTitles=translations??{};sourceRegistry=registry??{categories:[]};
     snapshot=data;
-    records=[...data.documents,...(relatedData.documents??[]),...(caseLawData.documents??[])].map(doc=>{
-      const enriched={...doc,titleZh:doc.titleZh||zhTitles[doc.id]||"",departments:departmentIdsFor(doc),legalTypeCode:doc.sourceCategory==="EU_LEGISLATION"?(doc.id?.[5]??""):""};
-      enriched.crossCuttingTopics=Array.isArray(doc.crossCuttingTopics)?doc.crossCuttingTopics:
-        taxonomy.crossCutting.filter(t=>t.topics.some(topic=>(doc.businessTopics??[]).includes(topic))).map(t=>t.id);
+    const unique=new Map();
+    for(const doc of [...data.documents,...asList(relatedData?.documents)]){
+      if(!doc?.id||unique.has(doc.id))continue;
+      const id=String(doc.id).toUpperCase();
+      const curated=zhTitles[id]||doc.titleZh||"";
+      const enriched={...doc,id,sourceCategory:doc.sourceCategory||"EU_LEGISLATION",titleZh:curated,departments:departmentIdsFor(doc),legalTypeCode:id[5]??""};
+      enriched.crossCuttingTopics=[...new Set([...asList(doc.crossCuttingTopics),...taxonomy.crossCutting.filter(t=>t.topics.some(topic=>asList(doc.businessTopics).includes(topic))).map(t=>t.id)])];
       enriched.topicNames=topicLabelsFor(enriched);
       enriched.searchText=makeSearchText(enriched);
-      return enriched;
-    });
+      unique.set(id,enriched);
+    }
+    records=[...unique.values()];
     buildTaxonomyUI();
     buildSourceDirectory();
-    const checkedAt=[data.checkedAt,relatedData.checkedAt,caseLawData.checkedAt].filter(Boolean).sort().at(-1)??data.checkedAt;
-    ui["sync-time"].dateTime=checkedAt;ui["sync-time"].textContent=chinaTime.format(new Date(checkedAt));
+    const checkedAt=data.checkedAt;
+    ui["sync-time"].dateTime=checkedAt;ui["sync-time"].textContent=Number.isFinite(Date.parse(checkedAt))?chinaTime.format(new Date(checkedAt)):"未标注";
     ui["sync-note"].textContent="北京时间 · 公报数据截至 "+(data.through??"未标注");
     ui["catalog-scope"].textContent="当前收录 "+numbers.format(records.length)+" 条法律及相关官方资料";
     refreshError=false;
@@ -174,14 +181,14 @@ function resultRow(record,today) {
   else if(record.sourceCategory==="OJ_C_SERIES"||record.sourceCollections?.includes("OJ_C_SERIES"))kindCell.append(tag("OJ C系列","material-ojc"));
   else if(record.sourceCategory==="EU_LEGISLATION")kindCell.append(tag("法律文件","material-law"));
   const zh=document.createElement("td");zh.className="title-zh";
-  zh.textContent=record.titleZh||(record.sourceCategory==="CASE_LAW"?"暂未维护中文案名":"暂未维护中文标题");
+  zh.textContent=record.titleZh||"暂无中文参考译名"; if(record.titleZh){const note=document.createElement("small");note.className="date-type";note.textContent="非官方参考译名";zh.append(note);}
   row.append(zh);
   const en=document.createElement("td");en.className="title-en";
   const link=document.createElement("a");link.className="act-title";link.href=record.officialUrl||("https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:"+encodeURIComponent(record.id));
   link.target="_blank";link.rel="noopener noreferrer";link.lang="en";link.textContent=record.title||(record.sourceCategory==="CASE_LAW"?"Open official CURIA case record":"Open official EUR-Lex record");
   const celex=document.createElement("span");celex.className="celex";
   celex.textContent=record.sourceCategory==="CASE_LAW"?(record.ecli?"ECLI "+record.ecli:record.caseNumber?"案件号 "+record.caseNumber:"CELLAR "+record.work):"CELEX "+record.id;
-  en.append(link,celex);
+  en.append(link,celex); const number=referenceNumber(record.id);if(number){const n=document.createElement("small");n.className="date-type";n.textContent="编号 "+number;en.append(n);}
   if(record.sourceCategory==="CASE_LAW"){
     const caseMeta=document.createElement("small");caseMeta.className="case-meta";
     caseMeta.textContent=[record.caseNumber&&record.ecli?"案件号 "+record.caseNumber:"",record.court,record.parties].filter(Boolean).join(" · ");
@@ -208,8 +215,8 @@ function matches(record,today,terms) {
     &&(!ui["cross-topic"].value||(record.crossCuttingTopics??[]).includes(ui["cross-topic"].value))
     &&(!ui.topic.value||(record.businessTopics??[]).includes(ui.topic.value))
     &&(!ui.material.value||(ui.material.value==="legislation"&&record.sourceCategory==="EU_LEGISLATION")||(ui.material.value==="soft_law"&&(record.sourceCategory==="EU_SOFT_LAW"||record.sourceCollections?.includes("EU_SOFT_LAW")))||(ui.material.value==="oj_c_series"&&(record.sourceCategory==="OJ_C_SERIES"||record.sourceCollections?.includes("OJ_C_SERIES")))||(ui.material.value==="case_law"&&record.sourceCategory==="CASE_LAW"))
-    &&(!ui.type.value||record.legalTypeCode===ui.type.value)
-    &&(!ui.status.value||record.sourceCategory!=="EU_LEGISLATION"||statusFor(record,today)===ui.status.value)
+    &&matchesType(record,ui.type.value)
+    &&(!ui.status.value||(record.sourceCategory==="EU_LEGISLATION"&&statusFor(record,today)===ui.status.value))
     &&terms.every(term=>record.searchText.includes(term));
 }
 function render() {
@@ -227,7 +234,8 @@ function render() {
   ui["page-count"].textContent="第 "+page+" / "+numbers.format(lastPage)+" 页";
   ui.previous.disabled=page===1;ui.next.disabled=page===lastPage;
 }
-ui.filters.addEventListener("submit",event=>event.preventDefault());
+ui.filters.addEventListener("submit",event=>{event.preventDefault();page=1;render();});
+ui.search.addEventListener("input",()=>{page=1;render();});
 ui.filters.addEventListener("input",()=>{page=1;render();});
 ui.filters.addEventListener("change",()=>{page=1;render();});
 ui.sort.addEventListener("change",()=>{page=1;render();});
