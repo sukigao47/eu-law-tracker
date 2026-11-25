@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 import re
 from urllib.parse import urlencode
+from zoneinfo import ZoneInfo
 
 from filter_catalog import filter_catalog
 from sync import CELLAR_WORK, ROOT, details, select, write_catalog
@@ -150,7 +151,7 @@ def deduplicate_materials(*collections: list[dict]) -> list[dict]:
 
 
 def sync_related(output: Path, profile: Path, today: date | None = None) -> dict:
-    through = today or date.today()
+    through = today or datetime.now(ZoneInfo("Europe/Brussels")).date()
     soft_since = through - timedelta(days=SOFT_LAW_DAYS)
     oj_since = through - timedelta(days=OJ_C_DAYS)
     soft_index = fetch_soft_law(soft_since, through)
