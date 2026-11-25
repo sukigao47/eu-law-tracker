@@ -245,6 +245,56 @@ function updateOverview() {
   }
 }
 
+function renderLatest() {
+  const container = ui["latest-list"];
+  if (!container) return;
+
+  const latest = records
+    .filter((record) => record.published)
+    .sort(newestFirst)
+    .slice(0, 5);
+
+  if (latest.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "latest-placeholder";
+    empty.textContent = "当前目录暂无可展示的近期发布日期记录。";
+    container.replaceChildren(empty);
+    return;
+  }
+
+  const items = latest.map((record) => {
+    const item = document.createElement("article");
+    item.className = "latest-item";
+
+    const main = document.createElement("div");
+    main.className = "latest-item-main";
+
+    const link = document.createElement("a");
+    link.href = "https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX%3A"
+      + encodeURIComponent(record.id);
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.lang = "en";
+    link.textContent = record.title || "在 EUR-Lex 查看法规";
+
+    const meta = document.createElement("p");
+    meta.className = "latest-meta";
+    meta.textContent = "CELEX " + record.id;
+
+    main.append(link, meta);
+
+    const date = document.createElement("time");
+    date.className = "latest-date";
+    date.dateTime = record.published;
+    date.textContent = formatDateZh(record.published);
+
+    item.append(main, date);
+    return item;
+  });
+
+  container.replaceChildren(...items);
+}
+
 function applyBoard(boardId, clearTopic = true) {
   activeBoard = boardId;
 
@@ -343,7 +393,7 @@ function renderNotice() {
   ui.notice.hidden = !message;
 }
 
-async function loadSnapshot(manual = false) {
+async async function loadSnapshot(manual = false) {
   if (refreshing) return;
 
   refreshing = true;
@@ -351,7 +401,7 @@ async function loadSnapshot(manual = false) {
   ui["recent-button"].disabled = true;
   ui["recent-button"].textContent = manual
     ? "正在检查"
-    : "查最新发布";
+    : "查看近 7 天发布";
 
   try {
     const url = new URL(
@@ -415,6 +465,7 @@ async function loadSnapshot(manual = false) {
 
       loadTopics();
       updateOverview();
+      renderLatest();
 
       ui["sync-time"].dateTime = data.checkedAt;
 
@@ -449,7 +500,7 @@ async function loadSnapshot(manual = false) {
     refreshing = false;
 
     ui["recent-button"].disabled = false;
-    ui["recent-button"].textContent = "查最新发布";
+    ui["recent-button"].textContent = "查看近 7 天发布";
 
     renderNotice();
     render();
