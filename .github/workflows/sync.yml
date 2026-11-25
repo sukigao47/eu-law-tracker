@@ -82,6 +82,14 @@ jobs:
         run: |
           python -m pip install argostranslate
           python scripts/translate_titles.py
+      - name: Install browser acceptance test dependencies
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Test generated site in Chromium
+        run: |
+          python -m http.server 8765 --directory site &
+          python scripts/browser_test.py
       # CJEU case-law ingestion is intentionally disabled per product-owner decision.
       # Official CURIA/EUR-Lex reference links remain available in the source registry.
       - uses: actions/upload-pages-artifact@v4
@@ -93,7 +101,7 @@ jobs:
     name: 发布到 GitHub Pages
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
     permissions:
       pages: write
       id-token: write
@@ -103,3 +111,16 @@ jobs:
     steps:
       - id: publish
         uses: actions/deploy-pages@v4
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Test published website
+        env:
+          TEST_URL: ${{ steps.publish.outputs.page_url }}
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+          python scripts/browser_test.py

@@ -1,6 +1,6 @@
 const PAGE_SIZE = 20;
 const TYPE_LABELS = { R: "条例 / Regulation", L: "指令 / Directive", D: "决定 / Decision" };
-const STATUS_LABELS = { active: "现行有效且已实施（适用）", not_applied: "现行有效尚未实施（适用）", partial: "现行有效·分阶段适用", pending: "尚未生效", inactive: "已失效", active_unknown: "现行有效·适用日期待核实", unknown: "状态待核实" };
+const STATUS_LABELS = { active: "现行有效且已实施（适用）", not_applied: "现行有效尚未实施（适用）", partial: "现行有效·分阶段适用", pending: "尚未生效", inactive: "已失效", active_unknown: "现行有效", unknown: "其他状态", na: "不适用" };
 const SUBJECT_LABELS = new Map(Object.entries({
   agriculture:"农业","common agricultural policy":"共同农业政策","common commercial policy":"共同商业政策",
   "common foreign and security policy":"共同外交与安全政策",competition:"竞争", "consumer protection":"消费者保护",
@@ -77,9 +77,8 @@ function buildSourceDirectory() {
   ui["source-grid"].replaceChildren(grid);
 }
 function buildTaxonomyUI() {
-  setSelectOptions(ui.department,taxonomy.departments,"全部业务部门");
+  setSelectOptions(ui.department,[...taxonomy.departments,{id:"other",label:"其他／通用法规"}],"全部业务部门");
   setSelectOptions(ui["cross-topic"],taxonomy.crossCutting,"全部跨部门专题");
-  setSelectOptions(ui.topic,(snapshot.profile?.topics ?? []).filter(t=>t.id!=="devices"),"全部法规主题");
   const grid=document.createDocumentFragment();
   taxonomy.departments.forEach(d=>{
     const button=document.createElement("button");
@@ -91,13 +90,6 @@ function buildTaxonomyUI() {
     grid.append(button);
   });
   ui["department-grid"].replaceChildren(grid);
-  const cross=document.createDocumentFragment();
-  taxonomy.crossCutting.forEach(t=>{
-    const button=document.createElement("button");button.type="button";button.className="cross-chip";
-    button.textContent=t.label;button.addEventListener("click",()=>{ui["cross-topic"].value=t.id;page=1;render();ui.catalog.scrollIntoView({behavior:"smooth",block:"start"});});
-    cross.append(button);
-  });
-  ui["crosscutting-list"].replaceChildren(cross);
 }
 function referenceNumber(id){const m=/^3(\d{4})[RLD](\d+)$/.exec(id);return m?m[1]+"/"+Number(m[2]):"";}
 function matchesType(record,value){
@@ -218,21 +210,33 @@ function resultRow(record,today,terms=[]) {
   const deptCell=row.insertCell();deptCell.className="topics";
   const deptNames=record.departments.map(id=>taxonomy.departments.find(d=>d.id===id)?.label??id);
   deptCell.textContent=deptNames.join("、")||"未分类";
-  const topics=row.insertCell();topics.className="topics";
-  topics.textContent=(record.topicNames??[]).join("、")||"未标注";
+  row.insertCell().textContent=record.entry||"—";
+  row.insertCell().textContent=asList(record.applicationDates).join("、")||"—";
   const date=row.insertCell();date.className="pub-date";date.textContent=record.published||"未标注";
   if(record.dateType){const dateNote=document.createElement("small");dateNote.className="date-type";dateNote.textContent=record.dateType==="OJ publication date"?"公报发布日期":record.dateType==="CELLAR document date"?"文书日期":record.dateType.startsWith("CELLAR record")?"数据库记录日期（需核验）":"文件日期";date.append(dateNote);}
   row.insertCell().append(tag(materialStatus(record,today),"status-"+(record.sourceCategory==="EU_LEGISLATION"?status:"unknown")));
   return row;
 }
+function advancedMatch(record,terms) {
+  const en=normalize(record.title),zh=normalize([record.titleZh,zhTitles[record.id]].join(" "));
+  const scope=ui["search-scope"].value;
+  const hay=scope==="english"?en:scope==="chinese"?zh:scope==="title"?en+" "+zh:record.searchText;
+  const words=id=>normalize(ui[id].value).split(" ").filter(Boolean);
+  const any=words("any-terms"),excluded=words("exclude-terms"),phrase=normalize(ui["exact-phrase"].value);
+  const number=normalize(ui["act-number"].value).match(/\d{4}\s*\/\s*\d+/)?.[0].replace(/\s/g,"")||normalize(ui["act-number"].value);
+  const author=/^commission\b/.test(en)?"commission":/^council\b/.test(en)?"council":/european parliament and (?:of )?the council/.test(en)?"parliament":"other";
+  return terms.every(t=>hay.includes(t))&&(!any.length||any.some(t=>hay.includes(t)))&&excluded.every(t=>!hay.includes(t))&&(!phrase||hay.includes(phrase))
+    &&zh.includes(normalize(ui["zh-name"].value))&&en.includes(normalize(ui["en-name"].value))
+    &&(!number||referenceNumber(record.id)===number)&&(!ui["celex-number"].value.trim()||normalize(record.id)===normalize(ui["celex-number"].value))
+    &&(!ui.author.value||author===ui.author.value);
+}
 function matches(record,today,terms) {
-  return (!ui.department.value||record.departments.includes(ui.department.value))
+  return (!ui.department.value||(ui.department.value==="other"?!record.departments.length:record.departments.includes(ui.department.value)))
     &&(!ui["cross-topic"].value||(record.crossCuttingTopics??[]).includes(ui["cross-topic"].value))
-    &&(!ui.topic.value||(record.businessTopics??[]).includes(ui.topic.value))
     &&(!ui.material.value||(ui.material.value==="legislation"&&record.sourceCategory==="EU_LEGISLATION")||(ui.material.value==="soft_law"&&(record.sourceCategory==="EU_SOFT_LAW"||record.sourceCollections?.includes("EU_SOFT_LAW")))||(ui.material.value==="oj_c_series"&&(record.sourceCategory==="OJ_C_SERIES"||record.sourceCollections?.includes("OJ_C_SERIES")))||(ui.material.value==="case_law"&&record.sourceCategory==="CASE_LAW"))
     &&matchesType(record,ui.type.value)
-    &&(!ui.status.value||(record.sourceCategory==="EU_LEGISLATION"&&statusFor(record,today)===ui.status.value))
-    &&terms.every(term=>record.searchText.includes(term));
+    &&(!ui.status.value||((record.sourceCategory==="EU_LEGISLATION"?statusFor(record,today):"na")===ui.status.value))
+    &&advancedMatch(record,terms);
 }
 function render() {
   if(!snapshot){ui["result-table"].hidden=true;ui.pagination.hidden=true;ui.empty.hidden=true;ui["result-count"].textContent=refreshError?"法规数据暂不可用":"正在载入法规数据";return;}
@@ -241,7 +245,7 @@ function render() {
   filtered.sort((a,b)=>ui.sort.value==="oldest"?(a.published??"").localeCompare(b.published??""):(b.published??"").localeCompare(a.published??"")||b.id.localeCompare(a.id));
   const lastPage=Math.max(1,Math.ceil(filtered.length/PAGE_SIZE));page=Math.min(page,lastPage);
   const start=(page-1)*PAGE_SIZE,visible=filtered.slice(start,start+PAGE_SIZE);
-  ui["result-rows"].replaceChildren(...visible.map(record=>resultRow(record,today,terms)));
+  ui["result-rows"].replaceChildren(...visible.map(record=>resultRow(record,today,[...terms,...normalize(ui["any-terms"].value).split(" ").filter(Boolean),...normalize(ui["exact-phrase"].value).split(" ").filter(Boolean)])));
   ui["result-table"].hidden=!visible.length;ui.empty.hidden=!!visible.length;
   ui["empty-title"].textContent="没有符合条件的资料";
   ui["empty-detail"].textContent="请尝试其他名称或编号关键词，或调整资料类别、业务部门及主题。";
