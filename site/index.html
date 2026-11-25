@@ -69,7 +69,7 @@
         <div class="filter-actions"><span class="filter-hint">各条件组合使用；检索标题与元数据，不含法规全文。</span><button class="text-button" id="clear-button" type="button">清除筛选</button></div>
       </form>
       <div class="results">
-        <div class="results-head"><p id="result-count" aria-live="polite">正在载入法规数据</p><label class="sort-control"><span class="sr-only">排序方式</span><select id="sort"><option value="relevance">相关度优先</option><option value="newest">发布日期从新到旧</option><option value="oldest">发布日期从旧到新</option></select></label></div>
+        <div class="results-head"><p id="result-count" aria-live="polite">正在载入法规数据</p><label class="sort-control"><span class="sr-only">排序方式</span><select id="sort"><option value="newest" selected>发布日期从新到旧</option><option value="relevance">业务相关度优先</option><option value="oldest">发布日期从旧到新</option></select></label></div>
         <div class="table-scroll"><table id="result-table" hidden><thead><tr>
           <th scope="col">收藏</th><th scope="col">文件类型</th><th scope="col">中文名称</th><th scope="col">官方英文名称及编号</th><th scope="col">生效日期</th><th scope="col">效力状态</th>
         </tr></thead><tbody id="result-rows"></tbody></table></div>

@@ -19,6 +19,16 @@ with sync_playwright() as p:
     expect(page.locator("#crosscutting-list")).to_have_count(0)
     rows = page.locator("#result-rows tr")
     expect(rows.first).to_be_visible()
+    expect(page.locator("#sort")).to_have_value("newest")
+    dates=rows.evaluate_all("(rs) => rs.map(r => r.dataset.published)")
+    assert dates == sorted(dates, reverse=True), dates
+    page.locator("#department").select_option("smartphone")
+    page.locator("#sort").select_option("relevance")
+    expect(rows.first).to_contain_text("32023R1670")
+    expect(rows.nth(1)).to_contain_text("32023R1669")
+    expect(rows.nth(2)).to_contain_text("32023R1542")
+    page.locator("#clear-button").click()
+    expect(page.locator("#sort")).to_have_value("newest")
     def reset():
         page.locator("#clear-button").click()
     def fill(key, value):

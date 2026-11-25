@@ -69,7 +69,7 @@ function applyView() {
     const name=taxonomy.departments.find(d=>d.id===departmentView).label;
     ui["page-title"].textContent=name+"法规实施跟踪";
     ui["catalog-title"].textContent=name+"法规一览";
-    ui.sort.options[0].textContent="业务相关度优先";
+    ui.sort.value="relevance";
     ui.departments.hidden=true;ui.department.value=departmentView;ui.department.disabled=true;
   } else if(favoritesView){
     ui["page-title"].textContent="我的收藏夹";
@@ -244,6 +244,7 @@ function highlightTitle(el,title,terms){
 }
 function resultRow(record,today,terms=[]) {
   const row=document.createElement("tr"),code=record.id?.[5]??"",status=statusFor(record,today);
+  row.dataset.published=record.published||"";row.dataset.celex=record.id;
   const favoriteCell=row.insertCell();const star=document.createElement("button");star.type="button";star.className="favorite-star";star.textContent=favorites[record.id]?"★":"☆";star.setAttribute("aria-label",favorites[record.id]?"取消收藏":"收藏法规");star.addEventListener("click",()=>{if(favorites[record.id])delete favorites[record.id];else favorites[record.id]={folder:folders[0],note:""};persist();render();});favoriteCell.append(star);
   const kindCell=row.insertCell();
   kindCell.append(tag(record.instrumentClass??TYPE_LABELS[code]??record.legalType??"其他","type-"+code));
@@ -315,14 +316,14 @@ const DEPARTMENT_TERMS = {
  "hardware-engineering":/radio equipment|electromagnetic compatibility|low voltage|ecodesign|batter(?:y|ies)|charging|hazardous substances|harmoni[sz]ed standards/i,
  "software-engineering":/cybersecurity|cyber resilience|artificial intelligence|data protection|personal data|software|digital content|data act|accessibility/i
 };
-function departmentRank(record,today){
- const core=DEPARTMENT_CORE[departmentView]||[];
+function departmentRank(record,today,department=departmentView){
+ const core=DEPARTMENT_CORE[department]||[];
  const i=core.indexOf(record.id);
  const status=statusFor(record,today);
  const valid=status!=="inactive";
  const law=record.sourceCategory==="EU_LEGISLATION";
  const title=record.title||"";
- const direct=DEPARTMENT_TERMS[departmentView]?.test(title);
+ const direct=DEPARTMENT_TERMS[department]?.test(title);
  const linked=core.some(id=>{const n=referenceNumber(id);return n&&title.includes(n);});
  const subordinate=/^(?:commission )?(?:delegated|implementing)\b/i.test(title);
  const minor=/\b(?:report|opinion|communication|recommendation|appointing|setting up|work programme)\b/i.test(title);
@@ -333,11 +334,18 @@ function departmentRank(record,today){
  return direct||linked?60:0;
 }
 
+function businessRank(record,today){
+ const selected=departmentView||ui.department.value;
+ if(selected&&DEPARTMENT_CORE[selected])return departmentRank(record,today,selected);
+ return Math.max(0,...Object.keys(DEPARTMENT_CORE).map(id=>departmentRank(record,today,id)));
+}
+let sortExplicit=false;
+function defaultSort(){return departmentView||ui.search.value.trim()?"relevance":"newest";}
 function render() {
   if(!snapshot){ui["result-table"].hidden=true;ui.pagination.hidden=true;ui.empty.hidden=true;ui["result-count"].textContent=refreshError?"法规数据暂不可用":"正在载入法规数据";return;}
   const today=todayInBrussels(),terms=normalize(ui.search.value).split(" ").filter(Boolean);
   const filtered=records.filter(record=>matches(record,today,terms));
-  filtered.sort((a,b)=>(ui.sort.value==="relevance"?searchRank(b,normalize(ui.search.value))-searchRank(a,normalize(ui.search.value))||(departmentView?departmentRank(b,today)-departmentRank(a,today):0):0)||(ui.sort.value==="oldest"?(a.published??"").localeCompare(b.published??""):(b.published??"").localeCompare(a.published??"")||b.id.localeCompare(a.id)));
+  filtered.sort((a,b)=>(ui.sort.value==="relevance"?searchRank(b,normalize(ui.search.value))-searchRank(a,normalize(ui.search.value))||(businessRank(b,today)-businessRank(a,today)):0)||(ui.sort.value==="oldest"?(a.published??"").localeCompare(b.published??""):(b.published??"").localeCompare(a.published??"")||b.id.localeCompare(a.id)));
   const lastPage=Math.max(1,Math.ceil(filtered.length/PAGE_SIZE));page=Math.min(page,lastPage);
   const start=(page-1)*PAGE_SIZE,visible=filtered.slice(start,start+PAGE_SIZE);
   ui["result-rows"].replaceChildren(...visible.map(record=>resultRow(record,today,[...terms,...normalize(ui["any-terms"].value).split(" ").filter(Boolean),...normalize(ui["exact-phrase"].value).split(" ").filter(Boolean)])));
@@ -349,12 +357,12 @@ function render() {
   ui.previous.disabled=page===1;ui.next.disabled=page===lastPage;
 }
 ui.filters.addEventListener("submit",event=>{event.preventDefault();page=1;render();});
-ui.search.addEventListener("input",()=>{page=1;render();});
+ui.search.addEventListener("input",()=>{if(!sortExplicit)ui.sort.value=defaultSort();page=1;render();});
 ui.filters.addEventListener("input",()=>{page=1;render();});
 ui.filters.addEventListener("change",()=>{page=1;render();});
-ui.sort.addEventListener("change",()=>{page=1;render();});
-ui["clear-button"].addEventListener("click",()=>{ui.filters.reset();if(departmentView)ui.department.value=departmentView;ui.sort.value="relevance";page=1;render();ui.search.focus();});
-ui["recent-button"].addEventListener("click",async()=>{ui.filters.reset();if(departmentView)ui.department.value=departmentView;ui.sort.value="relevance";page=1;await loadSnapshot(true);ui.catalog.scrollIntoView({behavior:"smooth",block:"start"});});
+ui.sort.addEventListener("change",()=>{sortExplicit=true;page=1;render();});
+ui["clear-button"].addEventListener("click",()=>{ui.filters.reset();if(departmentView)ui.department.value=departmentView;sortExplicit=false;ui.sort.value=defaultSort();page=1;render();ui.search.focus();});
+ui["recent-button"].addEventListener("click",async()=>{ui.filters.reset();if(departmentView)ui.department.value=departmentView;sortExplicit=false;ui.sort.value=defaultSort();page=1;await loadSnapshot(true);ui.catalog.scrollIntoView({behavior:"smooth",block:"start"});});
 ui.previous.addEventListener("click",()=>{page=Math.max(1,page-1);render();});
 ui.next.addEventListener("click",()=>{page+=1;render();});
 ui["folder-select"].addEventListener("change",()=>{page=1;render();});
