@@ -46,6 +46,9 @@ const params = new URLSearchParams(location.search);
 const departmentView = params.get("department") || "";
 const favoritesView = params.get("view") === "favorites";
 const HOME = new URL("./", document.baseURI);
+const homeView=!departmentView&&!favoritesView&&params.get("view")!=="laws"&&!["#catalog","#departments","#official-sources"].includes(location.hash);
+ui["home-view"].hidden=!homeView;ui.catalog.hidden=homeView;ui.departments.hidden=homeView||!!departmentView||favoritesView;ui["official-sources"].hidden=homeView;ui["coverage-note"].hidden=homeView;
+ui[homeView?"nav-home":"nav-laws"].setAttribute("aria-current","page");
 function readStorage(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } }
 let favorites = readStorage("eu-law-favorites-v1", {});
 let folders = readStorage("eu-law-folders-v1", ["默认收藏"]);
@@ -63,6 +66,12 @@ function openRecord(record) {
   folderOptions();ui["record-folder"].value=favorites[record.id]?.folder||folders[0];
   ui["record-note"].value=favorites[record.id]?.note||"";
   ui["record-dialog"].showModal();
+}
+function renderHome(){
+ const list=ui["latest-list"];list.replaceChildren();
+ const latest=records.filter(r=>r.sourceCategory==="EU_LEGISLATION"&&/^\d{4}-\d{2}-\d{2}$/.test(r.published||"")).sort((a,b)=>b.published.localeCompare(a.published)||b.id.localeCompare(a.id)).slice(0,2);
+ ui["home-update"].textContent=latest.length?"数据截至 "+(snapshot?.through||snapshot?.checkedAt?.slice(0,10)||"未标注")+" · 仅展示本库业务范围内已收录文件":"暂无可核验的发布日期记录，请查看欧盟官方公报。";
+ for(const r of latest){const item=document.createElement("article");item.className="latest-item";item.dataset.published=r.published;const date=document.createElement("time");date.dateTime=r.published;date.textContent=r.published;const body=document.createElement("div");const name=document.createElement("a");name.href=r.officialUrl||"https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:"+encodeURIComponent(r.id);name.target="_blank";name.rel="noopener noreferrer";name.textContent=r.titleZh||r.title;const en=document.createElement("p");en.textContent=r.title;const id=document.createElement("small");id.textContent="CELEX "+r.id;body.append(name,en,id);item.append(date,body);list.append(item);}
 }
 function applyView() {
   if(departmentView && taxonomy.departments.some(d=>d.id===departmentView)){
@@ -207,6 +216,7 @@ async function loadSnapshot(manual=false) {
     buildTaxonomyUI();
     applyView();
     buildSourceDirectory();
+    renderHome();
     const checkedAt=data.checkedAt;
     ui["sync-time"].dateTime=checkedAt;ui["sync-time"].textContent=Number.isFinite(Date.parse(checkedAt))?chinaTime.format(new Date(checkedAt)):"未标注";
     ui["sync-note"].textContent="北京时间 · 公报数据截至 "+(data.through??"未标注");
@@ -214,9 +224,9 @@ async function loadSnapshot(manual=false) {
     refreshError=false;
   } catch(error) {
     console.warn("Unable to load EU law catalogue:",error);refreshError=true;
-    if(!snapshot)ui["sync-time"].textContent="暂不可用";
+    if(!snapshot){ui["sync-time"].textContent="暂不可用";ui["home-update"].textContent="暂时无法读取法规数据，请查看欧盟官方公报。";}
   } finally {
-    refreshing=false;ui["recent-button"].disabled=false;ui["recent-button"].textContent="查看最新收录";
+    refreshing=false;ui["recent-button"].disabled=false;ui["recent-button"].textContent=homeView?"进入法规库":"查看最新收录";
     renderNotice();render();
   }
 }
@@ -362,7 +372,7 @@ ui.filters.addEventListener("input",()=>{page=1;render();});
 ui.filters.addEventListener("change",()=>{page=1;render();});
 ui.sort.addEventListener("change",()=>{sortExplicit=true;page=1;render();});
 ui["clear-button"].addEventListener("click",()=>{ui.filters.reset();if(departmentView)ui.department.value=departmentView;sortExplicit=false;ui.sort.value=defaultSort();page=1;render();ui.search.focus();});
-ui["recent-button"].addEventListener("click",async()=>{ui.filters.reset();if(departmentView)ui.department.value=departmentView;sortExplicit=false;ui.sort.value=defaultSort();page=1;await loadSnapshot(true);ui.catalog.scrollIntoView({behavior:"smooth",block:"start"});});
+ui["recent-button"].addEventListener("click",async()=>{if(homeView){location.href=new URL("?view=laws#catalog",HOME);return;}ui.filters.reset();if(departmentView)ui.department.value=departmentView;sortExplicit=false;ui.sort.value=defaultSort();page=1;await loadSnapshot(true);ui.catalog.scrollIntoView({behavior:"smooth",block:"start"});});
 ui.previous.addEventListener("click",()=>{page=Math.max(1,page-1);render();});
 ui.next.addEventListener("click",()=>{page+=1;render();});
 ui["folder-select"].addEventListener("change",()=>{page=1;render();});

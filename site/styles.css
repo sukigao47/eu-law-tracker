@@ -359,3 +359,18 @@ tbody tr:hover { background: #f6f9fd; }
 #result-table tbody tr td:nth-child(5){grid-row:4;grid-column:1/-1}
 #result-table tbody tr td:nth-child(5):before{content:"生效日期：";color:var(--muted)}
 }
+
+/* Homepage briefing */
+.topbar-links a[aria-current=page]{color:var(--blue);font-weight:750}
+.home-panel{padding:1.4rem 1.6rem;background:white;border:1px solid var(--line);border-radius:12px;margin:1rem 0 1.4rem}
+.home-panel h2{font-size:1.35rem;color:var(--navy);margin:0 0 .4rem}
+.home-meta{font-size:.82rem;color:var(--muted)}
+.latest-item{display:grid;grid-template-columns:7rem minmax(0,1fr);gap:1rem;padding:1rem 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
+.latest-item time{font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums}
+.latest-item a{font-weight:700;text-decoration:none}.latest-item a:hover{text-decoration:underline}
+.latest-item p,.latest-item small{color:var(--muted);font-size:.85rem;line-height:1.5;margin:.35rem 0}
+.home-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem}
+.home-links a{display:block;padding:1rem;border:1px solid var(--line);border-radius:8px;font-weight:650;text-decoration:none;overflow-wrap:anywhere}
+.home-links a:hover{background:#F4F8FC}.home-links small{display:block;color:var(--muted);font-weight:400;margin-top:.4rem}
+.topic-placeholder{min-height:5rem;border:1px dashed var(--line);border-radius:8px;background:#F8FAFC}
+@media(max-width:760px){.home-panel{padding:1rem}.home-links{grid-template-columns:repeat(2,minmax(0,1fr))}.latest-item{grid-template-columns:1fr;gap:.4rem}}

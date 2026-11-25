@@ -4,13 +4,23 @@ import re
 from urllib.parse import urljoin
 from playwright.sync_api import sync_playwright, expect
 
-URL = os.environ.get("TEST_URL", "http://127.0.0.1:8765/")
+HOME_URL = os.environ.get("TEST_URL", "http://127.0.0.1:8765/")
+URL = urljoin(HOME_URL, "?view=laws")
 with sync_playwright() as p:
     browser = p.chromium.launch()
     page = browser.new_page()
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
-    page.goto(URL, wait_until="networkidle")
+    page.goto(HOME_URL, wait_until="networkidle")
+    expect(page.locator("#home-view")).to_be_visible()
+    expect(page.locator("#catalog")).to_be_hidden()
+    expect(page.locator("#latest-list .latest-item")).to_have_count(2)
+    latest_dates=page.locator("#latest-list .latest-item").evaluate_all("(rs) => rs.map(r => r.dataset.published)")
+    assert latest_dates == sorted(latest_dates, reverse=True)
+    expect(page.locator(".home-links a")).to_have_count(6)
+    expect(page.locator("#topics-title")).to_have_text("最新专题")
+    page.locator("#nav-laws").click()
+    expect(page.locator("#catalog")).to_be_visible()
     expect(page.locator("#result-count")).to_contain_text("匹配", timeout=30000)
     expect(page.locator("#department-grid a")).to_have_count(9)
     expect(page.locator("#catalog-title")).to_have_text("高级检索")

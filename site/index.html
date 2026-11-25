@@ -15,7 +15,7 @@
     <div class="shell topbar-inner">
       <a class="brand" href="./" aria-label="欧盟法规实施跟踪沙盘首页"><span class="brand-icon" aria-hidden="true"><span></span></span><span>欧盟法规实施跟踪沙盘</span></a>
       <nav class="topbar-links" aria-label="网站导航">
-        <a href="./">首页</a><a href="./#departments">业务板块</a><a href="./#catalog">高级检索</a><a href="./?view=favorites#catalog">收藏夹</a>
+        <a id="nav-home" href="./">首页</a><a id="nav-laws" href="./?view=laws">法规</a><a href="./?view=favorites#catalog">收藏夹</a>
         <a href="https://eur-lex.europa.eu/oj/direct-access.html?locale=en" target="_blank" rel="noopener">欧盟官方公报</a>
       </nav>
     </div>
@@ -27,18 +27,18 @@
         <p class="eyebrow">EU LEGAL & REGULATORY TRACKER</p>
         <h1 id="page-title">欧盟法规实施跟踪沙盘</h1>
         <p>按业务跟踪法规实施动态，集中检索欧盟法律文件及相关官方资料。</p>
-        <button class="primary-button" id="recent-button" type="button">查看最新收录</button>
+        <button class="primary-button" id="recent-button" type="button">进入法规库</button>
       </div>
       <div class="hero-status">
         <span class="sync-label">上次成功同步</span><time id="sync-time">正在读取</time>
         <span class="sync-note" id="sync-note">数据来源 EUR-Lex / Cellar</span>
       </div>
     </section>
-    <section class="department-section" id="departments" aria-labelledby="department-title">
+    <div id="home-view" hidden><section class="home-panel" aria-labelledby="latest-title"><div class="section-head"><div><h2 id="latest-title">最新动态</h2><p>本库已收录的最新发布法律文件 · 按官方公报发布日期</p></div><a href="./?view=laws#catalog">查看更多 →</a></div><p id="home-update" class="home-meta" role="status">正在读取法规数据</p><div id="latest-list"></div></section><section class="home-panel" aria-labelledby="links-title"><div class="section-head"><div><h2 id="links-title">网址速递</h2><p>欧盟官方立法及监管动态入口</p></div></div><div class="home-links"><a href="https://eur-lex.europa.eu/oj/direct-access.html?locale=en" target="_blank" rel="noopener">欧盟官方公报 <small>正式发布法律文件</small></a><a href="https://eur-lex.europa.eu/" target="_blank" rel="noopener">EUR-Lex <small>法规原文与修订记录</small></a><a href="https://commission.europa.eu/law/tracking-law-making_en" target="_blank" rel="noopener">欧盟委员会立法跟踪 <small>立法及授权、实施法案进程</small></a><a href="https://commission.europa.eu/law/contribute-law-making_en" target="_blank" rel="noopener">公众咨询与意见反馈 <small>拟议立法及征求意见</small></a><a href="https://oeil.europarl.europa.eu/oeil/en/find-out-more" target="_blank" rel="noopener">欧洲议会立法观察站 <small>立法程序及进展</small></a><a href="https://www.consilium.europa.eu/en/press/" target="_blank" rel="noopener">欧盟理事会新闻中心 <small>政策与立法动态</small></a></div></section><section class="home-panel" aria-labelledby="topics-title"><h2 id="topics-title">最新专题</h2><div class="topic-placeholder"></div></section></div><section class="department-section" id="departments" hidden aria-labelledby="department-title">
       <div class="section-head"><div><h2 id="department-title">业务板块</h2><p>一部法规可以关联多个部门；部门关联用于检索导航，不代替具体适用性判断。</p></div></div>
       <div class="department-grid" id="department-grid"></div>
     </section>
-    <section class="catalog" id="catalog" aria-labelledby="catalog-title">
+    <section class="catalog" id="catalog" hidden aria-labelledby="catalog-title">
       <div class="section-head">
         <div><h2 id="catalog-title">高级检索</h2><p id="catalog-scope">现有目录覆盖范围以数据源说明为准</p></div>
         <a class="source-link" href="https://eur-lex.europa.eu/" target="_blank" rel="noopener">到 EUR-Lex 核对</a>
@@ -77,11 +77,11 @@
         <div class="pagination" id="pagination" aria-label="结果分页" hidden><span id="page-count"></span><div><button class="outline-button" id="previous" type="button">上一页</button><button class="outline-button" id="next" type="button">下一页</button></div></div>
       </div>
     </section>
-    <section class="coverage-note" aria-label="数据范围说明">
+    <section class="coverage-note" id="coverage-note" aria-label="数据范围说明">
       <strong>数据范围说明</strong>
       <p>本库自动同步 CELLAR 法律文件、部分软法及 C 系列资料。中文不是欧盟官方语言，中文参考译名（含机器翻译）不具有官方法律效力；实施状态按已取得的适用日期判断，指令成员国转化及个别条款仍须核对；请以 EUR-Lex 官方语言文本为准。协调标准引用文件与标准全文不同。指南和标准库尚未完整接入；不自动同步法院判例。</p>
     </section>
-    <section class="official-sources" id="official-sources" aria-labelledby="sources-title">
+    <section class="official-sources" id="official-sources" hidden aria-labelledby="sources-title">
       <div class="section-head"><div><h2 id="sources-title">其他官方资料入口</h2><p>软法、判例、委员会文件及技术标准分开核验；下列链接为官方检索入口，并不代表已全部自动收录。</p></div></div>
       <div class="source-grid" id="source-grid"></div>
     </section>
