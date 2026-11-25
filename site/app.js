@@ -53,6 +53,7 @@ function buildSourceDirectory() {
     const heading=document.createElement("h3");heading.textContent=category.label;
     const description=document.createElement("p");description.textContent=category.description;
     section.append(heading,description);
+    if(category.coverage){const coverage=document.createElement("p");coverage.className="source-coverage";coverage.textContent=category.coverage;section.append(coverage);}
     const list=document.createElement("ul");
     for (const source of category.sources ?? []) {
       const item=document.createElement("li");
