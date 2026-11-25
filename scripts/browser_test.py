@@ -19,7 +19,7 @@ with sync_playwright() as p:
     assert latest_dates == sorted(latest_dates, reverse=True)
     expect(page.locator(".home-links a")).to_have_count(6)
     expect(page.locator("#nav-search")).to_have_count(0)
-    expect(page.get_by_role("link", name="欧盟官方公报", exact=True)).to_have_count(1)
+    expect(page.locator('.home-links a[href="https://eur-lex.europa.eu/oj/direct-access.html?locale=en"]')).to_have_count(1)
     expect(page.locator("#topics-title")).to_have_text("最新专题")
     page.evaluate("window.__moduleNavigationMarker = true")
     page.locator("#nav-laws").click()
