@@ -97,7 +97,7 @@ function makeSearchText(record) {
   const deptNames=departmentIdsFor(record).map(id=>taxonomy.departments.find(d=>d.id===id)?.label ?? id);
   const topicNames=topicLabelsFor(record);
   return normalize([
-    record.id,record.ecli,record.caseNumber,record.parties,record.court,record.work,record.title,record.titleZh,zhTitles[record.id],
+    record.id,record.ecli,record.caseCelex,record.caseNumber,record.parties,record.court,record.work,record.title,record.titleZh,zhTitles[record.id],...(record.interpretedActs??[]),...(record.citedDocuments??[]),...(record.caseSubjects??[]),
     record.legalType,record.instrumentClass,record.bindingNature,record.dateType,record.sourceCategory,...(record.caseLawDigest??[]),...(record.sourceCollections??[]),TYPE_LABELS[record.id?.[5]],record.published,record.entry,
     ...(record.subjects??[]),...(record.keywords??[]),...topicNames,...deptNames
   ].join(" "));
@@ -186,6 +186,11 @@ function resultRow(record,today) {
     const caseMeta=document.createElement("small");caseMeta.className="case-meta";
     caseMeta.textContent=[record.caseNumber&&record.ecli?"案件号 "+record.caseNumber:"",record.court,record.parties].filter(Boolean).join(" · ");
     if(caseMeta.textContent)en.append(caseMeta);
+    if(record.interpretedActs?.length){
+      const acts=document.createElement("small");acts.className="case-meta";
+      acts.textContent="解释/适用法规："+record.interpretedActs.slice(0,8).join("、")+(record.interpretedActs.length>8?" 等":"");
+      en.append(acts);
+    }
   }
   row.append(en);
   const deptCell=row.insertCell();deptCell.className="topics";
