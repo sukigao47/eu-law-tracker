@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0e274d">
-  <meta name="description" content="检索手机、平板、智能穿戴及其他智能终端全生命周期相关的欧盟法规，追踪《欧盟官方公报》的近期发布。">
-  <title>欧盟法规库</title>
+  <meta name="description" content="按终端业务部门检索欧盟法规，支持中文标题、英文标题、CELEX编号和法规关键词搜索。">
+  <title>欧盟法规库｜终端业务法务</title>
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app.js"></script>
 </head>
@@ -13,131 +13,65 @@
   <a class="skip-link" href="#catalog">跳到法规检索</a>
   <header class="topbar">
     <div class="shell topbar-inner">
-      <a class="brand" href="./" aria-label="欧盟法规库首页">
-        <span class="brand-icon" aria-hidden="true"><span></span></span>
-        <span>欧盟法规库</span>
-      </a>
+      <a class="brand" href="./" aria-label="欧盟法规库首页"><span class="brand-icon" aria-hidden="true"><span></span></span><span>欧盟法规库</span></a>
       <nav class="topbar-links" aria-label="网站导航">
-        <a href="#catalog">法规目录</a>
-        <a href="https://eur-lex.europa.eu/oj/direct-access.html?locale=en" target="_blank" rel="noopener">官方公报</a>
+        <a href="#departments">业务部门</a><a href="#catalog">法规检索</a>
+        <a href="https://eur-lex.europa.eu/oj/direct-access.html?locale=en" target="_blank" rel="noopener">欧盟官方公报</a>
       </nav>
     </div>
   </header>
-
   <main class="shell">
     <section class="hero" aria-labelledby="page-title">
       <div class="hero-orbit" aria-hidden="true"></div>
       <div class="hero-intro">
+        <p class="eyebrow">EU LEGAL & REGULATORY TRACKER</p>
         <h1 id="page-title">欧盟法规检索</h1>
-        <p>追踪手机、平板、智能穿戴及其他智能终端从研发到回收的欧盟法规。</p>
-        <button class="primary-button" id="recent-button" type="button">查最新发布</button>
+        <p>围绕终端产品全生命周期，连接九大业务部门与跨部门合规主题。</p>
+        <button class="primary-button" id="recent-button" type="button">查看最新收录</button>
       </div>
       <div class="hero-status">
-        <span class="sync-label">上次成功同步</span>
-        <time id="sync-time">正在读取</time>
+        <span class="sync-label">上次成功同步</span><time id="sync-time">正在读取</time>
         <span class="sync-note" id="sync-note">数据来源 EUR-Lex / Cellar</span>
       </div>
     </section>
-
+    <section class="department-section" id="departments" aria-labelledby="department-title">
+      <div class="section-head"><div><h2 id="department-title">按业务部门查询</h2><p>一部法规可以关联多个部门；部门关联用于检索导航，不代替具体适用性判断。</p></div></div>
+      <div class="department-grid" id="department-grid"></div>
+      <div class="crosscutting-wrap"><h3>跨部门法规专题</h3><div class="crosscutting-list" id="crosscutting-list"></div></div>
+    </section>
     <section class="catalog" id="catalog" aria-labelledby="catalog-title">
       <div class="section-head">
-        <div>
-          <h2 id="catalog-title">法规目录</h2>
-          <p id="catalog-scope">智能终端全生命周期 · 现行法规与近 90 天新发布文件</p>
-        </div>
-        <a class="source-link" href="https://eur-lex.europa.eu/oj/direct-access.html?locale=en" target="_blank" rel="noopener">到官方公报核对</a>
+        <div><h2 id="catalog-title">法规目录</h2><p id="catalog-scope">现有目录覆盖范围以数据源说明为准</p></div>
+        <a class="source-link" href="https://eur-lex.europa.eu/" target="_blank" rel="noopener">到 EUR-Lex 核对</a>
       </div>
       <div class="notice" id="notice" role="status" hidden></div>
-
       <form class="filters" id="filters" aria-label="法规筛选">
         <label class="search-box">
-          <span class="sr-only">搜索关键词、标题或 CELEX 编号</span>
-          <span class="search-icon" aria-hidden="true"></span>
-          <input type="search" id="search" placeholder="搜索英文标题、关键词或 CELEX 编号">
+          <span class="sr-only">搜索中文标题、英文标题、法规编号或关键词</span><span class="search-icon" aria-hidden="true"></span>
+          <input type="search" id="search" autocomplete="off" placeholder="搜索中文标题、英文标题、法规编号、CELEX 或关键词">
         </label>
-
         <div class="filter-fields">
-          <label>
-            <span>效力层级</span>
-            <select id="type">
-              <option value="">全部效力层级</option>
-              <option value="R">法规</option>
-              <option value="L">指令</option>
-              <option value="D">决定</option>
-            </select>
-          </label>
-          <label>
-            <span>业务主题</span>
-            <select id="topic"><option value="">全部主题</option></select>
-          </label>
-          <label>
-            <span>有效状态</span>
-            <select id="status">
-              <option value="">全部状态</option>
-              <option value="active">现行有效</option>
-              <option value="pending">尚未生效</option>
-              <option value="inactive">非现行</option>
-              <option value="unknown">状态未标注</option>
-            </select>
-          </label>
-          <label>
-            <span>发布日期起</span>
-            <input type="date" id="since" aria-label="发布日期起">
-          </label>
-          <label>
-            <span>发布日期止</span>
-            <input type="date" id="until" aria-label="发布日期止">
-          </label>
+          <label><span>业务部门</span><select id="department"><option value="">全部业务部门</option></select></label>
+          <label><span>法规主题</span><select id="topic"><option value="">全部法规主题</option></select></label>
+          <label><span>文件类型</span><select id="type"><option value="">全部文件类型</option><option value="R">Regulation（条例）</option><option value="L">Directive（指令）</option><option value="D">Decision（决定）</option></select></label>
+          <label><span>效力状态</span><select id="status"><option value="">全部状态</option><option value="active">现行有效</option><option value="pending">已生效/尚未适用或尚未生效</option><option value="inactive">非现行</option><option value="unknown">状态未标注</option></select></label>
         </div>
-        <div class="filter-actions">
-          <div class="quick-filters" aria-label="发布日期快捷筛选">
-            <button class="chip" type="button" data-days="7" aria-pressed="false">近 7 天</button>
-            <button class="chip" type="button" data-days="30" aria-pressed="false">近 30 天</button>
-            <button class="chip" type="button" data-days="90" aria-pressed="false">近 90 天</button>
-          </div>
-          <button class="text-button" id="clear-button" type="button">清除筛选</button>
-        </div>
+        <div class="filter-actions"><span class="filter-hint">支持中文、英文及编号的组合关键词检索</span><button class="text-button" id="clear-button" type="button">清除筛选</button></div>
       </form>
-
       <div class="results">
-        <div class="results-head">
-          <p id="result-count" aria-live="polite">正在载入法规数据</p>
-          <label class="sort-control">
-            <span class="sr-only">排序方式</span>
-            <select id="sort">
-              <option value="newest">发布日期从新到旧</option>
-              <option value="oldest">发布日期从旧到新</option>
-            </select>
-          </label>
-        </div>
-        <table id="result-table" hidden>
-          <thead><tr>
-            <th scope="col">效力层级</th>
-            <th scope="col">法规标题</th>
-            <th scope="col">业务主题</th>
-            <th scope="col">发布日期</th>
-            <th scope="col">有效状态</th>
-          </tr></thead>
-          <tbody id="result-rows"></tbody>
-        </table>
-        <div class="empty" id="empty" hidden>
-          <h3 id="empty-title"></h3>
-          <p id="empty-detail"></p>
-        </div>
-        <div class="pagination" id="pagination" aria-label="结果分页" hidden>
-          <span id="page-count"></span>
-          <div>
-            <button class="outline-button" id="previous" type="button">上一页</button>
-            <button class="outline-button" id="next" type="button">下一页</button>
-          </div>
-        </div>
+        <div class="results-head"><p id="result-count" aria-live="polite">正在载入法规数据</p><label class="sort-control"><span class="sr-only">排序方式</span><select id="sort"><option value="newest">发布日期从新到旧</option><option value="oldest">发布日期从旧到新</option></select></label></div>
+        <div class="table-scroll"><table id="result-table" hidden><thead><tr>
+          <th scope="col">文件类型</th><th scope="col">法规中文标题</th><th scope="col">Official English Title</th><th scope="col">适用部门</th><th scope="col">法规主题</th><th scope="col">发布日期</th><th scope="col">状态</th>
+        </tr></thead><tbody id="result-rows"></tbody></table></div>
+        <div class="empty" id="empty" hidden><h3 id="empty-title"></h3><p id="empty-detail"></p></div>
+        <div class="pagination" id="pagination" aria-label="结果分页" hidden><span id="page-count"></span><div><button class="outline-button" id="previous" type="button">上一页</button><button class="outline-button" id="next" type="button">下一页</button></div></div>
       </div>
     </section>
+    <section class="coverage-note" aria-label="数据范围说明">
+      <strong>数据范围说明</strong>
+      <p>当前自动同步以 Cellar 中可识别的现行及近期《欧盟官方公报》L 系列法规、指令和决定为基础，并按已配置业务主题筛选。中文标题仅对已人工核验并维护的法规提供；未维护时显示“暂未维护中文标题”。建议对软法、判例、成员国转化措施及技术标准另行核验，不应将当前目录理解为欧盟全部法律文件的穷尽清单。</p>
+    </section>
   </main>
-  <footer class="footer shell">
-    <span>欧盟法规库</span>
-    <a href="https://op.europa.eu/en/web/eu-vocabularies/cellar" target="_blank" rel="noopener">数据来源 欧盟出版局 Cellar</a>
-  </footer>
-  <noscript>启用 JavaScript 后即可在本页搜索和筛选法规。</noscript>
-</body>
-</html>
+  <footer class="footer shell"><span>欧盟法规库 · 终端业务法务</span><a href="https://op.europa.eu/en/web/cellar" target="_blank" rel="noopener">欧盟出版局 Cellar 数据库</a></footer>
+  <noscript>启用 JavaScript 后即可搜索和筛选法规。</noscript>
+</body></html>
