@@ -156,15 +156,29 @@
 
         <button class="board-card" type="button" data-board-id="sustainability">
           <span>07</span>
-          <strong>可持续与供应链</strong>
-          <p>生态设计、供应链尽调、材料与循环经济</p>
+          <strong>生态设计、材料与循环经济</strong>
+          <p>能效、电池、化学品、包装、回收与生产者责任</p>
           <small><b data-board-count="sustainability">—</b> 项关联文件</small>
         </button>
 
-        <button class="board-card" type="button" data-board-id="all">
+        <button class="board-card" type="button" data-board-id="supply">
           <span>08</span>
-          <strong>综合与其他</strong>
-          <p>查看当前智能终端法规目录中的全部文件</p>
+          <strong>供应链、ESG与生产责任</strong>
+          <p>供应链尽调、强迫劳动、原材料与生产环节责任</p>
+          <small><b data-board-count="supply">—</b> 项关联文件</small>
+        </button>
+
+        <button class="board-card" type="button" data-board-id="service">
+          <span>09</span>
+          <strong>维修、售后与产品召回</strong>
+          <p>维修权、备件、软件更新、质保与安全召回</p>
+          <small><b data-board-count="service">—</b> 项关联文件</small>
+        </button>
+
+        <button class="board-card" type="button" data-board-id="all">
+          <span>10</span>
+          <strong>全部相关文件</strong>
+          <p>查看当前智能终端出海法规目录中的全部文件</p>
           <small><b data-board-count="all">—</b> 项目录文件</small>
         </button>
 
@@ -223,7 +237,7 @@
 
         <div class="filter-fields">
           <label>
-            <span>效力层级</span>
+            <span>文件类型</span>
             <select id="type"><option value="">全部文件类型</option></select>
           </label>
 
@@ -242,6 +256,7 @@
               <option value="non-binding">不具有约束力</option>
               <option value="preparatory">立法准备文件</option>
               <option value="informational">信息或说明文件</option>
+              <option value="judicial">司法裁判文件</option>
               <option value="uncertain">需个案核验</option>
             </select>
           </label>
