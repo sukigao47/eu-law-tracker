@@ -146,16 +146,21 @@ def filter_catalog(catalog, config_path):
         if matches:
             department_ids = sorted({department_id for topic_id in matches for department_id in department_map.get(topic_id, set())})
             cross_cutting_ids = sorted({topic_id for matched_topic in matches for topic_id in cross_map.get(matched_topic, set())})
-            kind_code = record["id"][5] if len(record["id"]) > 5 else ""
-            legal_type = {"R": "Regulation", "L": "Directive", "D": "Decision"}.get(kind_code, "Other")
-            instrument_class = classify_instrument(record["title"], kind_code)
+            source_category = record.get("sourceCategory", "EU_LEGISLATION")
+            kind_code = record["id"][5] if source_category == "EU_LEGISLATION" and len(record["id"]) > 5 else ""
+            if source_category == "EU_LEGISLATION":
+                legal_type = {"R": "Regulation", "L": "Directive", "D": "Decision"}.get(kind_code, "Other")
+                instrument_class = classify_instrument(record["title"], kind_code)
+            else:
+                legal_type = record.get("legalType", "Non-legislative material")
+                instrument_class = record.get("instrumentClass", legal_type)
             documents.append({
                 **record,
-                "titleZh": chinese_titles.get(record["id"], ""),
+                "titleZh": chinese_titles.get(record["id"], record.get("titleZh", "")),
                 "legalType": legal_type,
                 "instrumentClass": instrument_class,
-                "sourceCategory": "EU_LEGISLATION",
-                "officialUrl": f"https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:{record['id']}",
+                "sourceCategory": source_category,
+                "officialUrl": record.get("officialUrl") or ("https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:" + record["id"]),
                 "businessTopics": matches,
                 "departments": department_ids,
                 "crossCuttingTopics": cross_cutting_ids,
