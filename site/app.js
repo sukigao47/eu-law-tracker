@@ -69,6 +69,7 @@ function applyView() {
     const name=taxonomy.departments.find(d=>d.id===departmentView).label;
     ui["page-title"].textContent=name+"法规实施跟踪";
     ui["catalog-title"].textContent=name+"法规一览";
+    ui.sort.options[0].textContent="业务相关度优先";
     ui.departments.hidden=true;ui.department.value=departmentView;ui.department.disabled=true;
   } else if(favoritesView){
     ui["page-title"].textContent="我的收藏夹";
@@ -209,7 +210,7 @@ async function loadSnapshot(manual=false) {
     const checkedAt=data.checkedAt;
     ui["sync-time"].dateTime=checkedAt;ui["sync-time"].textContent=Number.isFinite(Date.parse(checkedAt))?chinaTime.format(new Date(checkedAt)):"未标注";
     ui["sync-note"].textContent="北京时间 · 公报数据截至 "+(data.through??"未标注");
-    ui["catalog-scope"].textContent="当前收录 "+numbers.format(records.length)+" 条法律及相关官方资料";
+    ui["catalog-scope"].textContent=departmentView?"默认优先展示本业务核心法规，其次为相关有效法规、配套文件及参考资料；排序不代表法律效力等级或具体适用性结论。":"当前收录 "+numbers.format(records.length)+" 条法律及相关官方资料";
     refreshError=false;
   } catch(error) {
     console.warn("Unable to load EU law catalogue:",error);refreshError=true;
@@ -290,11 +291,53 @@ function matches(record,today,terms) {
     &&(!ui.status.value||((record.sourceCategory==="EU_LEGISLATION"?statusFor(record,today):"na")===ui.status.value))
     &&advancedMatch(record,terms);
 }
+
+// Editorial priority lists: operational relevance, not a formal hierarchy of EU legal norms.
+const DEPARTMENT_CORE = {
+ smartphone:["32023R1670","32023R1669","32023R1542","32014L0053","32022L2380","32024R1781","32017R1369","32023R0988","32024R2847","32011L0065","32012L0019","32024L1799","32019L0882","32016R0679","32024R1689","32019R1020","32025R0040","32006R1907"],
+ wearables:["32014L0053","32023R1542","32023R0988","32024R2847","32011L0065","32016R0679","32024R1689","32024R1781","32012L0019","32017R0745","32019R1020"],
+ "tablet-pc":["32023R1670","32023R1669","32023R1542","32014L0053","32022L2380","32024R1781","32017R1369","32024R2847","32011L0065","32012L0019","32023R0988","32019L0882"],
+ "marketing-services":["32005L0029","32006L0114","32011L0083","32016R0679","32024R1689","32022R2065","32024L0825","32019L0770","32019L0771","32024L1799","32023R0988","32019L0882","32017R1369"],
+ iot:["32014L0053","32024R2847","32023R2854","32023R0988","32023R1542","32011L0065","32014L0030","32014L0035","32024R1781","32016R0679","32024R1689","32012L0019"],
+ "smart-vehicle":["32018R0858","32019R2144","32023R1542","32023R1804","32016R0679","32024R1689","32023R2854","32014L0053","32019R1020"],
+ "integrated-delivery":["32019R1020","32013R0608","32024L1760","32024R3015","32023R1542","32025R0040","32024R1157","32006R1907","32012L0019","32023R0988","32024L1799","32016R0679"],
+ "hardware-engineering":["32014L0053","32014L0030","32014L0035","32023R1670","32023R1669","32023R1542","32011L0065","32024R1781","32023R0988","32019R1020","32006R1907","32012L0019","32024R2847"],
+ "software-engineering":["32024R2847","32016R0679","32024R1689","32023R2854","32022L2555","32019R0881","32019L0882","32019L0770","32022R2065","32022R1925","32009L0024"]
+};
+const DEPARTMENT_TERMS = {
+ smartphone:/smartphones?|mobile phones?|slate tablets?|energy labell?ing|ecodesign|batter(?:y|ies)|radio equipment|charging|usb type.c/i,
+ wearables:/wearables?|smart watch|radio equipment|batter(?:y|ies)|wireless communication|medical devices|cyber resilience/i,
+ "tablet-pc":/slate tablets?|computers?|notebooks?|displays?|ecodesign|energy labell?ing|charging|batter(?:y|ies)/i,
+ "marketing-services":/consumer rights|unfair commercial|advertising|consumer protection|digital services|online platform|recall|repair|sales contracts/i,
+ iot:/internet of things|connected products?|radio equipment|cyber resilience|data act|smart devices|networked standby/i,
+ "smart-vehicle":/motor vehicles?|vehicle type.approval|automotive|vehicles? and their trailers|alternative fuels|traction batter/i,
+ "integrated-delivery":/customs code|customs formalities|due diligence|forced labour|supply chain|waste shipments|packaging|market surveillance/i,
+ "hardware-engineering":/radio equipment|electromagnetic compatibility|low voltage|ecodesign|batter(?:y|ies)|charging|hazardous substances|harmoni[sz]ed standards/i,
+ "software-engineering":/cybersecurity|cyber resilience|artificial intelligence|data protection|personal data|software|digital content|data act|accessibility/i
+};
+function departmentRank(record,today){
+ const core=DEPARTMENT_CORE[departmentView]||[];
+ const i=core.indexOf(record.id);
+ const status=statusFor(record,today);
+ const valid=status!=="inactive";
+ const law=record.sourceCategory==="EU_LEGISLATION";
+ const title=record.title||"";
+ const direct=DEPARTMENT_TERMS[departmentView]?.test(title);
+ const linked=core.some(id=>{const n=referenceNumber(id);return n&&title.includes(n);});
+ const subordinate=/^(?:commission )?(?:delegated|implementing)\b/i.test(title);
+ const minor=/\b(?:report|opinion|communication|recommendation|appointing|setting up|work programme)\b/i.test(title);
+ if(law&&valid&&i>=0)return 10000-i*10;
+ if(law&&valid&&(direct||linked))return (subordinate?650:800)+(linked?120:0)-(minor?150:0);
+ if(law&&valid)return subordinate?350:450;
+ if(law)return 100+(direct?30:0);
+ return direct||linked?60:0;
+}
+
 function render() {
   if(!snapshot){ui["result-table"].hidden=true;ui.pagination.hidden=true;ui.empty.hidden=true;ui["result-count"].textContent=refreshError?"法规数据暂不可用":"正在载入法规数据";return;}
   const today=todayInBrussels(),terms=normalize(ui.search.value).split(" ").filter(Boolean);
   const filtered=records.filter(record=>matches(record,today,terms));
-  filtered.sort((a,b)=>(ui.sort.value==="relevance"?searchRank(b,normalize(ui.search.value))-searchRank(a,normalize(ui.search.value)):0)||(ui.sort.value==="oldest"?(a.published??"").localeCompare(b.published??""):(b.published??"").localeCompare(a.published??"")||b.id.localeCompare(a.id)));
+  filtered.sort((a,b)=>(ui.sort.value==="relevance"?searchRank(b,normalize(ui.search.value))-searchRank(a,normalize(ui.search.value))||(departmentView?departmentRank(b,today)-departmentRank(a,today):0):0)||(ui.sort.value==="oldest"?(a.published??"").localeCompare(b.published??""):(b.published??"").localeCompare(a.published??"")||b.id.localeCompare(a.id)));
   const lastPage=Math.max(1,Math.ceil(filtered.length/PAGE_SIZE));page=Math.min(page,lastPage);
   const start=(page-1)*PAGE_SIZE,visible=filtered.slice(start,start+PAGE_SIZE);
   ui["result-rows"].replaceChildren(...visible.map(record=>resultRow(record,today,[...terms,...normalize(ui["any-terms"].value).split(" ").filter(Boolean),...normalize(ui["exact-phrase"].value).split(" ").filter(Boolean)])));
