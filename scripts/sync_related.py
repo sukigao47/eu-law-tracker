@@ -69,7 +69,7 @@ def _index(query_body: str, since: date, through: date, identifier_filter: str) 
             identifier, work = row.get("id", ""), row.get("work", "")
             if not identifier or not CELLAR_WORK.fullmatch(work):
                 continue
-            found[identifier] = {"id": identifier, "work": work, "published": row.get("published")}
+            found[identifier] = {"id": identifier, "work": work, "published": row.get("published"), "dateType": row.get("dateType")}
         if len(rows) < PAGE_SIZE:
             return found
         cursor = rows[-1]["id"]
@@ -77,7 +77,10 @@ def _index(query_body: str, since: date, through: date, identifier_filter: str) 
 
 def fetch_soft_law(since: date, through: date) -> dict[str, dict]:
     return _index(
-        "?work cdm:resource_legal_id_celex ?id ; cdm:work_date_document ?published .",
+        "?work cdm:resource_legal_id_celex ?id ; cdm:work_date_document ?documentDate . "
+        "OPTIONAL { ?work cdm:official-journal-act_date_publication ?ojPublished . } "
+        "BIND(COALESCE(?ojPublished, ?documentDate) AS ?published) "
+        "BIND(IF(BOUND(?ojPublished), \"OJ publication date\", \"Document date\") AS ?dateType)",
         since,
         through,
         f'REGEX(STR(?id), "^{SOFT_LAW_CELEX.pattern[1:-1]}$")',
@@ -88,7 +91,8 @@ def fetch_oj_c_series(since: date, through: date) -> dict[str, dict]:
     return _index(
         f"?work cdm:official-journal-act_part_of_collection_document <{OJ_C}> ; "
         "cdm:official-journal-act_date_publication ?published ; "
-        "cdm:resource_legal_id_celex ?id .",
+        "cdm:resource_legal_id_celex ?id . "
+        'BIND("OJ publication date" AS ?dateType)',
         since,
         through,
         'STR(?id) != ""',
@@ -115,6 +119,7 @@ def hydrate(index: dict[str, dict], category: str) -> list[dict]:
             "title": title,
             "titleZh": "",
             "published": source.get("published") or record.get("published"),
+            "dateType": source.get("dateType") or ("OJ publication date" if category == "OJ_C_SERIES" else "Document date"),
             "entry": None,
             "inForce": None,
             "subjects": record.get("subjects", []),
