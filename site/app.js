@@ -73,7 +73,7 @@ function makeSearchText(record) {
   const topicNames=topicLabelsFor(record);
   return normalize([
     record.id,record.work,record.title,record.titleZh,zhTitles[record.id],
-    record.legalType,TYPE_LABELS[record.id?.[5]],record.published,record.entry,
+    record.legalType,record.instrumentClass,TYPE_LABELS[record.id?.[5]],record.published,record.entry,
     ...(record.subjects??[]),...(record.keywords??[]),...topicNames,...deptNames
   ].join(" "));
 }
@@ -122,7 +122,7 @@ async function loadSnapshot(manual=false) {
 function tag(text,className) { const el=document.createElement("span");el.className="tag "+className;el.textContent=text;return el; }
 function resultRow(record,today) {
   const row=document.createElement("tr"),code=record.id?.[5]??"",status=statusFor(record,today);
-  row.insertCell().append(tag(TYPE_LABELS[code]??record.legalType??"其他","type-"+code));
+  row.insertCell().append(tag(record.instrumentClass??TYPE_LABELS[code]??record.legalType??"其他","type-"+code));
   const zh=document.createElement("td");zh.className="title-zh";
   zh.textContent=record.titleZh||"暂未维护中文标题";
   row.append(zh);
