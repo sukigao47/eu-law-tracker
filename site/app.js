@@ -16,6 +16,41 @@ const numbers = new Intl.NumberFormat("zh-CN");
 const ui = Object.fromEntries(Array.from(document.querySelectorAll("[id]"), el => [el.id,el]));
 let snapshot = null, records = [], taxonomy = {departments:[],crossCutting:[]}, zhTitles = {}, sourceRegistry = {categories:[]};
 let page = 1, refreshError = false, refreshing = false;
+const params = new URLSearchParams(location.search);
+const departmentView = params.get("department") || "";
+const favoritesView = params.get("view") === "favorites";
+const HOME = new URL("./", document.baseURI);
+function readStorage(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } }
+let favorites = readStorage("eu-law-favorites-v1", {});
+let folders = readStorage("eu-law-folders-v1", ["默认收藏"]);
+let selectedRecord = null;
+function persist() { try { localStorage.setItem("eu-law-favorites-v1",JSON.stringify(favorites));localStorage.setItem("eu-law-folders-v1",JSON.stringify(folders));return true; } catch { alert("无法保存收藏：浏览器存储不可用。");return false; } }
+function folderOptions() {
+  setSelectOptions(ui["folder-select"],folders.map(x=>({id:x,label:x})),"全部收藏");
+  ui["record-folder"].replaceChildren(...folders.map(x=>new Option(x,x)));
+}
+function openRecord(record) {
+  selectedRecord=record;
+  ui["record-name"].textContent=record.titleZh;
+  ui["record-en"].textContent=record.title;
+  ui["record-depts"].textContent="关联业务："+record.departments.map(id=>taxonomy.departments.find(d=>d.id===id)?.label??id).join("、");
+  folderOptions();ui["record-folder"].value=favorites[record.id]?.folder||folders[0];
+  ui["record-note"].value=favorites[record.id]?.note||"";
+  ui["record-dialog"].showModal();
+}
+function applyView() {
+  if(departmentView && taxonomy.departments.some(d=>d.id===departmentView)){
+    const name=taxonomy.departments.find(d=>d.id===departmentView).label;
+    ui["page-title"].textContent=name+"法规实施跟踪";
+    ui["catalog-title"].textContent=name+"法规一览";
+    ui.departments.hidden=true;ui.department.value=departmentView;ui.department.disabled=true;
+  } else if(favoritesView){
+    ui["page-title"].textContent="我的收藏夹";
+    ui["catalog-title"].textContent="收藏法规";
+    ui.departments.hidden=true;ui["favorites-panel"].hidden=false;
+  }
+  folderOptions();
+}
 
 function todayInBrussels() {
   const p = Object.fromEntries(dateParts.formatToParts(new Date()).map(x=>[x.type,x.value]));
@@ -81,12 +116,12 @@ function buildTaxonomyUI() {
   setSelectOptions(ui["cross-topic"],taxonomy.crossCutting,"全部跨部门专题");
   const grid=document.createDocumentFragment();
   taxonomy.departments.forEach(d=>{
-    const button=document.createElement("button");
-    button.type="button"; button.className="department-card"; button.dataset.department=d.id;
+    const button=document.createElement("a");
+    button.className="department-card"; button.dataset.department=d.id; const target=new URL("departments/"+d.id+"/",HOME);button.href=target.href;
     const name=document.createElement("strong"); name.textContent=d.label;
     const en=document.createElement("span"); en.textContent=d.labelEn;
     button.append(name,en);
-    button.addEventListener("click",()=>{ui.filters.reset();ui.department.value=d.id;page=1;render();ui.catalog.scrollIntoView({behavior:"smooth",block:"start"});});
+    
     grid.append(button);
   });
   ui["department-grid"].replaceChildren(grid);
@@ -104,7 +139,7 @@ function makeSearchText(record) {
   const deptNames=departmentIdsFor(record).map(id=>taxonomy.departments.find(d=>d.id===id)?.label ?? id);
   const topicNames=topicLabelsFor(record);
   return normalize([
-    record.id,record.ecli,record.caseCelex,record.caseNumber,record.parties,record.court,record.work,record.title,record.titleZh,zhTitles[record.id],referenceNumber(record.id),record.titleZh?.replace(/能源/g,"能效"),/eco[- ]?design|energy labell?ing|energy efficiency/i.test(record.title??"")?"能效 能源标签 生态设计":"",...asList(record.interpretedActs),...asList(record.citedDocuments),...asList(record.caseSubjects),
+    record.id,record.ecli,record.caseCelex,record.caseNumber,record.parties,record.court,record.work,record.title,record.titleZh,record.titleZhFull,zhTitles[record.id],referenceNumber(record.id),record.titleZh?.replace(/能源/g,"能效"),/eco[- ]?design|energy labell?ing|energy efficiency/i.test(record.title??"")?"能效 能源标签 生态设计":"",...asList(record.interpretedActs),...asList(record.citedDocuments),...asList(record.caseSubjects),
     record.legalType,record.instrumentClass,record.bindingNature,record.dateType,record.sourceCategory,...asList(record.caseLawDigest),...asList(record.sourceCollections),TYPE_LABELS[record.id?.[5]],record.published,record.entry,
     ...asList(record.subjects),...asList(record.keywords),...topicNames,...deptNames
   ].join(" "));
@@ -134,7 +169,7 @@ async function loadSnapshot(manual=false) {
     for(const doc of [...data.documents,...asList(relatedData?.documents)]){
       if(!doc?.id||unique.has(doc.id))continue;
       const id=String(doc.id).toUpperCase();
-      const curated=doc.titleZhFull||zhTitles[id]||doc.titleZh||"";
+      const curated=zhTitles[id]||doc.titleZhFull||doc.titleZh||"";
       const enriched={...doc,id,sourceCategory:doc.sourceCategory||"EU_LEGISLATION",titleZh:curated,departments:departmentIdsFor(doc),legalTypeCode:id[5]??""};
       enriched.crossCuttingTopics=[...new Set([...asList(doc.crossCuttingTopics),...taxonomy.crossCutting.filter(t=>t.topics.some(topic=>asList(doc.businessTopics).includes(topic))).map(t=>t.id)])];
       enriched.topicNames=topicLabelsFor(enriched);
@@ -143,6 +178,7 @@ async function loadSnapshot(manual=false) {
     }
     records=[...unique.values()];
     buildTaxonomyUI();
+    applyView();
     buildSourceDirectory();
     const checkedAt=data.checkedAt;
     ui["sync-time"].dateTime=checkedAt;ui["sync-time"].textContent=Number.isFinite(Date.parse(checkedAt))?chinaTime.format(new Date(checkedAt)):"未标注";
@@ -181,15 +217,12 @@ function highlightTitle(el,title,terms){
 }
 function resultRow(record,today,terms=[]) {
   const row=document.createElement("tr"),code=record.id?.[5]??"",status=statusFor(record,today);
+  const favoriteCell=row.insertCell();const star=document.createElement("button");star.type="button";star.className="favorite-star";star.textContent=favorites[record.id]?"★":"☆";star.setAttribute("aria-label",favorites[record.id]?"取消收藏":"收藏法规");star.addEventListener("click",()=>{if(favorites[record.id])delete favorites[record.id];else favorites[record.id]={folder:folders[0],note:""};persist();render();});favoriteCell.append(star);
   const kindCell=row.insertCell();
   kindCell.append(tag(record.instrumentClass??TYPE_LABELS[code]??record.legalType??"其他","type-"+code));
-  if(record.sourceCategory==="CASE_LAW")kindCell.append(tag("欧盟法院判例","material-case-law"));
-  else if(record.sourceCategory==="EU_SOFT_LAW")kindCell.append(tag(["non_binding_instrument","generally_non_binding_instrument"].includes(record.bindingNature)?"软法":"非立法文件","material-soft"));
-  else if(record.sourceCategory==="OJ_C_SERIES"||record.sourceCollections?.includes("OJ_C_SERIES"))kindCell.append(tag("OJ C系列","material-ojc"));
-  else if(record.sourceCategory==="EU_LEGISLATION")kindCell.append(tag("法律文件","material-law"));
   const zh=document.createElement("td");zh.className="title-zh";
   zh.textContent=record.titleZh||"暂无中文参考译名"; if(record.titleZh){const note=document.createElement("small");note.className="date-type";note.textContent="非官方参考译名";zh.append(note);}
-  row.append(zh);
+  const detail=document.createElement("button");detail.type="button";detail.className="text-button record-detail";detail.textContent="详情与备注";detail.addEventListener("click",()=>openRecord(record));zh.append(detail);row.append(zh);
   const en=document.createElement("td");en.className="title-en";
   const link=document.createElement("a");link.className="act-title";link.href=record.officialUrl||("https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:"+encodeURIComponent(record.id));
   link.target="_blank";link.rel="noopener noreferrer";link.lang="en";highlightTitle(link,record.title||"Open official EUR-Lex record",terms);
@@ -207,18 +240,12 @@ function resultRow(record,today,terms=[]) {
     }
   }
   row.append(en);
-  const deptCell=row.insertCell();deptCell.className="topics";
-  const deptNames=record.departments.map(id=>taxonomy.departments.find(d=>d.id===id)?.label??id);
-  deptCell.textContent=deptNames.join("、")||"未分类";
   row.insertCell().textContent=record.entry||"—";
-  row.insertCell().textContent=asList(record.applicationDates).join("、")||"—";
-  const date=row.insertCell();date.className="pub-date";date.textContent=record.published||"未标注";
-  if(record.dateType){const dateNote=document.createElement("small");dateNote.className="date-type";dateNote.textContent=record.dateType==="OJ publication date"?"公报发布日期":record.dateType==="CELLAR document date"?"文书日期":record.dateType.startsWith("CELLAR record")?"数据库记录日期（需核验）":"文件日期";date.append(dateNote);}
-  row.insertCell().append(tag(materialStatus(record,today),"status-"+(record.sourceCategory==="EU_LEGISLATION"?status:"unknown")));
+  row.insertCell().append(tag(record.sourceCategory==="EU_LEGISLATION"?STATUS_LABELS[status]:"不适用","status-"+(record.sourceCategory==="EU_LEGISLATION"?status:"unknown")));
   return row;
 }
 function advancedMatch(record,terms) {
-  const en=normalize(record.title),zh=normalize([record.titleZh,zhTitles[record.id]].join(" "));
+  const en=normalize(record.title),zh=normalize([record.titleZh,record.titleZhFull,zhTitles[record.id]].join(" "));
   const scope=ui["search-scope"].value;
   const hay=scope==="english"?en:scope==="chinese"?zh:scope==="title"?en+" "+zh:record.searchText;
   const words=id=>normalize(ui[id].value).split(" ").filter(Boolean);
@@ -231,7 +258,7 @@ function advancedMatch(record,terms) {
     &&(!ui.author.value||author===ui.author.value);
 }
 function matches(record,today,terms) {
-  return (!ui.department.value||(ui.department.value==="other"?!record.departments.length:record.departments.includes(ui.department.value)))
+  return (!departmentView||record.departments.includes(departmentView))&&(!favoritesView||(!!favorites[record.id]&&(!ui["folder-select"].value||favorites[record.id].folder===ui["folder-select"].value)))&&(!ui.department.value||(ui.department.value==="other"?!record.departments.length:record.departments.includes(ui.department.value)))
     &&(!ui["cross-topic"].value||(record.crossCuttingTopics??[]).includes(ui["cross-topic"].value))
     &&(!ui.material.value||(ui.material.value==="legislation"&&record.sourceCategory==="EU_LEGISLATION")||(ui.material.value==="soft_law"&&(record.sourceCategory==="EU_SOFT_LAW"||record.sourceCollections?.includes("EU_SOFT_LAW")))||(ui.material.value==="oj_c_series"&&(record.sourceCategory==="OJ_C_SERIES"||record.sourceCollections?.includes("OJ_C_SERIES")))||(ui.material.value==="case_law"&&record.sourceCategory==="CASE_LAW"))
     &&matchesType(record,ui.type.value)
@@ -258,8 +285,11 @@ ui.search.addEventListener("input",()=>{page=1;render();});
 ui.filters.addEventListener("input",()=>{page=1;render();});
 ui.filters.addEventListener("change",()=>{page=1;render();});
 ui.sort.addEventListener("change",()=>{page=1;render();});
-ui["clear-button"].addEventListener("click",()=>{ui.filters.reset();ui.sort.value="newest";page=1;render();ui.search.focus();});
-ui["recent-button"].addEventListener("click",async()=>{ui.filters.reset();ui.sort.value="newest";page=1;await loadSnapshot(true);ui.catalog.scrollIntoView({behavior:"smooth",block:"start"});});
+ui["clear-button"].addEventListener("click",()=>{ui.filters.reset();if(departmentView)ui.department.value=departmentView;ui.sort.value="newest";page=1;render();ui.search.focus();});
+ui["recent-button"].addEventListener("click",async()=>{ui.filters.reset();if(departmentView)ui.department.value=departmentView;ui.sort.value="newest";page=1;await loadSnapshot(true);ui.catalog.scrollIntoView({behavior:"smooth",block:"start"});});
 ui.previous.addEventListener("click",()=>{page=Math.max(1,page-1);render();});
 ui.next.addEventListener("click",()=>{page+=1;render();});
+ui["folder-select"].addEventListener("change",()=>{page=1;render();});
+ui["new-folder"].addEventListener("click",()=>{const name=prompt("收藏文件夹名称")?.trim();if(name&&!folders.includes(name)){folders.push(name);persist();folderOptions();}});
+ui["save-note"].addEventListener("click",()=>{if(!selectedRecord)return;favorites[selectedRecord.id]={folder:ui["record-folder"].value||folders[0],note:ui["record-note"].value};if(persist()){ui["record-dialog"].close();render();}});
 loadSnapshot();
