@@ -8,6 +8,14 @@ on:
       - config/**
       - scripts/**
       - site/**
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/sync.yml
+      - config/**
+      - scripts/**
+      - site/**
+      - tests/**
   schedule:
     # UTC 11:24 corresponds to 19:24 in Asia/Shanghai.
     - cron: "24 11 * * *"
@@ -49,6 +57,8 @@ jobs:
           restore-keys: eu-law-catalog-v1-
       - name: 运行法规分类回归测试
         run: python -m unittest discover -s tests -v
+      - name: 检查前端 JavaScript 语法
+        run: node --check site/app.js
       - name: 核对 Cellar 数据并筛选业务主题
         env:
           REBUILD: ${{ inputs.rebuild }}
