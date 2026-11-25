@@ -8,7 +8,6 @@ import json
 from pathlib import Path
 import re
 from urllib.parse import urlencode
-from urllib.request import quote
 
 from filter_catalog import filter_catalog
 from sync import CELLAR_WORK, ROOT, details, select, write_catalog
