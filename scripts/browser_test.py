@@ -68,10 +68,33 @@ with sync_playwright() as p:
     fill("search", "能效标签")
     expect(rows.first).to_be_visible()
     reset()
-    for button in page.locator("#department-grid button").all():
-        button.click()
-        assert page.locator("#department").input_value() == button.get_attribute("data-department")
+    core = {
+        "smartphone": ["32023R1670", "32023R1669", "32023R1542"],
+        "wearables": ["32014L0053", "32023R1542"],
+        "tablet-pc": ["32023R1670", "32023R1669", "32023R1542"],
+        "marketing-services": ["32005L0029", "32006L0114"],
+        "iot": ["32014L0053", "32024R2847"],
+        "smart-vehicle": ["32018R0858", "32019R2144"],
+        "integrated-delivery": ["32019R1020", "32013R0608"],
+        "hardware-engineering": ["32014L0053", "32014L0030"],
+        "software-engineering": ["32024R2847", "32016R0679", "32024R1689"],
+    }
+    links = [(a.get_attribute("href"), a.get_attribute("data-department")) for a in page.locator("#department-grid a").all()]
+    assert set(d for _, d in links) == set(core)
+    for href, department in links:
+        page.goto(href, wait_until="networkidle")
         expect(page.locator("#result-count")).to_contain_text("匹配")
+        expect(page.locator("#department")).to_have_value(department)
+        expect(page.locator("#department")).to_be_disabled()
+        expect(page.locator("#sort")).to_have_value("relevance")
+        for index, celex in enumerate(core[department]):
+            expect(rows.nth(index)).to_contain_text(celex)
+        if department == "smartphone":
+            fill("search", "人工智能法案")
+            expect(rows.first).to_contain_text("32024R1689")
+            reset()
+            expect(rows.first).to_contain_text("32023R1670")
+    page.goto(URL, wait_until="networkidle")
     reset()
     page.set_viewport_size({"width":390,"height":844})
     fill("celex-number", "32023R1669")
