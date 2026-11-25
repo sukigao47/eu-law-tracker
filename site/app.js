@@ -43,12 +43,50 @@ const ui = Object.fromEntries(Array.from(document.querySelectorAll("[id]"), el =
 let snapshot = null, records = [], taxonomy = {departments:[],crossCutting:[]}, zhTitles = {}, sourceRegistry = {categories:[]};
 let page = 1, refreshError = false, refreshing = false;
 const params = new URLSearchParams(location.search);
-const departmentView = params.get("department") || "";
-const favoritesView = params.get("view") === "favorites";
+let departmentView = params.get("department") || "";
+let favoritesView = params.get("view") === "favorites";
 const HOME = new URL("./", document.baseURI);
-const homeView=!departmentView&&!favoritesView&&params.get("view")!=="laws"&&!["#catalog","#departments","#official-sources"].includes(location.hash);
-ui["home-view"].hidden=!homeView;ui.catalog.hidden=homeView;ui.departments.hidden=homeView||!!departmentView||favoritesView;ui["official-sources"].hidden=homeView;ui["coverage-note"].hidden=homeView;
-ui[homeView?"nav-home":"nav-laws"].setAttribute("aria-current","page");
+let activeView=departmentView?"laws":favoritesView?"favorites":params.get("view")==="laws"?"laws":(["#catalog","#search"].includes(location.hash)?"search":location.hash==="#departments"||location.hash==="#laws"?"laws":location.hash==="#favorites"?"favorites":"home");
+let homeView=activeView==="home";
+function showModule(view,department="",reset=true){
+ activeView=view;homeView=view==="home";favoritesView=view==="favorites";departmentView=department;
+ ui["home-view"].hidden=!homeView;
+ ui.catalog.hidden=homeView;
+ ui.departments.hidden=view!=="laws"||!!departmentView;
+ ui["official-sources"].hidden=view!=="laws"||!!departmentView;
+ ui["coverage-note"].hidden=homeView;
+ ui["favorites-panel"].hidden=!favoritesView;
+ ui.department.disabled=false;
+ if(reset){ui.filters.reset();ui.department.value=departmentView;sortExplicit=false;ui.sort.value=defaultSort();page=1;}
+ ui["page-title"].textContent="欧盟法规实施跟踪沙盘";
+ ui["catalog-title"].textContent=view==="favorites"?"收藏法规":"高级检索";
+ for(const link of document.querySelectorAll(".topbar-links [data-view]")){
+  if(link.dataset.view===view)link.setAttribute("aria-current","page");else link.removeAttribute("aria-current");
+ }
+ ui["recent-button"].textContent=homeView?"进入法规库":"查看最新收录";
+ if(snapshot){applyView();render();}
+}
+function navigateModule(view,department=""){
+ const url=new URL(HOME);url.hash=department?"laws/"+department:view;
+ history.pushState(null,"",url);showModule(view,department);
+ window.scrollTo({top:0});
+}
+function restoreModule(){
+ const hash=location.hash.slice(1);
+ if(hash.startsWith("laws/"))showModule("laws",hash.slice(5));
+ else if(["home","laws","favorites","search"].includes(hash))showModule(hash);
+ else if(hash==="catalog")showModule("search");
+ else if(hash==="departments")showModule("laws");
+ else {const query=new URLSearchParams(location.search);showModule(query.get("department")?"laws":query.get("view")==="favorites"?"favorites":query.get("view")==="laws"?"laws":"home",query.get("department")||"");}
+}
+document.addEventListener("click",event=>{
+ const link=event.target.closest("a[data-view],a.department-card");
+ if(!link||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey||event.button!==0)return;
+ event.preventDefault();
+ navigateModule(link.dataset.view||"laws",link.dataset.department||"");
+});
+window.addEventListener("popstate",restoreModule);
+window.addEventListener("hashchange",restoreModule);
 function readStorage(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } }
 let favorites = readStorage("eu-law-favorites-v1", {});
 let folders = readStorage("eu-law-folders-v1", ["默认收藏"]);
@@ -153,7 +191,7 @@ function buildTaxonomyUI() {
   const grid=document.createDocumentFragment();
   taxonomy.departments.forEach(d=>{
     const button=document.createElement("a");
-    button.className="department-card"; button.dataset.department=d.id; const target=new URL("departments/"+d.id+"/",HOME);button.href=target.href;
+    button.className="department-card"; button.dataset.department=d.id; const target=new URL(HOME);target.hash="laws/"+d.id;button.href=target.href;
     const name=document.createElement("strong"); name.textContent=d.label;
     const en=document.createElement("span"); en.textContent=d.labelEn;
     button.append(name,en);
@@ -372,10 +410,11 @@ ui.filters.addEventListener("input",()=>{page=1;render();});
 ui.filters.addEventListener("change",()=>{page=1;render();});
 ui.sort.addEventListener("change",()=>{sortExplicit=true;page=1;render();});
 ui["clear-button"].addEventListener("click",()=>{ui.filters.reset();if(departmentView)ui.department.value=departmentView;sortExplicit=false;ui.sort.value=defaultSort();page=1;render();ui.search.focus();});
-ui["recent-button"].addEventListener("click",async()=>{if(homeView){location.href=new URL("?view=laws#catalog",HOME);return;}ui.filters.reset();if(departmentView)ui.department.value=departmentView;sortExplicit=false;ui.sort.value=defaultSort();page=1;await loadSnapshot(true);ui.catalog.scrollIntoView({behavior:"smooth",block:"start"});});
+ui["recent-button"].addEventListener("click",async()=>{if(homeView){navigateModule("laws");return;}ui.filters.reset();if(departmentView)ui.department.value=departmentView;sortExplicit=false;ui.sort.value=defaultSort();page=1;await loadSnapshot(true);ui.catalog.scrollIntoView({behavior:"smooth",block:"start"});});
 ui.previous.addEventListener("click",()=>{page=Math.max(1,page-1);render();});
 ui.next.addEventListener("click",()=>{page+=1;render();});
 ui["folder-select"].addEventListener("change",()=>{page=1;render();});
 ui["new-folder"].addEventListener("click",()=>{const name=prompt("收藏文件夹名称")?.trim();if(name&&!folders.includes(name)){folders.push(name);persist();folderOptions();}});
 ui["save-note"].addEventListener("click",()=>{if(!selectedRecord)return;favorites[selectedRecord.id]={folder:ui["record-folder"].value||folders[0],note:ui["record-note"].value};if(persist()){ui["record-dialog"].close();render();}});
+showModule(activeView,departmentView,false);
 loadSnapshot();

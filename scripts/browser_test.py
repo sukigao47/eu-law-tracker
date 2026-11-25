@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 from playwright.sync_api import sync_playwright, expect
 
 HOME_URL = os.environ.get("TEST_URL", "http://127.0.0.1:8765/")
-URL = urljoin(HOME_URL, "?view=laws")
+URL = urljoin(HOME_URL, "#laws")
 with sync_playwright() as p:
     browser = p.chromium.launch()
     page = browser.new_page()
@@ -19,6 +19,14 @@ with sync_playwright() as p:
     assert latest_dates == sorted(latest_dates, reverse=True)
     expect(page.locator(".home-links a")).to_have_count(6)
     expect(page.locator("#topics-title")).to_have_text("最新专题")
+    page.evaluate("window.__moduleNavigationMarker = true")
+    page.locator("#nav-laws").click()
+    assert page.evaluate("window.__moduleNavigationMarker === true"), "Navigation reloaded the document"
+    page.locator("#nav-search").click()
+    expect(page.locator("#departments")).to_be_hidden()
+    expect(page.locator("#catalog")).to_be_visible()
+    page.locator("#nav-favorites").click()
+    expect(page.locator("#favorites-panel")).to_be_visible()
     page.locator("#nav-laws").click()
     expect(page.locator("#catalog")).to_be_visible()
     expect(page.locator("#result-count")).to_contain_text("匹配", timeout=30000)
