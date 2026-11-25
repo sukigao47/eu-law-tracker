@@ -96,6 +96,21 @@ def filter_catalog(catalog, config_path):
     if products is None:
         raise ValueError("The business profile must define product terms")
 
+    taxonomy_path = config_path.with_name("business-taxonomy.json")
+    titles_path = config_path.with_name("titles-zh.json")
+    taxonomy = json.loads(taxonomy_path.read_text(encoding="utf-8")) if taxonomy_path.is_file() else {"departments": [], "crossCutting": []}
+    chinese_titles = json.loads(titles_path.read_text(encoding="utf-8")) if titles_path.is_file() else {}
+    department_map = {
+        topic_id: department["id"]
+        for department in taxonomy.get("departments", [])
+        for topic_id in department.get("topics", [])
+    }
+    cross_map = {
+        topic_id: topic["id"]
+        for topic in taxonomy.get("crossCutting", [])
+        for topic_id in topic.get("topics", [])
+    }
+
     documents = []
     for record in catalog["documents"]:
         title = normalize(record["title"])
@@ -110,7 +125,19 @@ def filter_catalog(catalog, config_path):
             if topic.matches(record["id"], cited, concepts, labels, text, product, product_title)
         ]
         if matches:
-            documents.append({**record, "businessTopics": matches})
+            department_ids = sorted({department_map[topic_id] for topic_id in matches if topic_id in department_map})
+            cross_cutting_ids = sorted({cross_map[topic_id] for topic_id in matches if topic_id in cross_map})
+            kind_code = record["id"][5] if len(record["id"]) > 5 else ""
+            legal_type = {"R": "Regulation", "L": "Directive", "D": "Decision"}.get(kind_code, "Other")
+            documents.append({
+                **record,
+                "titleZh": chinese_titles.get(record["id"], ""),
+                "legalType": legal_type,
+                "officialUrl": f"https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:{record['id']}",
+                "businessTopics": matches,
+                "departments": department_ids,
+                "crossCuttingTopics": cross_cutting_ids,
+            })
 
     return {
         **catalog,
@@ -118,6 +145,8 @@ def filter_catalog(catalog, config_path):
             "id": profile["id"],
             "label": profile["label"],
             "topics": [{"id": topic.id, "label": topic.label} for topic in topics],
+            "departments": taxonomy.get("departments", []),
+            "crossCutting": taxonomy.get("crossCutting", []),
         },
         "documents": documents,
     }
