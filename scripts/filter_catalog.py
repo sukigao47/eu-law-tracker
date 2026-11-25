@@ -148,7 +148,7 @@ def classify_celex(identifier: str, title: str = "") -> dict:
             "6": "judicial", "C": "official-journal-information",
         }.get(sector, "other")
     title_lower = (title or "").casefold()
-    if sector == "5" and re.search(r"guideline|guidance|notice|recommendation|code of conduct|faq|frequently asked questions", title_lower):
+    if sector == "5" and re.search(r"guideline|guidance|notice|recommendation|communication|code of conduct|faq|frequently asked questions", title_lower):
         effect, nature = "non-binding", "soft-law"
     if sector == "3" and descriptor in {"R", "L", "D"}:
         if "delegated" in title_lower:
