@@ -89,8 +89,8 @@ async function loadSnapshot(manual=false) {
     const base=new URL("./",import.meta.url);
     const [catalogResponse,taxonomyResponse,zhResponse]=await Promise.all([
       fetch(new URL("./data/catalog.json",base),{cache:manual?"no-cache":"default"}),
-      fetch(new URL("../config/business-taxonomy.json",base),{cache:"no-cache"}),
-      fetch(new URL("../config/titles-zh.json",base),{cache:"no-cache"})
+      fetch(new URL("./data/business-taxonomy.json",base),{cache:"no-cache"}),
+      fetch(new URL("./data/titles-zh.json",base),{cache:"no-cache"})
     ]);
     if(!catalogResponse.ok)throw new Error("Catalogue HTTP "+catalogResponse.status);
     const data=await catalogResponse.json();
