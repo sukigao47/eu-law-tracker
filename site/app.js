@@ -3,7 +3,7 @@ const PAGE_SIZE = 15;
 const STATUS_LABELS = { active:"现行有效", pending:"尚未生效", inactive:"非现行", unknown:"未标注" };
 const EFFECT_LABELS = {
   binding:"具有约束力", "non-binding":"不具有约束力",
-  preparatory:"立法准备文件", informational:"信息或说明文件", uncertain:"需个案核验"
+  preparatory:"立法准备文件", informational:"信息或说明文件", judicial:"司法裁判文件", uncertain:"需个案核验"
 };
 const TYPE_LABELS = {
   R:"条例（Regulation）", L:"指令（Directive）", D:"决定（Decision）",
