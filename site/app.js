@@ -1,4 +1,30 @@
 const PAGE_SIZE = 20;
+const LAW_ALIASES = {
+"32024R1689":["人工智能法案","人工智能条例","人工智能法规","AI Act","Artificial Intelligence Act","欧盟人工智能法案","AI法案"],
+"32016R0679":["通用数据保护条例","一般数据保护条例","GDPR","General Data Protection Regulation"],
+"32024R2847":["网络韧性法案","网络弹性法案","网络复原力法案","CRA","Cyber Resilience Act"],
+"32023R2854":["数据法案","Data Act"],
+"32022R2065":["数字服务法案","DSA","Digital Services Act"],
+"32022R1925":["数字市场法案","DMA","Digital Markets Act"],
+"32023R0988":["通用产品安全条例","通用产品安全法规","GPSR","General Product Safety Regulation"],
+"32024R1781":["可持续产品生态设计条例","ESPR","Ecodesign for Sustainable Products Regulation"],
+"32023R1542":["电池法案","电池法规","电池和废电池条例","Batteries Regulation"],
+"32023R1669":["能效标签","能源标签","智能手机能效标签","Energy Labelling"],
+"32023R1670":["智能手机生态设计","生态设计","Ecodesign"],
+"32014L0053":["无线电设备指令","RED","Radio Equipment Directive"],
+"32011L0065":["RoHS","有害物质限制指令"],
+"32006R1907":["REACH","化学品注册评估授权和限制法规"]
+};
+function aliasesFor(record){return LAW_ALIASES[record.id]||[];}
+function searchRank(record,query){
+ if(!query)return 0;
+ const exact=[record.id,referenceNumber(record.id),...aliasesFor(record),zhTitles[record.id],record.titleZh].map(normalize);
+ if(exact.includes(query))return 3;
+ if(exact.some(x=>x.includes(query)))return 2;
+ if(normalize(record.title).includes(query))return 1;
+ return 0;
+}
+
 const TYPE_LABELS = { R: "条例 / Regulation", L: "指令 / Directive", D: "决定 / Decision" };
 const STATUS_LABELS = { active: "现行有效且已实施（适用）", not_applied: "现行有效尚未实施（适用）", partial: "现行有效·分阶段适用", pending: "尚未生效", inactive: "已失效", active_unknown: "现行有效", unknown: "其他状态", na: "不适用" };
 const SUBJECT_LABELS = new Map(Object.entries({
@@ -139,7 +165,7 @@ function makeSearchText(record) {
   const deptNames=departmentIdsFor(record).map(id=>taxonomy.departments.find(d=>d.id===id)?.label ?? id);
   const topicNames=topicLabelsFor(record);
   return normalize([
-    record.id,record.ecli,record.caseCelex,record.caseNumber,record.parties,record.court,record.work,record.title,record.titleZh,record.titleZhFull,zhTitles[record.id],referenceNumber(record.id),record.titleZh?.replace(/能源/g,"能效"),/eco[- ]?design|energy labell?ing|energy efficiency/i.test(record.title??"")?"能效 能源标签 生态设计":"",...asList(record.interpretedActs),...asList(record.citedDocuments),...asList(record.caseSubjects),
+    ...aliasesFor(record),record.id,record.ecli,record.caseCelex,record.caseNumber,record.parties,record.court,record.work,record.title,record.titleZh,record.titleZhFull,zhTitles[record.id],referenceNumber(record.id),record.titleZh?.replace(/能源/g,"能效"),/eco[- ]?design|energy labell?ing|energy efficiency/i.test(record.title??"")?"能效 能源标签 生态设计":"",...asList(record.interpretedActs),...asList(record.citedDocuments),...asList(record.caseSubjects),
     record.legalType,record.instrumentClass,record.bindingNature,record.dateType,record.sourceCategory,...asList(record.caseLawDigest),...asList(record.sourceCollections),TYPE_LABELS[record.id?.[5]],record.published,record.entry,
     ...asList(record.subjects),...asList(record.keywords),...topicNames,...deptNames
   ].join(" "));
@@ -245,13 +271,13 @@ function resultRow(record,today,terms=[]) {
   return row;
 }
 function advancedMatch(record,terms) {
-  const en=normalize(record.title),zh=normalize([record.titleZh,record.titleZhFull,zhTitles[record.id]].join(" "));
+  const officialEn=normalize(record.title),en=normalize([record.title,...aliasesFor(record).filter(x=>/[a-z]/i.test(x)&&!/[\u3400-\u9fff]/.test(x))].join(" ")),zh=normalize([record.titleZh,record.titleZhFull,zhTitles[record.id],...aliasesFor(record).filter(x=>/[\u3400-\u9fff]/.test(x))].join(" "));
   const scope=ui["search-scope"].value;
   const hay=scope==="english"?en:scope==="chinese"?zh:scope==="title"?en+" "+zh:record.searchText;
   const words=id=>normalize(ui[id].value).split(" ").filter(Boolean);
   const any=words("any-terms"),excluded=words("exclude-terms"),phrase=normalize(ui["exact-phrase"].value);
   const number=normalize(ui["act-number"].value).match(/\d{4}\s*\/\s*\d+/)?.[0].replace(/\s/g,"")||normalize(ui["act-number"].value);
-  const author=/^commission\b/.test(en)?"commission":/^council\b/.test(en)?"council":/european parliament and (?:of )?the council/.test(en)?"parliament":"other";
+  const author=/^commission\b/.test(officialEn)?"commission":/^council\b/.test(officialEn)?"council":/european parliament and (?:of )?the council/.test(officialEn)?"parliament":"other";
   return terms.every(t=>hay.includes(t))&&(!any.length||any.some(t=>hay.includes(t)))&&excluded.every(t=>!hay.includes(t))&&(!phrase||hay.includes(phrase))
     &&zh.includes(normalize(ui["zh-name"].value))&&en.includes(normalize(ui["en-name"].value))
     &&(!number||referenceNumber(record.id)===number)&&(!ui["celex-number"].value.trim()||normalize(record.id)===normalize(ui["celex-number"].value))
@@ -269,7 +295,7 @@ function render() {
   if(!snapshot){ui["result-table"].hidden=true;ui.pagination.hidden=true;ui.empty.hidden=true;ui["result-count"].textContent=refreshError?"法规数据暂不可用":"正在载入法规数据";return;}
   const today=todayInBrussels(),terms=normalize(ui.search.value).split(" ").filter(Boolean);
   const filtered=records.filter(record=>matches(record,today,terms));
-  filtered.sort((a,b)=>ui.sort.value==="oldest"?(a.published??"").localeCompare(b.published??""):(b.published??"").localeCompare(a.published??"")||b.id.localeCompare(a.id));
+  filtered.sort((a,b)=>(ui.sort.value==="relevance"?searchRank(b,normalize(ui.search.value))-searchRank(a,normalize(ui.search.value)):0)||(ui.sort.value==="oldest"?(a.published??"").localeCompare(b.published??""):(b.published??"").localeCompare(a.published??"")||b.id.localeCompare(a.id)));
   const lastPage=Math.max(1,Math.ceil(filtered.length/PAGE_SIZE));page=Math.min(page,lastPage);
   const start=(page-1)*PAGE_SIZE,visible=filtered.slice(start,start+PAGE_SIZE);
   ui["result-rows"].replaceChildren(...visible.map(record=>resultRow(record,today,[...terms,...normalize(ui["any-terms"].value).split(" ").filter(Boolean),...normalize(ui["exact-phrase"].value).split(" ").filter(Boolean)])));
@@ -285,8 +311,8 @@ ui.search.addEventListener("input",()=>{page=1;render();});
 ui.filters.addEventListener("input",()=>{page=1;render();});
 ui.filters.addEventListener("change",()=>{page=1;render();});
 ui.sort.addEventListener("change",()=>{page=1;render();});
-ui["clear-button"].addEventListener("click",()=>{ui.filters.reset();if(departmentView)ui.department.value=departmentView;ui.sort.value="newest";page=1;render();ui.search.focus();});
-ui["recent-button"].addEventListener("click",async()=>{ui.filters.reset();if(departmentView)ui.department.value=departmentView;ui.sort.value="newest";page=1;await loadSnapshot(true);ui.catalog.scrollIntoView({behavior:"smooth",block:"start"});});
+ui["clear-button"].addEventListener("click",()=>{ui.filters.reset();if(departmentView)ui.department.value=departmentView;ui.sort.value="relevance";page=1;render();ui.search.focus();});
+ui["recent-button"].addEventListener("click",async()=>{ui.filters.reset();if(departmentView)ui.department.value=departmentView;ui.sort.value="relevance";page=1;await loadSnapshot(true);ui.catalog.scrollIntoView({behavior:"smooth",block:"start"});});
 ui.previous.addEventListener("click",()=>{page=Math.max(1,page-1);render();});
 ui.next.addEventListener("click",()=>{page+=1;render();});
 ui["folder-select"].addEventListener("change",()=>{page=1;render();});
