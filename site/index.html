@@ -10,13 +10,12 @@
   <script type="module" src="./app.js"></script>
 </head>
 <body>
-  <a class="skip-link" href="#search" data-view="search">跳到法规检索</a>
+  <a class="skip-link" href="#catalog">跳到法规检索</a>
   <header class="topbar">
     <div class="shell topbar-inner">
       <a class="brand" href="./" aria-label="欧盟法规实施跟踪沙盘首页"><span class="brand-icon" aria-hidden="true"><span></span></span><span>欧盟法规实施跟踪沙盘</span></a>
       <nav class="topbar-links" aria-label="网站导航">
-        <a id="nav-home" href="#home" data-view="home">首页</a><a id="nav-laws" href="#laws" data-view="laws">法规</a><a id="nav-favorites" href="#favorites" data-view="favorites">收藏夹</a><a id="nav-search" href="#search" data-view="search">检索</a>
-        <a href="https://eur-lex.europa.eu/oj/direct-access.html?locale=en" target="_blank" rel="noopener">欧盟官方公报</a>
+        <a id="nav-home" href="#home" data-view="home">首页</a><a id="nav-laws" href="#laws" data-view="laws">法规</a><a id="nav-favorites" href="#favorites" data-view="favorites">收藏夹</a>
       </nav>
     </div>
   </header>
@@ -34,7 +33,7 @@
         <span class="sync-note" id="sync-note">数据来源 EUR-Lex / Cellar</span>
       </div>
     </section>
-    <div id="home-view" hidden><section class="home-panel" aria-labelledby="latest-title"><div class="section-head"><div><h2 id="latest-title">最新动态</h2><p>本库已收录的最新发布法律文件 · 按官方公报发布日期</p></div><a href="#search" data-view="search">查看更多 →</a></div><p id="home-update" class="home-meta" role="status">正在读取法规数据</p><div id="latest-list"></div></section><section class="home-panel" aria-labelledby="links-title"><div class="section-head"><div><h2 id="links-title">网址速递</h2><p>欧盟官方立法及监管动态入口</p></div></div><div class="home-links"><a href="https://eur-lex.europa.eu/oj/direct-access.html?locale=en" target="_blank" rel="noopener">欧盟官方公报 <small>正式发布法律文件</small></a><a href="https://eur-lex.europa.eu/" target="_blank" rel="noopener">EUR-Lex <small>法规原文与修订记录</small></a><a href="https://commission.europa.eu/law/tracking-law-making_en" target="_blank" rel="noopener">欧盟委员会立法跟踪 <small>立法及授权、实施法案进程</small></a><a href="https://commission.europa.eu/law/contribute-law-making_en" target="_blank" rel="noopener">公众咨询与意见反馈 <small>拟议立法及征求意见</small></a><a href="https://oeil.europarl.europa.eu/oeil/en/find-out-more" target="_blank" rel="noopener">欧洲议会立法观察站 <small>立法程序及进展</small></a><a href="https://www.consilium.europa.eu/en/press/" target="_blank" rel="noopener">欧盟理事会新闻中心 <small>政策与立法动态</small></a></div></section><section class="home-panel" aria-labelledby="topics-title"><h2 id="topics-title">最新专题</h2><div class="topic-placeholder"></div></section></div><section class="department-section" id="departments" hidden aria-labelledby="department-title">
+    <div id="home-view" hidden><section class="home-panel" aria-labelledby="latest-title"><div class="section-head"><div><h2 id="latest-title">最新动态</h2><p>本库已收录的最新发布法律文件 · 按官方公报发布日期</p></div><a href="#laws" data-view="laws">查看更多 →</a></div><p id="home-update" class="home-meta" role="status">正在读取法规数据</p><div id="latest-list"></div></section><section class="home-panel" aria-labelledby="links-title"><div class="section-head"><div><h2 id="links-title">网址速递</h2><p>欧盟官方立法及监管动态入口</p></div></div><div class="home-links"><a href="https://eur-lex.europa.eu/oj/direct-access.html?locale=en" target="_blank" rel="noopener">欧盟官方公报 <small>正式发布法律文件</small></a><a href="https://eur-lex.europa.eu/" target="_blank" rel="noopener">EUR-Lex <small>法规原文与修订记录</small></a><a href="https://commission.europa.eu/law/tracking-law-making_en" target="_blank" rel="noopener">欧盟委员会立法跟踪 <small>立法及授权、实施法案进程</small></a><a href="https://commission.europa.eu/law/contribute-law-making_en" target="_blank" rel="noopener">公众咨询与意见反馈 <small>拟议立法及征求意见</small></a><a href="https://oeil.europarl.europa.eu/oeil/en/find-out-more" target="_blank" rel="noopener">欧洲议会立法观察站 <small>立法程序及进展</small></a><a href="https://www.consilium.europa.eu/en/press/" target="_blank" rel="noopener">欧盟理事会新闻中心 <small>政策与立法动态</small></a></div></section><section class="home-panel" aria-labelledby="topics-title"><h2 id="topics-title">最新专题</h2><div class="topic-placeholder"></div></section></div><section class="department-section" id="departments" hidden aria-labelledby="department-title">
       <div class="section-head"><div><h2 id="department-title">业务板块</h2><p>一部法规可以关联多个部门；部门关联用于检索导航，不代替具体适用性判断。</p></div></div>
       <div class="department-grid" id="department-grid"></div>
     </section>

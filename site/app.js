@@ -46,7 +46,7 @@ const params = new URLSearchParams(location.search);
 let departmentView = params.get("department") || "";
 let favoritesView = params.get("view") === "favorites";
 const HOME = new URL("./", document.baseURI);
-let activeView=departmentView?"laws":favoritesView?"favorites":params.get("view")==="laws"?"laws":(["#catalog","#search"].includes(location.hash)?"search":location.hash==="#departments"||location.hash==="#laws"?"laws":location.hash==="#favorites"?"favorites":"home");
+let activeView=departmentView?"laws":favoritesView?"favorites":params.get("view")==="laws"?"laws":(["#catalog","#search"].includes(location.hash)?"laws":location.hash==="#departments"||location.hash==="#laws"?"laws":location.hash==="#favorites"?"favorites":"home");
 let homeView=activeView==="home";
 function showModule(view,department="",reset=true){
  activeView=view;homeView=view==="home";favoritesView=view==="favorites";departmentView=department;
@@ -74,8 +74,9 @@ function navigateModule(view,department=""){
 function restoreModule(){
  const hash=location.hash.slice(1);
  if(hash.startsWith("laws/"))showModule("laws",hash.slice(5));
- else if(["home","laws","favorites","search"].includes(hash))showModule(hash);
- else if(hash==="catalog")showModule("search");
+ else if(["home","laws","favorites"].includes(hash))showModule(hash);
+ else if(hash==="search")showModule("laws");
+ else if(hash==="catalog")showModule("laws");
  else if(hash==="departments")showModule("laws");
  else {const query=new URLSearchParams(location.search);showModule(query.get("department")?"laws":query.get("view")==="favorites"?"favorites":query.get("view")==="laws"?"laws":"home",query.get("department")||"");}
 }
