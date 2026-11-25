@@ -23,7 +23,7 @@
           "purpose": "检索委员会正式文件、Communication 及相关工作文件。"
         }
       ],
-      "coverage": "CELLAR CELEX descriptors 3A, 3H, 3G, 3C and 5DC; rolling five-year document-date window; only records matching the configured terminal-business profile are published."
+      "coverage": "CELLAR CELEX descriptors 3A/3H/3G/3C; 5DC/5JC/5SC; institutional opinion/report descriptors 5AA/5TA/5SA/5AB/5HB/5XB/5AE/5IE/5AC/5AR/5IR/5XR. Rolling five-year document-date window; only records matching the configured terminal-business profile are published."
     },
     {
       "id": "oj_c_series",
