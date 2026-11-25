@@ -18,7 +18,7 @@ PAGE_SIZE = 1000
 BATCH_SIZE = 80
 SOFT_LAW_DAYS = 5 * 366
 OJ_C_DAYS = 180
-SOFT_LAW_CELEX = re.compile(r"^(?:3[0-9]{4}[AHGC][0-9]{4,6}|5[0-9]{4}DC[0-9]{4,6})$")
+SOFT_LAW_CELEX = re.compile(r"^(?:3[0-9]{4}[AHGC][0-9]{4,6}|5[0-9]{4}(?:DC|JC|SC|AA|TA|SA|AB|HB|XB|AE|IE|AC|AR|IR|XR)[0-9]{1,6})$")
 
 
 def official_url(identifier: str) -> str:
@@ -39,16 +39,31 @@ def classify_soft_law(identifier: str, title: str) -> tuple[str, str]:
         return "Resolution", "generally_non_binding_instrument"
     if identifier.startswith("3") and descriptor == "C":
         return "Declaration", "generally_non_binding_instrument"
-    if identifier.startswith("5") and descriptor == "DC":
-        if "communication" in lowered:
-            return "Commission Communication", "non_legislative_document"
-        if "white paper" in lowered:
-            return "White Paper", "non_legislative_document"
-        if "green paper" in lowered:
-            return "Green Paper", "non_legislative_document"
-        if "report" in lowered:
-            return "Commission Report", "non_legislative_document"
-        return "Other Commission document", "non_legislative_document"
+    if identifier.startswith("5"):
+        if descriptor in {"AA", "AB", "AE", "AC", "AR"}:
+            return "Institutional Opinion", "non_legislative_document"
+        if descriptor in {"IE", "IR"}:
+            return "Own-initiative Opinion", "non_legislative_document"
+        if descriptor == "HB":
+            return "ECB Recommendation", "non_legislative_document"
+        if descriptor in {"TA", "SA"}:
+            return "Audit / Special Report", "non_legislative_document"
+        if descriptor == "SC":
+            return "Staff Working Document", "non_legislative_document"
+        if descriptor == "JC":
+            return "Joint Communication", "non_legislative_document"
+        if descriptor == "DC":
+            if "communication" in lowered:
+                return "Commission Communication", "non_legislative_document"
+            if "white paper" in lowered:
+                return "White Paper", "non_legislative_document"
+            if "green paper" in lowered:
+                return "Green Paper", "non_legislative_document"
+            if "report" in lowered:
+                return "Commission Report", "non_legislative_document"
+            return "Other Commission document", "non_legislative_document"
+        if descriptor in {"XB", "XR"}:
+            return "Institutional document", "non_legislative_document"
     return "Other non-legislative document", "not_assessed"
 
 
@@ -189,7 +204,7 @@ def sync_related(output: Path, profile: Path, today: date | None = None) -> dict
             "softLawBusinessRelevant": len(soft_catalog["documents"]),
             "ojCSeriesBusinessRelevant": len(oj_catalog["documents"]),
             "businessRelevantUnique": len(combined),
-            "softLawCelexDescriptors": ["3A", "3H", "3G", "3C", "5DC"],
+            "softLawCelexDescriptors": ["3A", "3H", "3G", "3C", "5DC", "5JC", "5SC", "5AA", "5TA", "5SA", "5AB", "5HB", "5XB", "5AE", "5IE", "5AC", "5AR", "5IR", "5XR"],
             "ojCollection": "OJ-C",
         },
         "profile": soft_catalog.get("profile", {}),
