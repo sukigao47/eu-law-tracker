@@ -1,6 +1,6 @@
 const PAGE_SIZE = 20;
 const TYPE_LABELS = { R: "条例 / Regulation", L: "指令 / Directive", D: "决定 / Decision" };
-const STATUS_LABELS = { active: "现行有效", pending: "尚未适用 / 待生效", inactive: "非现行", unknown: "未标注" };
+const STATUS_LABELS = { active: "现行有效且已实施（适用）", not_applied: "现行有效尚未实施（适用）", partial: "现行有效·分阶段适用", pending: "尚未生效", inactive: "已失效", active_unknown: "现行有效·适用日期待核实", unknown: "状态待核实" };
 const SUBJECT_LABELS = new Map(Object.entries({
   agriculture:"农业","common agricultural policy":"共同农业政策","common commercial policy":"共同商业政策",
   "common foreign and security policy":"共同外交与安全政策",competition:"竞争", "consumer protection":"消费者保护",
@@ -27,8 +27,13 @@ function normalize(value) {
 }
 function statusFor(record,today) {
   if (record.entry && record.entry > today) return "pending";
-  if (record.inForce === true) return "active";
-  return record.inForce === false ? "inactive" : "unknown";
+  if (record.inForce === false) return "inactive";
+  if (record.inForce !== true) return "unknown";
+  const dates=asList(record.applicationDates).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
+  if(!dates.length)return "active_unknown";
+  if(dates[0]>today)return "not_applied";
+  if(dates[dates.length-1]>today)return "partial";
+  return "active";
 }
 function labelSubject(subject) { return SUBJECT_LABELS.get(String(subject).toLowerCase()) ?? subject; }
 function departmentIdsFor(doc) {
@@ -39,7 +44,7 @@ function departmentIdsFor(doc) {
 function topicLabelsFor(doc) {
   const ids = doc.businessTopics ?? [];
   const labels = new Map((snapshot?.profile?.topics ?? []).map(t=>[t.id,t.label]));
-  return ids.map(id=>labels.get(id) ?? id);
+  return ids.filter(id=>id!=="devices").map(id=>labels.get(id) ?? id);
 }
 function setSelectOptions(select, items, placeholder) {
   const selected=select.value;
@@ -74,7 +79,7 @@ function buildSourceDirectory() {
 function buildTaxonomyUI() {
   setSelectOptions(ui.department,taxonomy.departments,"全部业务部门");
   setSelectOptions(ui["cross-topic"],taxonomy.crossCutting,"全部跨部门专题");
-  setSelectOptions(ui.topic,snapshot.profile?.topics ?? [],"全部法规主题");
+  setSelectOptions(ui.topic,(snapshot.profile?.topics ?? []).filter(t=>t.id!=="devices"),"全部法规主题");
   const grid=document.createDocumentFragment();
   taxonomy.departments.forEach(d=>{
     const button=document.createElement("button");
@@ -107,7 +112,7 @@ function makeSearchText(record) {
   const deptNames=departmentIdsFor(record).map(id=>taxonomy.departments.find(d=>d.id===id)?.label ?? id);
   const topicNames=topicLabelsFor(record);
   return normalize([
-    record.id,record.ecli,record.caseCelex,record.caseNumber,record.parties,record.court,record.work,record.title,record.titleZh,zhTitles[record.id],referenceNumber(record.id),record.titleZh?.replace(/能源/g,"能效"),...asList(record.interpretedActs),...asList(record.citedDocuments),...asList(record.caseSubjects),
+    record.id,record.ecli,record.caseCelex,record.caseNumber,record.parties,record.court,record.work,record.title,record.titleZh,zhTitles[record.id],referenceNumber(record.id),record.titleZh?.replace(/能源/g,"能效"),/eco[- ]?design|energy labell?ing|energy efficiency/i.test(record.title??"")?"能效 能源标签 生态设计":"",...asList(record.interpretedActs),...asList(record.citedDocuments),...asList(record.caseSubjects),
     record.legalType,record.instrumentClass,record.bindingNature,record.dateType,record.sourceCategory,...asList(record.caseLawDigest),...asList(record.sourceCollections),TYPE_LABELS[record.id?.[5]],record.published,record.entry,
     ...asList(record.subjects),...asList(record.keywords),...topicNames,...deptNames
   ].join(" "));
@@ -137,7 +142,7 @@ async function loadSnapshot(manual=false) {
     for(const doc of [...data.documents,...asList(relatedData?.documents)]){
       if(!doc?.id||unique.has(doc.id))continue;
       const id=String(doc.id).toUpperCase();
-      const curated=zhTitles[id]||doc.titleZh||"";
+      const curated=doc.titleZhFull||zhTitles[id]||doc.titleZh||"";
       const enriched={...doc,id,sourceCategory:doc.sourceCategory||"EU_LEGISLATION",titleZh:curated,departments:departmentIdsFor(doc),legalTypeCode:id[5]??""};
       enriched.crossCuttingTopics=[...new Set([...asList(doc.crossCuttingTopics),...taxonomy.crossCutting.filter(t=>t.topics.some(topic=>asList(doc.businessTopics).includes(topic))).map(t=>t.id)])];
       enriched.topicNames=topicLabelsFor(enriched);
@@ -172,7 +177,17 @@ function materialStatus(record,today) {
   })[record.bindingNature]??"性质待核验";
 }
 function tag(text,className) { const el=document.createElement("span");el.className="tag "+className;el.textContent=text;return el; }
-function resultRow(record,today) {
+const KEY_TERMS = /\b(?:eco[- ]?design|energy labell?ing|energy efficiency|smartphones?|slate tablets?|cybersecurity|cyber resilience|artificial intelligence|data protection|digital services|digital markets|digital product passports?|radio equipment|harmoni[sz]ed standards?|electromagnetic compatibility|batter(?:y|ies)|waste batteries|consumer protection|product safety|market surveillance|due diligence|forced labour|right to repair|packaging|persistent organic pollutants|customs|intellectual property|accessibility|dual-use items|personal data|recycling|repair|recall|charging|USB Type-C)\b/gi;
+function highlightTitle(el,title,terms){
+  const spans=[];
+  for(const m of title.matchAll(KEY_TERMS))spans.push([m.index,m.index+m[0].length]);
+  const lower=title.toLowerCase();
+  for(const term of terms.filter(t=>/[a-z0-9]/i.test(t))){let p=0;while((p=lower.indexOf(term,p))!==-1){spans.push([p,p+term.length]);p+=term.length;}}
+  spans.sort((a,b)=>a[0]-b[0]);const merged=[];
+  for(const s of spans){const last=merged[merged.length-1];if(last&&s[0]<=last[1])last[1]=Math.max(last[1],s[1]);else merged.push(s);}
+  let pos=0;for(const [a,b] of merged){el.append(document.createTextNode(title.slice(pos,a)));const mark=document.createElement("mark");mark.textContent=title.slice(a,b);mark.style.backgroundColor="#fff0a3";mark.style.color="#172b4d";el.append(mark);pos=b;}el.append(document.createTextNode(title.slice(pos)));
+}
+function resultRow(record,today,terms=[]) {
   const row=document.createElement("tr"),code=record.id?.[5]??"",status=statusFor(record,today);
   const kindCell=row.insertCell();
   kindCell.append(tag(record.instrumentClass??TYPE_LABELS[code]??record.legalType??"其他","type-"+code));
@@ -185,7 +200,7 @@ function resultRow(record,today) {
   row.append(zh);
   const en=document.createElement("td");en.className="title-en";
   const link=document.createElement("a");link.className="act-title";link.href=record.officialUrl||("https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:"+encodeURIComponent(record.id));
-  link.target="_blank";link.rel="noopener noreferrer";link.lang="en";link.textContent=record.title||(record.sourceCategory==="CASE_LAW"?"Open official CURIA case record":"Open official EUR-Lex record");
+  link.target="_blank";link.rel="noopener noreferrer";link.lang="en";highlightTitle(link,record.title||"Open official EUR-Lex record",terms);
   const celex=document.createElement("span");celex.className="celex";
   celex.textContent=record.sourceCategory==="CASE_LAW"?(record.ecli?"ECLI "+record.ecli:record.caseNumber?"案件号 "+record.caseNumber:"CELLAR "+record.work):"CELEX "+record.id;
   en.append(link,celex); const number=referenceNumber(record.id);if(number){const n=document.createElement("small");n.className="date-type";n.textContent="编号 "+number;en.append(n);}
@@ -226,7 +241,7 @@ function render() {
   filtered.sort((a,b)=>ui.sort.value==="oldest"?(a.published??"").localeCompare(b.published??""):(b.published??"").localeCompare(a.published??"")||b.id.localeCompare(a.id));
   const lastPage=Math.max(1,Math.ceil(filtered.length/PAGE_SIZE));page=Math.min(page,lastPage);
   const start=(page-1)*PAGE_SIZE,visible=filtered.slice(start,start+PAGE_SIZE);
-  ui["result-rows"].replaceChildren(...visible.map(record=>resultRow(record,today)));
+  ui["result-rows"].replaceChildren(...visible.map(record=>resultRow(record,today,terms)));
   ui["result-table"].hidden=!visible.length;ui.empty.hidden=!!visible.length;
   ui["empty-title"].textContent="没有符合条件的资料";
   ui["empty-detail"].textContent="请尝试其他名称或编号关键词，或调整资料类别、业务部门及主题。";
