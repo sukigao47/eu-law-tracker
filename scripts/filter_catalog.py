@@ -44,6 +44,15 @@ SECTOR4 = {
     "Z": ("Complementary legislation", "uncertain"),
 }
 SECTOR5 = {
+    "AG": ("Council position / statement of reasons", "preparatory"),
+    "KG": ("Council assent", "preparatory"), "IG": ("Member State initiative", "preparatory"),
+    "XG": ("Other Council / Member State document", "preparatory"),
+    "EC": ("Proposal for codified regulations", "preparatory"),
+    "FC": ("Proposal for codified directives", "preparatory"),
+    "GC": ("Proposal for codified decisions", "preparatory"),
+    "M": ("Merger-control document", "preparatory"), "AT": ("Antitrust document", "preparatory"),
+    "AS": ("State-aid document", "preparatory"), "DMA": ("Digital Markets Act document", "preparatory"),
+    "DSA": ("Digital Services Act document", "preparatory"),
     "PC": ("Commission legislative proposal", "preparatory"),
     "DC": ("Commission communication / report / policy paper", "preparatory"),
     "SC": ("Commission staff working document / impact assessment", "preparatory"),
@@ -51,6 +60,7 @@ SECTOR5 = {
     "XC": ("Other Commission document", "preparatory"),
     "AP": ("European Parliament legislative resolution", "preparatory"),
     "IP": ("European Parliament resolution / declaration", "preparatory"),
+    "BP": ("European Parliament budget document", "informational"),
     "DP": ("European Parliament internal decision", "uncertain"),
     "XP": ("Other European Parliament document", "preparatory"),
     "AA": ("European Court of Auditors opinion", "preparatory"),
@@ -67,6 +77,9 @@ SECTOR5 = {
     "AR": ("Committee of the Regions opinion", "non-binding"),
     "IR": ("Committee of the Regions own-initiative opinion", "non-binding"),
     "XR": ("Other Committee of the Regions document", "informational"),
+    "AK": ("ECSC Consultative Committee opinion", "non-binding"),
+    "XK": ("Other ECSC Committee document", "informational"),
+    "XX": ("Other EU institutional document", "informational"),
 }
 SECTOR6 = {
     "CJ": ("Court of Justice judgment", "judicial"),
@@ -135,6 +148,8 @@ def classify_celex(identifier: str, title: str = "") -> dict:
             "6": "judicial", "C": "official-journal-information",
         }.get(sector, "other")
     title_lower = (title or "").casefold()
+    if sector == "5" and re.search(r"guideline|guidance|notice|recommendation|code of conduct|faq|frequently asked questions", title_lower):
+        effect, nature = "non-binding", "soft-law"
     if sector == "3" and descriptor in {"R", "L", "D"}:
         if "delegated" in title_lower:
             label = "Delegated " + label
