@@ -53,6 +53,10 @@ def classify_soft_law(identifier: str, title: str) -> tuple[str, str]:
             return "Staff Working Document", "non_legislative_document"
         if descriptor == "JC":
             return "Joint Communication", "non_legislative_document"
+        if descriptor == "XC":
+            if "blue guide" in lowered or "guidance" in lowered or "guideline" in lowered:
+                return "Commission Notice / Guidance", "interpretative_guidance_non_binding"
+            return "Commission Notice", "non_legislative_document"
         if descriptor == "DC":
             if "communication" in lowered:
                 return "Commission Communication", "non_legislative_document"
@@ -153,8 +157,60 @@ def hydrate(index: dict[str, dict], category: str) -> list[dict]:
             "sourceCategory": category,
             "officialUrl": official_url(identifier),
             "ojSeries": "C" if category == "OJ_C_SERIES" else None,
+            "ojCitation": {"52022XC0629(04)": "2022/C 247/01", "52022XC0629(04)R(02)": "C/2026/90070"}.get(identifier),
             "metadataCompleteness": "title_available" if title else "title_missing",
         })
+    return records
+
+
+def curated_blue_guide_records() -> list[dict]:
+    """Keep the high-value Blue Guide and its latest corrigendum discoverable."""
+    common = {
+        "work": None,
+        "titleZh": "",
+        "entry": None,
+        "inForce": None,
+        "subjects": [
+            "Free movement of goods", "Internal market - Principles",
+            "Consumer protection", "Standardisation", "Market supervision",
+            "Market approval", "Launching of a product",
+        ],
+        "keywords": [
+            "Blue Guide", "product rules", "CE marking", "conformity assessment",
+            "manufacturer", "importer", "distributor", "placing on the market",
+            "making available on the market", "harmonised standards",
+            "notified bodies", "product safety", "market surveillance",
+            "mutual recognition",
+        ],
+        "concepts": [],
+        "bindingNature": "interpretative_guidance_non_binding",
+        "sourceCategory": "EU_SOFT_LAW",
+        "officialUrl": "",
+    }
+    records = [
+        {
+            **common,
+            "id": "52022XC0629(04)",
+            "title": "Commission notice The ‘Blue Guide’ on the implementation of EU product rules 2022 (Text with EEA relevance)",
+            "published": "2022-06-29",
+            "dateType": "OJ publication date",
+            "legalType": "Commission Notice / Guidance",
+            "instrumentClass": "Commission Notice / Guidance",
+            "ojCitation": "2022/C 247/01",
+        },
+        {
+            **common,
+            "id": "52022XC0629(04)R(02)",
+            "title": "Corrigendum to Commission notice The ‘Blue Guide’ on the implementation of EU product rules 2022 (OJ C 247, 29.6.2022)",
+            "published": "2026-09-24",
+            "dateType": "OJ publication date",
+            "legalType": "Commission Notice / Guidance Corrigendum",
+            "instrumentClass": "Commission Notice / Guidance",
+            "ojCitation": "C/2026/90070",
+        },
+    ]
+    for record in records:
+        record["officialUrl"] = official_url(record["id"])
     return records
 
 
@@ -190,6 +246,25 @@ def sync_related(output: Path, profile: Path, today: date | None = None) -> dict
 
     soft_records = hydrate(soft_index, "EU_SOFT_LAW")
     oj_records = hydrate(oj_index, "OJ_C_SERIES")
+    # Keep these specifically curated, high-value interpretative materials discoverable
+    # even if a future CELLAR query omits a CELEX record or its metadata changes.
+    curated = {record["id"]: record for record in soft_records}
+    for record in curated_blue_guide_records():
+        current = curated.get(record["id"])
+        if current is None:
+            curated[record["id"]] = record
+        else:
+            for key, value in record.items():
+                if value is None:
+                    continue
+                if key in {"legalType", "instrumentClass", "bindingNature", "ojCitation"} or not current.get(key):
+                    current[key] = value
+    soft_records = list(curated.values())
+    corrigendum = next(
+        record for record in curated_blue_guide_records()
+        if record["id"] == "52022XC0629(04)R(02)"
+    )
+    oj_records.append({**corrigendum, "sourceCategory": "OJ_C_SERIES", "ojSeries": "C"})
     # The existing business-profile matcher is reused, but these remain separate
     # non-legislative material categories and are never merged into the binding-act catalogue.
     checked_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -214,6 +289,7 @@ def sync_related(output: Path, profile: Path, today: date | None = None) -> dict
             "ojCSeriesBusinessRelevant": len(oj_catalog["documents"]),
             "businessRelevantUnique": len(combined),
             "softLawCelexDescriptors": ["3A", "3H", "3G", "3C", "5DC", "5JC", "5SC", "5AA", "5TA", "5SA", "5AB", "5HB", "5XB", "5AE", "5IE", "5AC", "5AR", "5IR", "5XR"],
+            "curatedGuidanceDocuments": ["52022XC0629(04)", "52022XC0629(04)R(02)"],
             "ojCollection": "OJ-C",
         },
         "profile": soft_catalog.get("profile", {}),
