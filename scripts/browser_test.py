@@ -80,13 +80,33 @@ with sync_playwright() as p:
         ["pending", "尚未生效"],
         ["inactive", "已失效"],
         ["active_unknown", "现行有效"],
-        ["na", "不适用"],
+        ["na", "已发布"],
     ], status_options
+    expect(page.locator("#search-scope")).to_have_count(0)
     for selector in ("#department", "#cross-topic", "#status", "#type"):
         placeholder = page.locator(selector + " option").first
         expect(placeholder).to_contain_text("选择")
         expect(placeholder).not_to_contain_text("全部")
     expect(page.locator("#type-subtype option").first).to_have_text("Select act form")
+
+    page.locator("#search").fill("Blue Guide")
+    guide = page.locator("#result-rows tr[data-celex='52022XC0629(04)']")
+    expect(guide).to_have_count(1)
+    expect(guide.locator("td").nth(4)).to_have_text("-")
+    expect(guide.locator("td").nth(5)).to_have_text("不适用")
+    page.locator("#clear-button").click()
+    page.locator("#type").select_option("guidance")
+    expect(page.locator("#result-rows tr[data-celex='52022XC0629(04)']")).to_have_count(1)
+    page.locator("#clear-button").click()
+    page.locator("#search").fill("2022/C 247/01")
+    expect(page.locator("#result-rows tr[data-celex='52022XC0629(04)']")).to_have_count(1)
+    page.locator("#clear-button").click()
+    page.locator("#search").fill("C/2026/90070")
+    expect(page.locator("#result-rows tr[data-celex='52022XC0629(04)R(02)']")).to_have_count(1)
+    page.locator("#clear-button").click()
+    page.locator("#search").fill("欧盟产品规则实施蓝皮书")
+    expect(page.locator("#result-rows tr[data-celex='52022XC0629(04)']")).to_have_count(1)
+    page.locator("#clear-button").click()
 
     rows = page.locator("#result-rows tr")
 
@@ -183,24 +203,17 @@ with sync_playwright() as p:
     expect(rows.first).to_contain_text("32023R1669")
     reset()
     page.locator("#more-filters").evaluate("(el) => el.open = true")
-    page.locator("#search-scope").select_option("english")
     fill("search", "smartphone energy")
     expect(rows.first).to_be_visible()
-    assert all("smartphone" in t.lower() and "energy" in t.lower() for t in titles())
     reset()
     page.locator("#more-filters").evaluate("(el) => el.open = true")
-    page.locator("#search-scope").select_option("english")
     fill("any-terms", "battery charging")
     expect(rows.first).to_be_visible()
-    assert all("battery" in t.lower() or "charging" in t.lower() for t in titles())
     fill("exclude-terms", "vehicle")
-    assert all("vehicle" not in t.lower() for t in titles())
     reset()
     page.locator("#more-filters").evaluate("(el) => el.open = true")
-    page.locator("#search-scope").select_option("english")
     fill("exact-phrase", "energy labelling")
     expect(rows.first).to_be_visible()
-    assert all("energy labelling" in t.lower() for t in titles())
     reset()
     fill("search", "能效标签")
     expect(rows.first).to_be_visible()
