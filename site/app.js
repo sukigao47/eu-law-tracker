@@ -310,7 +310,7 @@ function buildSourceDirectory() {
 }
 function buildTaxonomyUI() {
   setSelectOptions(ui.department,[...taxonomy.departments,{id:"other",label:"其他／通用法规"}],"选择业务部门");
-  setSelectOptions(ui["cross-topic"],taxonomy.legalFields??[],"选择法律领域部门");
+  setSelectOptions(ui["cross-topic"],taxonomy.legalFields??[],"选择法律领域");
   const grid=document.createDocumentFragment();
   taxonomy.departments.forEach(d=>{
     const button=document.createElement("a");
