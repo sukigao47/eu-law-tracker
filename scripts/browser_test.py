@@ -82,6 +82,14 @@ with sync_playwright() as p:
         ["active_unknown", "现行有效"],
         ["na", "已发布"],
     ], status_options
+    page.locator("#status").select_option("inactive")
+    inactive_rows = page.locator("#result-rows tr")
+    expect(inactive_rows.first).to_be_visible()
+    assert inactive_rows.count() > 0, "已失效状态筛选应至少返回一条法规"
+    assert inactive_rows.evaluate_all(
+        "(rows) => rows.every(row => row.querySelector('.status-inactive'))"
+    ), "已失效筛选结果中包含非已失效状态记录"
+    page.locator("#clear-button").click()
     expect(page.locator("#search-scope")).to_have_count(0)
     for selector in ("#department", "#cross-topic", "#status", "#type"):
         placeholder = page.locator(selector + " option").first
