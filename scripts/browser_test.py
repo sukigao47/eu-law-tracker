@@ -93,7 +93,7 @@ with sync_playwright() as p:
     guide = page.locator("#result-rows tr[data-celex='52022XC0629(04)']")
     expect(guide).to_have_count(1)
     expect(guide.locator("td").nth(4)).to_have_text("-")
-    expect(guide.locator("td").nth(5)).to_have_text("不适用")
+    expect(guide.locator("td").nth(5)).to_have_text("已发布")
     page.locator("#clear-button").click()
     page.locator("#type").select_option("guidance")
     expect(page.locator("#result-rows tr[data-celex='52022XC0629(04)']")).to_have_count(1)
