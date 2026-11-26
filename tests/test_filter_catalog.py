@@ -60,6 +60,47 @@ class CatalogueClassificationTests(unittest.TestCase):
             self.assertEqual(document["instrumentClass"], "Regulation")
             self.assertTrue(document["officialUrl"].endswith("CELEX:32024R2847"))
 
+    def test_curated_commission_guidance_is_included_in_product_conformity_topic(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config = Path(directory) / "terminal-lifecycle.json"
+            config.write_text(json.dumps({
+                "id": "test-profile", "label": "测试目录",
+                "products": ["smartphone"],
+                "topics": [{
+                    "id": "conformity", "label": "产品合规",
+                    "acts": [], "follow": [], "documents": ["52022XC0629(04)"],
+                    "concepts": [], "labels": [], "phrases": [], "context": []
+                }]
+            }), encoding="utf-8")
+            (Path(directory) / "business-taxonomy.json").write_text(json.dumps({
+                "departments": [{"id": "hardware", "label": "硬件工程", "topics": ["conformity"]}],
+                "crossCutting": [{"id": "product-safety", "label": "产品安全", "topics": ["conformity"]}]
+            }), encoding="utf-8")
+            (Path(directory) / "titles-zh.json").write_text(
+                json.dumps({"52022XC0629(04)": "欧盟产品规则实施蓝皮书（2022）"}), encoding="utf-8"
+            )
+            source = {
+                "version": 1, "checkedAt": "2026-01-01T00:00:00+00:00",
+                "documents": [{
+                    "id": "52022XC0629(04)",
+                    "title": "Commission notice The Blue Guide on the implementation of EU product rules 2022",
+                    "published": "2022-06-29", "entry": None, "inForce": None,
+                    "subjects": [], "keywords": [], "concepts": [],
+                    "legalType": "Commission Notice / Guidance",
+                    "instrumentClass": "Commission Notice / Guidance",
+                    "bindingNature": "interpretative_guidance_non_binding",
+                    "sourceCategory": "EU_SOFT_LAW"
+                }]
+            }
+            result = filter_catalog(source, config)
+            self.assertEqual(len(result["documents"]), 1)
+            document = result["documents"][0]
+            self.assertEqual(document["titleZh"], "欧盟产品规则实施蓝皮书（2022）")
+            self.assertEqual(document["businessTopics"], ["conformity"])
+            self.assertEqual(document["departments"], ["hardware"])
+            self.assertEqual(document["instrumentClass"], "Commission Notice / Guidance")
+            self.assertEqual(document["sourceCategory"], "EU_SOFT_LAW")
+
     def test_non_legislative_celex_is_not_misclassified_as_directive(self):
         with tempfile.TemporaryDirectory() as directory:
             config = Path(directory) / "terminal-lifecycle.json"
