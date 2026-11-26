@@ -88,12 +88,18 @@ with sync_playwright() as p:
         expect(placeholder).not_to_contain_text("全部")
     expect(page.locator("#type-subtype option").first).to_have_text("Select act form")
 
+    rows = page.locator("#result-rows tr")
+
     def result_ids():
         return page.locator("#result-rows tr").evaluate_all("(rs) => rs.map(r => r.dataset.celex)")
+
+    def subtype_options():
+        return page.locator("#type-subtype option").evaluate_all("(options) => options.slice(1).map(option => [option.value, option.textContent.trim()])")
 
     for form, code in [("R", "R"), ("L", "L"), ("D", "D")]:
         page.locator("#type").select_option("legislative")
         expect(page.locator("#type-subtype")).to_be_visible()
+        assert subtype_options() == [["R", "Regulation"], ["L", "Directive"], ["D", "Decision"]]
         page.locator("#type-subtype").select_option(form)
         expect(rows.first).to_be_visible()
         ids = result_ids()
@@ -103,6 +109,11 @@ with sync_playwright() as p:
 
     page.locator("#type").select_option("delegated")
     expect(page.locator("#type-subtype")).to_be_visible()
+    assert subtype_options() == [
+        ["delegated-regulation", "Delegated Regulation"],
+        ["delegated-directive", "Delegated Directive"],
+        ["delegated-decision", "Delegated Decision"],
+    ]
     delegated_sets = []
     for form in ("delegated-regulation", "delegated-directive", "delegated-decision"):
         page.locator("#type-subtype").select_option(form)
@@ -110,6 +121,11 @@ with sync_playwright() as p:
     assert delegated_sets[0] == delegated_sets[1] == delegated_sets[2], delegated_sets
 
     page.locator("#type").select_option("implementing")
+    expect(page.locator("#type-subtype")).to_be_visible()
+    assert subtype_options() == [
+        ["implementing-regulation", "Implementing Regulation"],
+        ["implementing-decision", "Implementing Decision"],
+    ]
     implementing_sets = []
     for form in ("implementing-regulation", "implementing-decision"):
         page.locator("#type-subtype").select_option(form)
@@ -125,7 +141,6 @@ with sync_playwright() as p:
     expect(page.locator("#material")).to_have_count(0)
     expect(page.locator("#cross-topic option").first).to_have_text("选择法律领域部门")
     expect(page.locator("#cross-topic option")).to_have_count(11)
-    rows = page.locator("#result-rows tr")
     expect(rows.first).to_be_visible()
     expect(page.locator("#sort")).to_have_value("relevance")
     page.locator("#sort").select_option("newest")
