@@ -50,6 +50,7 @@ class Topic:
     label: str
     acts: set
     follow: set
+    documents: set
     concepts: set
     labels: set
     phrases: re.Pattern | None
@@ -67,6 +68,7 @@ class Topic:
             label=row["label"],
             acts=acts,
             follow={(code[5], int(code[1:5]), int(code[6:])) for code in follow},
+            documents=set(row.get("documents", [])),
             concepts=set(row.get("concepts", [])),
             labels={normalize(label) for label in row.get("labels", [])},
             phrases=phrase_pattern(row.get("phrases", [])),
@@ -77,6 +79,7 @@ class Topic:
     def matches(self, identifier, cited, concepts, labels, text, product, product_title):
         return (
             identifier in self.acts
+            or identifier in self.documents
             or not self.follow.isdisjoint(cited)
             or not self.concepts.isdisjoint(concepts)
             or not self.labels.isdisjoint(labels)
