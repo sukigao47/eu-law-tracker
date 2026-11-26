@@ -75,7 +75,7 @@ function searchRank(record,query,clauses){
  if(zh.some(title=>title===q))return 85000000;
  const title=normalize(record.title);
  if(title===q)return 80000000;
- if(title.includes(q))return 70000000+Math.min(9999,q.length*10);
+ let score=title.includes(q)?25000+Math.min(5000,q.length*10):0;
  const fields=[
   [id,1200],[number,1100],[aliases.join(" "),950],[zh.join(" "),850],
   [title,750],[normalize(asList(record.keywords).join(" ")),430],
@@ -83,13 +83,12 @@ function searchRank(record,query,clauses){
   [normalize([...topicLabelsFor(record),...departmentIdsFor(record).map(id=>taxonomy.departments.find(d=>d.id===id)?.label??id)].join(" ")),220],
   [record.searchText,100]
  ];
- let score=0;
  for(const clause of clauses){
   const documentFrequency=records.reduce((count,item)=>count+(clause.some(term=>item.searchText.includes(term))?1:0),0);
   const idf=Math.log(1+(records.length-documentFrequency+0.5)/(documentFrequency+0.5));
-  let bestWeight=0;
-  for(const [text,weight] of fields)if(clause.some(term=>text.includes(term)))bestWeight=Math.max(bestWeight,weight);
-  score+=bestWeight*idf;
+  let matchedWeight=0;
+  for(const [text,weight] of fields)if(clause.some(term=>text.includes(term)))matchedWeight+=weight;
+  score+=matchedWeight*idf;
  }
  return score;
 }
