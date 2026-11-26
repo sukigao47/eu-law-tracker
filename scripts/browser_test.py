@@ -61,7 +61,18 @@ with sync_playwright() as p:
     expect(page.locator("label:has(#type) > span")).to_have_text("效力层级")
     expect(page.locator("label:has(#status) > span")).to_have_text("现行状态")
     expect(page.locator("#department option").first).to_have_text("选择业务部门")
-    expect(page.locator("#type option").first).to_have_text("选择效力层级")
+    expect(page.locator("#type option").first).to_have_text("Select legal act level")
+    expect(page.locator("#type-subtype")).to_be_hidden()
+    expect(page.locator("#type-subtype")).to_be_disabled()
+    type_options = page.locator("#type option").evaluate_all("(options) => options.map(option => [option.value, option.textContent.trim()])")
+    assert type_options == [
+        ["", "Select legal act level"],
+        ["legislative", "Legislative Acts"],
+        ["delegated", "Delegated Acts"],
+        ["implementing", "Implementing Acts"],
+        ["guidance", "Guidance"],
+        ["standards", "Harmonised Standards / Common Specifications"],
+    ], type_options
     expect(page.locator("#status option").first).to_have_text("选择现行状态")
     status_options = page.locator("#status option").evaluate_all("(options) => options.map(option => [option.value, option.textContent.trim()])")
     assert status_options == [
@@ -71,10 +82,45 @@ with sync_playwright() as p:
         ["active_unknown", "现行有效"],
         ["na", "不适用"],
     ], status_options
-    for selector in ("#department", "#cross-topic", "#type", "#status"):
+    for selector in ("#department", "#cross-topic", "#status", "#type"):
         placeholder = page.locator(selector + " option").first
-        expect(placeholder).to_contain_text("选择")
+        expect(placeholder).to_contain_text("选择" if selector != "#type" else "Select")
         expect(placeholder).not_to_contain_text("全部")
+    expect(page.locator("#type-subtype option").first).to_have_text("Select act form")
+
+    def result_ids():
+        return page.locator("#result-rows tr").evaluate_all("(rs) => rs.map(r => r.dataset.celex)")
+
+    for form, code in [("R", "R"), ("L", "L"), ("D", "D")]:
+        page.locator("#type").select_option("legislative")
+        expect(page.locator("#type-subtype")).to_be_visible()
+        page.locator("#type-subtype").select_option(form)
+        expect(rows.first).to_be_visible()
+        ids = result_ids()
+        assert ids and all(len(identifier) > 5 and identifier[5] == code for identifier in ids), (form, ids)
+        page.locator("#clear-button").click()
+        expect(page.locator("#type-subtype")).to_be_hidden()
+
+    page.locator("#type").select_option("delegated")
+    expect(page.locator("#type-subtype")).to_be_visible()
+    delegated_sets = []
+    for form in ("delegated-regulation", "delegated-directive", "delegated-decision"):
+        page.locator("#type-subtype").select_option(form)
+        delegated_sets.append(result_ids())
+    assert delegated_sets[0] == delegated_sets[1] == delegated_sets[2], delegated_sets
+
+    page.locator("#type").select_option("implementing")
+    implementing_sets = []
+    for form in ("implementing-regulation", "implementing-decision"):
+        page.locator("#type-subtype").select_option(form)
+        implementing_sets.append(result_ids())
+    assert implementing_sets[0] == implementing_sets[1], implementing_sets
+
+    page.locator("#type").select_option("guidance")
+    expect(page.locator("#type-subtype")).to_be_hidden()
+    page.locator("#type").select_option("standards")
+    expect(page.locator("#type-subtype")).to_be_hidden()
+    page.locator("#clear-button").click()
     expect(page.locator("#topic")).to_have_count(0)
     expect(page.locator("#material")).to_have_count(0)
     expect(page.locator("#cross-topic option").first).to_have_text("选择法律领域部门")
