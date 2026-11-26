@@ -13,7 +13,9 @@ const LAW_ALIASES = {
 "32023R1670":["智能手机生态设计","生态设计","Ecodesign"],
 "32014L0053":["无线电设备指令","RED","Radio Equipment Directive"],
 "32011L0065":["RoHS","有害物质限制指令"],
-"32006R1907":["REACH","化学品注册评估授权和限制法规"]
+"32006R1907":["REACH","化学品注册评估授权和限制法规"],
+"52022XC0629(04)":["欧盟蓝皮书","蓝皮书","欧盟产品规则实施蓝皮书","Blue Guide","2022 Blue Guide","2022/C 247/01"],
+"52022XC0629(04)R(02)":["欧盟蓝皮书勘误","蓝皮书勘误","Blue Guide corrigendum","C/2026/90070"]
 };
 function aliasesFor(record){return LAW_ALIASES[record.id]||[];}
 function searchRank(record,query){
@@ -26,7 +28,7 @@ function searchRank(record,query){
 }
 
 const TYPE_LABELS = { R: "条例 / Regulation", L: "指令 / Directive", D: "决定 / Decision" };
-const STATUS_LABELS = { active: "现行有效且已实施（适用）", not_applied: "现行有效尚未实施（适用）", partial: "现行有效·分阶段适用", pending: "尚未生效", inactive: "已失效", active_unknown: "现行有效", unknown: "其他状态", na: "不适用" };
+const STATUS_LABELS = { active: "现行有效且已实施（适用）", not_applied: "现行有效尚未实施（适用）", partial: "现行有效·分阶段适用", pending: "尚未生效", inactive: "已失效", active_unknown: "现行有效", unknown: "其他状态", na: "已发布" };
 const SUBJECT_LABELS = new Map(Object.entries({
   agriculture:"农业","common agricultural policy":"共同农业政策","common commercial policy":"共同商业政策",
   "common foreign and security policy":"共同外交与安全政策",competition:"竞争", "consumer protection":"消费者保护",
@@ -281,7 +283,7 @@ function matchesType(record,value){
  if(!value)return true;
  const title=String(record.title??"").toLowerCase(), kind=String(record.instrumentClass??"").toLowerCase();
  if(value==="delegated"||value==="implementing")return kind.includes(value)||title.startsWith("commission "+value);
- if(value==="guidance")return record.sourceCategory!=="EU_LEGISLATION"&&/guidance|guidelines|guideline|interpretative notice/.test(title);
+ if(value==="guidance")return record.sourceCategory!=="EU_LEGISLATION"&&(record.bindingNature==="interpretative_guidance_non_binding"||/guidance|guidelines|guideline|interpretative notice|blue guide/.test(title)||/guidance/i.test(String(record.instrumentClass??record.legalType??"")));
  if(value==="standards")return /harmonised standard|harmonized standard|common specification/.test(title);
  return record.sourceCategory==="EU_LEGISLATION"&&record.legalTypeCode===value;
 }
@@ -290,7 +292,7 @@ function makeSearchText(record) {
   const topicNames=topicLabelsFor(record);
   return normalize([
     ...aliasesFor(record),record.id,record.ecli,record.caseCelex,record.caseNumber,record.parties,record.court,record.work,record.title,record.titleZh,record.titleZhFull,zhTitles[record.id],referenceNumber(record.id),record.titleZh?.replace(/能源/g,"能效"),/eco[- ]?design|energy labell?ing|energy efficiency/i.test(record.title??"")?"能效 能源标签 生态设计":"",...asList(record.interpretedActs),...asList(record.citedDocuments),...asList(record.caseSubjects),
-    record.legalType,record.instrumentClass,record.bindingNature,record.dateType,record.sourceCategory,...asList(record.caseLawDigest),...asList(record.sourceCollections),TYPE_LABELS[record.id?.[5]],record.published,record.entry,
+    record.legalType,record.instrumentClass,record.bindingNature,record.dateType,record.sourceCategory,record.ojCitation,record.officialCitation,...asList(record.caseLawDigest),...asList(record.sourceCollections),TYPE_LABELS[record.id?.[5]],record.published,record.entry,
     ...asList(record.subjects),...asList(record.keywords),...topicNames,...deptNames
   ].join(" "));
 }
@@ -376,14 +378,13 @@ function resultRow(record,today,terms=[]) {
   celex.textContent=record.id?"CELEX "+record.id:"CELEX编号待核验";
   en.append(link,celex);
   row.append(en);
-  row.insertCell().textContent=record.entry&&record.entry>="1952-01-01"?record.entry:"待核验";
+  row.insertCell().textContent=record.entry&&record.entry>="1952-01-01"?record.entry:"-";
   row.insertCell().append(tag(record.sourceCategory==="EU_LEGISLATION"?STATUS_LABELS[status]:"不适用","status-"+(record.sourceCategory==="EU_LEGISLATION"?status:"unknown")));
   return row;
 }
 function advancedMatch(record,terms) {
   const officialEn=normalize(record.title),en=normalize([record.title,...aliasesFor(record).filter(x=>/[a-z]/i.test(x)&&!/[\u3400-\u9fff]/.test(x))].join(" ")),zh=normalize([record.titleZh,record.titleZhFull,zhTitles[record.id],...aliasesFor(record).filter(x=>/[\u3400-\u9fff]/.test(x))].join(" "));
-  const scope=ui["search-scope"].value;
-  const hay=scope==="english"?en:scope==="chinese"?zh:scope==="title"?en+" "+zh:record.searchText;
+  const hay=record.searchText;
   const words=id=>normalize(ui[id].value).split(" ").filter(Boolean);
   const any=words("any-terms"),excluded=words("exclude-terms"),phrase=normalize(ui["exact-phrase"].value);
   const number=normalize(ui["act-number"].value).match(/\d{4}\s*\/\s*\d+/)?.[0].replace(/\s/g,"")||normalize(ui["act-number"].value);
