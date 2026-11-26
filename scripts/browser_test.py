@@ -84,7 +84,7 @@ with sync_playwright() as p:
     ], status_options
     for selector in ("#department", "#cross-topic", "#status", "#type"):
         placeholder = page.locator(selector + " option").first
-        expect(placeholder).to_contain_text("选择" if selector != "#type" else "Select")
+        expect(placeholder).to_contain_text("选择")
         expect(placeholder).not_to_contain_text("全部")
     expect(page.locator("#type-subtype option").first).to_have_text("Select act form")
 
