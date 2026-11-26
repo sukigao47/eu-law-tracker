@@ -379,7 +379,7 @@ function resultRow(record,today,terms=[]) {
   en.append(link,celex);
   row.append(en);
   row.insertCell().textContent=record.entry&&record.entry>="1952-01-01"?record.entry:"-";
-  row.insertCell().append(tag(record.sourceCategory==="EU_LEGISLATION"?STATUS_LABELS[status]:"不适用","status-"+(record.sourceCategory==="EU_LEGISLATION"?status:"unknown")));
+  row.insertCell().append(tag(record.sourceCategory==="EU_LEGISLATION"?STATUS_LABELS[status]:"已发布","status-"+(record.sourceCategory==="EU_LEGISLATION"?status:"unknown")));
   return row;
 }
 function advancedMatch(record,terms) {
