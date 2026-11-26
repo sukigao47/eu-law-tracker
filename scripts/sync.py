@@ -62,24 +62,60 @@ def select(query):
             time.sleep(3 ** (attempt + 1))
 
 
-def in_force_index():
-    cursor = ""
+def legal_status_index(value, description):
+    """Index all CELEX sector-3 acts with an explicit in-force boolean."""
+    if value not in {"true", "false"}:
+        raise ValueError("Legal in-force index only accepts true or false")
+    cursor_id = ""
+    cursor_work = ""
     found = {}
     while True:
+        cursor_filter = (
+            f'FILTER(STR(?id) > "{cursor_id}" || '
+            f'(STR(?id) = "{cursor_id}" && STR(?work) > "{cursor_work}"))'
+            if cursor_id else ""
+        )
         rows = select(f"""
           SELECT DISTINCT ?id ?work WHERE {{
-            ?work cdm:resource_legal_in-force true ;
+            ?work cdm:resource_legal_in-force {value} ;
                   cdm:resource_legal_id_celex ?id .
             FILTER(REGEX(STR(?id), "{CELEX}"))
-            FILTER(STR(?id) > "{cursor}")
+            {cursor_filter}
           }} ORDER BY STR(?id) STR(?work) LIMIT {PAGE_SIZE}
         """)
         for row in rows:
             found.setdefault(row["id"], row["work"])
-        print(f"Current acts identified: {len(found):,}", flush=True)
+        print(f"{description}: {len(found):,}", flush=True)
         if len(rows) < PAGE_SIZE:
             return found
-        cursor = rows[-1]["id"]
+        cursor_id, cursor_work = rows[-1]["id"], rows[-1]["work"]
+
+
+def in_force_index():
+    return legal_status_index("true", "Current acts identified")
+
+
+def not_in_force_index():
+    return legal_status_index("false", "Non-current acts identified")
+
+
+def wanted_index(current, non_current, recent):
+    """Combine current, non-current and recently published legislation."""
+    wanted = dict(non_current)
+    wanted.update(current)
+    wanted.update({identifier: row["work"] for identifier, row in recent.items()})
+    return wanted
+
+
+def apply_indexed_in_force(identifier, record, current, non_current):
+    """Preserve the official in-force flag instead of erasing repealed status."""
+    if identifier in current:
+        record["inForce"] = True
+    elif identifier in non_current:
+        record["inForce"] = False
+    elif record.get("inForce") is True:
+        record["inForce"] = None
+    return record
 
 
 def recent_index(since, through):
@@ -235,6 +271,7 @@ def sync(output, previous_path, cache, profile, rebuild, recent_only):
         raise ValueError("Cellar found no legislation across the recent publication window")
 
     current = {} if recent_only else in_force_index()
+    non_current = {} if recent_only else not_in_force_index()
     previous = None if rebuild or recent_only else read_previous([cache, previous_path, output])
     before = {row["id"]: row for row in previous["documents"]} if previous else {}
     if not recent_only:
@@ -242,18 +279,19 @@ def sync(output, previous_path, cache, profile, rebuild, recent_only):
         if len(current) < max(1000, old_current * 0.9):
             raise ValueError("Cellar returned an unexpectedly small current catalogue")
 
-    wanted = dict(current)
-    wanted.update({identifier: row["work"] for identifier, row in recent.items()})
+    wanted = wanted_index(current, non_current, recent)
     refreshed_since = (today - timedelta(days=13)).isoformat()
     to_fetch = []
     kept = {}
     for identifier, work in wanted.items():
         previous_row = before.get(identifier)
         recent_date = recent.get(identifier, {}).get("published", "")
+        expected_in_force = (True if identifier in current else
+                             False if identifier in non_current else None)
         if (previous_row is None or previous_row["work"] != work.rsplit("/", 1)[1]
                 or not previous_row["title"] or recent_date >= refreshed_since
                 or (identifier in recent and not (previous_row["subjects"] or previous_row["keywords"]))
-                or (previous_row["inForce"] is True) != (identifier in current)):
+                or previous_row.get("inForce") is not expected_in_force):
             to_fetch.append((identifier, work))
         else:
             kept[identifier] = previous_row
@@ -285,10 +323,7 @@ def sync(output, previous_path, cache, profile, rebuild, recent_only):
 
     for identifier, record in kept.items():
         if not recent_only:
-            if identifier in current:
-                record["inForce"] = True
-            elif record["inForce"] is True:
-                record["inForce"] = None
+            apply_indexed_in_force(identifier, record, current, non_current)
         if identifier in recent:
             record["published"] = recent[identifier]["published"]
 
