@@ -19,7 +19,7 @@ PAGE_SIZE = 1000
 BATCH_SIZE = 80
 SOFT_LAW_DAYS = 5 * 366
 OJ_C_DAYS = 180
-SOFT_LAW_CELEX = re.compile(r"^(3[0-9]{4}[AHGC][0-9]{4,6}(\\([0-9]{1,2}\\))?(R\\([0-9]{2}\\))?|5[0-9]{4}(DC|JC|SC|XC|AA|TA|SA|AB|HB|XB|AE|IE|AC|AR|IR|XR)[0-9]{1,6}(\\([0-9]{1,2}\\))?(R\\([0-9]{2}\\))?)$")
+SOFT_LAW_CELEX = re.compile(r"^(3[0-9]{4}[AHGC][0-9]{4,6}(\([0-9]{1,2}\))?(R\([0-9]{2}\))?|5[0-9]{4}(DC|JC|SC|XC|AA|TA|SA|AB|HB|XB|AE|IE|AC|AR|IR|XR)[0-9]{1,6}(\([0-9]{1,2}\))?(R\([0-9]{2}\))?)$")
 
 
 def official_url(identifier: str) -> str:
@@ -163,6 +163,57 @@ def hydrate(index: dict[str, dict], category: str) -> list[dict]:
     return records
 
 
+def curated_blue_guide_records() -> list[dict]:
+    """Keep the high-value Blue Guide and its latest corrigendum discoverable."""
+    common = {
+        "work": None,
+        "titleZh": "",
+        "entry": None,
+        "inForce": None,
+        "subjects": [
+            "Free movement of goods", "Internal market - Principles",
+            "Consumer protection", "Standardisation", "Market supervision",
+            "Market approval", "Launching of a product",
+        ],
+        "keywords": [
+            "Blue Guide", "product rules", "CE marking", "conformity assessment",
+            "manufacturer", "importer", "distributor", "placing on the market",
+            "making available on the market", "harmonised standards",
+            "notified bodies", "product safety", "market surveillance",
+            "mutual recognition",
+        ],
+        "concepts": [],
+        "bindingNature": "interpretative_guidance_non_binding",
+        "sourceCategory": "EU_SOFT_LAW",
+        "officialUrl": "",
+    }
+    records = [
+        {
+            **common,
+            "id": "52022XC0629(04)",
+            "title": "Commission notice The ‘Blue Guide’ on the implementation of EU product rules 2022 (Text with EEA relevance)",
+            "published": "2022-06-29",
+            "dateType": "OJ publication date",
+            "legalType": "Commission Notice / Guidance",
+            "instrumentClass": "Commission Notice / Guidance",
+            "ojCitation": "2022/C 247/01",
+        },
+        {
+            **common,
+            "id": "52022XC0629(04)R(02)",
+            "title": "Corrigendum to Commission notice The ‘Blue Guide’ on the implementation of EU product rules 2022 (OJ C 247, 29.6.2022)",
+            "published": "2026-09-24",
+            "dateType": "OJ publication date",
+            "legalType": "Commission Notice / Guidance Corrigendum",
+            "instrumentClass": "Commission Notice / Guidance",
+            "ojCitation": "C/2026/90070",
+        },
+    ]
+    for record in records:
+        record["officialUrl"] = official_url(record["id"])
+    return records
+
+
 def deduplicate_materials(*collections: list[dict]) -> list[dict]:
     """Merge records with the same CELEX while retaining every collection tag."""
     merged: dict[str, dict] = {}
@@ -195,6 +246,23 @@ def sync_related(output: Path, profile: Path, today: date | None = None) -> dict
 
     soft_records = hydrate(soft_index, "EU_SOFT_LAW")
     oj_records = hydrate(oj_index, "OJ_C_SERIES")
+    # Keep these specifically curated, high-value interpretative materials discoverable
+    # even if a future CELLAR query omits a CELEX record or its metadata changes.
+    curated = {record["id"]: record for record in soft_records}
+    for record in curated_blue_guide_records():
+        current = curated.get(record["id"])
+        if current is None:
+            curated[record["id"]] = record
+        else:
+            for key, value in record.items():
+                if not current.get(key) and value is not None:
+                    current[key] = value
+    soft_records = list(curated.values())
+    corrigendum = next(
+        record for record in curated_blue_guide_records()
+        if record["id"] == "52022XC0629(04)R(02)"
+    )
+    oj_records.append({**corrigendum, "sourceCategory": "OJ_C_SERIES", "ojSeries": "C"})
     # The existing business-profile matcher is reused, but these remain separate
     # non-legislative material categories and are never merged into the binding-act catalogue.
     checked_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
