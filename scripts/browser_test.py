@@ -92,7 +92,6 @@ with sync_playwright() as p:
         "(els) => els.map(el => Math.round(el.getBoundingClientRect().height))"
     )
     assert control_heights and all(abs(height - 42) <= 1 for height in control_heights), control_heights
-    reset = lambda: page.locator("#clear-button").click()
     page.locator("#search").fill("Blue Guide")
     guide = page.locator("#result-rows tr[data-celex='52022XC0629(04)']")
     expect(guide).to_have_count(1)
