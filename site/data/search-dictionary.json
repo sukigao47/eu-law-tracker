@@ -1,0 +1,365 @@
+{
+  "version": 1,
+  "description": "Bilingual EU legal and product-compliance terminology groups used to expand search queries. Synonyms improve discovery only; they do not change legal classification or imply that documents are legally equivalent.",
+  "groups": [
+    {
+      "id": "artificial-intelligence",
+      "terms": [
+        "人工智能",
+        "人工智能法案",
+        "人工智能条例",
+        "AI",
+        "AI Act",
+        "Artificial Intelligence",
+        "Artificial Intelligence Act",
+        "AI systems"
+      ]
+    },
+    {
+      "id": "cyber-resilience",
+      "terms": [
+        "网络安全",
+        "网络韧性",
+        "网络弹性",
+        "网络复原力",
+        "网络安全韧性",
+        "cybersecurity",
+        "cyber security",
+        "cyber resilience",
+        "cyber-resilience",
+        "network security",
+        "Cyber Resilience Act",
+        "CRA"
+      ]
+    },
+    {
+      "id": "data-protection",
+      "terms": [
+        "个人数据",
+        "数据保护",
+        "个人信息保护",
+        "GDPR",
+        "General Data Protection Regulation",
+        "data protection",
+        "personal data",
+        "privacy"
+      ]
+    },
+    {
+      "id": "battery",
+      "terms": [
+        "电池",
+        "蓄电池",
+        "电池法规",
+        "电池法案",
+        "电池和废电池",
+        "battery",
+        "batteries",
+        "Batteries Regulation",
+        "Battery Regulation",
+        "waste batteries"
+      ]
+    },
+    {
+      "id": "battery-removability",
+      "terms": [
+        "电池可拆卸",
+        "电池可更换",
+        "电池拆卸",
+        "电池更换",
+        "可拆卸电池",
+        "可更换电池",
+        "电池可拆卸性",
+        "battery removability",
+        "battery replaceability",
+        "removability",
+        "replaceability",
+        "removable battery",
+        "replaceable battery",
+        "battery removal",
+        "battery replacement",
+        "拆卸",
+        "更换"
+      ]
+    },
+    {
+      "id": "repairability",
+      "terms": [
+        "维修权",
+        "修理权",
+        "维修",
+        "修理",
+        "可维修性",
+        "可修复性",
+        "维修服务",
+        "备件",
+        "零部件",
+        "right to repair",
+        "repairability",
+        "reparability",
+        "repair",
+        "repair services",
+        "spare parts",
+        "replacement parts"
+      ]
+    },
+    {
+      "id": "ecodesign",
+      "terms": [
+        "生态设计",
+        "生态设计要求",
+        "可持续产品生态设计",
+        "Ecodesign",
+        "eco-design",
+        "ecodesign",
+        "Ecodesign for Sustainable Products Regulation",
+        "ESPR"
+      ]
+    },
+    {
+      "id": "sustainable-products",
+      "terms": [
+        "可持续产品",
+        "可持续产品法规",
+        "可持续产品生态设计条例",
+        "sustainable products",
+        "sustainable product policy",
+        "sustainable product regulation"
+      ]
+    },
+    {
+      "id": "energy-labelling",
+      "terms": [
+        "能效标签",
+        "能源标签",
+        "能效标识",
+        "能源效率标签",
+        "energy labelling",
+        "energy labeling",
+        "energy label",
+        "energy efficiency label"
+      ]
+    },
+    {
+      "id": "digital-product-passport",
+      "terms": [
+        "数字产品护照",
+        "数字产品通行证",
+        "DPP",
+        "digital product passport",
+        "digital product passports"
+      ]
+    },
+    {
+      "id": "green-claims",
+      "terms": [
+        "绿色声明",
+        "环境声明",
+        "绿色宣称",
+        "环保宣称",
+        "漂绿",
+        "green claims",
+        "environmental claims",
+        "environmental marketing",
+        "greenwashing"
+      ]
+    },
+    {
+      "id": "product-safety",
+      "terms": [
+        "产品安全",
+        "通用产品安全",
+        "产品安全法规",
+        "product safety",
+        "general product safety",
+        "General Product Safety Regulation",
+        "GPSR"
+      ]
+    },
+    {
+      "id": "radio-equipment",
+      "terms": [
+        "无线电设备",
+        "无线电设备指令",
+        "射频设备",
+        "radio equipment",
+        "Radio Equipment Directive",
+        "RED"
+      ]
+    },
+    {
+      "id": "chemicals-rohs-reach",
+      "terms": [
+        "有害物质限制",
+        "有害物质",
+        "化学品注册评估授权和限制",
+        "RoHS",
+        "REACH",
+        "restriction of hazardous substances",
+        "registration evaluation authorisation restriction",
+        "chemical substances"
+      ]
+    },
+    {
+      "id": "waste-recycling",
+      "terms": [
+        "废弃物",
+        "废物",
+        "回收",
+        "循环利用",
+        "再循环",
+        "废弃电子电气设备",
+        "WEEE",
+        "waste",
+        "waste management",
+        "recycling",
+        "recyclability",
+        "circular economy",
+        "waste electrical and electronic equipment"
+      ]
+    },
+    {
+      "id": "packaging",
+      "terms": [
+        "包装",
+        "包装废弃物",
+        "包装材料",
+        "packaging",
+        "packaging waste",
+        "packaging and packaging waste"
+      ]
+    },
+    {
+      "id": "due-diligence",
+      "terms": [
+        "尽职调查",
+        "供应链尽职调查",
+        "企业可持续尽职调查",
+        "供应链责任",
+        "due diligence",
+        "supply chain due diligence",
+        "corporate sustainability due diligence",
+        "responsible sourcing"
+      ]
+    },
+    {
+      "id": "forced-labour",
+      "terms": [
+        "强迫劳动",
+        "强制劳动",
+        "强迫劳工",
+        "forced labour",
+        "forced labor",
+        "forced labour regulation"
+      ]
+    },
+    {
+      "id": "market-surveillance",
+      "terms": [
+        "市场监管",
+        "市场监督",
+        "市场监督管理",
+        "market surveillance",
+        "market supervision",
+        "market surveillance regulation"
+      ]
+    },
+    {
+      "id": "conformity-assessment",
+      "terms": [
+        "合格评定",
+        "符合性评估",
+        "符合性评价",
+        "CE认证",
+        "conformity assessment",
+        "CE marking",
+        "CE marking requirements"
+      ]
+    },
+    {
+      "id": "consumer-rights",
+      "terms": [
+        "消费者权益",
+        "消费者保护",
+        "消费者权利",
+        "不公平商业行为",
+        "consumer rights",
+        "consumer protection",
+        "unfair commercial practices"
+      ]
+    },
+    {
+      "id": "digital-services",
+      "terms": [
+        "数字服务法案",
+        "数字服务",
+        "DSA",
+        "Digital Services Act",
+        "digital services",
+        "online platforms"
+      ]
+    },
+    {
+      "id": "digital-markets",
+      "terms": [
+        "数字市场法案",
+        "数字市场",
+        "DMA",
+        "Digital Markets Act",
+        "digital markets",
+        "gatekeepers"
+      ]
+    },
+    {
+      "id": "data-act",
+      "terms": [
+        "数据法案",
+        "数据共享",
+        "数据访问",
+        "Data Act",
+        "data access",
+        "data sharing"
+      ]
+    },
+    {
+      "id": "customs-trade",
+      "terms": [
+        "海关",
+        "关税",
+        "进口",
+        "出口",
+        "原产地",
+        "customs",
+        "customs duties",
+        "import",
+        "export",
+        "rules of origin",
+        "tariff"
+      ]
+    },
+    {
+      "id": "charging-usb-c",
+      "terms": [
+        "充电接口",
+        "统一充电接口",
+        "USB Type-C",
+        "USB-C",
+        "common charger",
+        "common charging port",
+        "charging port"
+      ]
+    },
+    {
+      "id": "design-rights",
+      "terms": [
+        "外观设计",
+        "外观设计权",
+        "欧盟外观设计",
+        "design rights",
+        "registered EU design",
+        "EU design",
+        "industrial design"
+      ]
+    }
+  ]
+}
