@@ -17,7 +17,29 @@ with sync_playwright() as p:
     expect(page.locator("#latest-list .latest-item")).to_have_count(2)
     latest_dates=page.locator("#latest-list .latest-item").evaluate_all("(rs) => rs.map(r => r.dataset.published)")
     assert latest_dates == sorted(latest_dates, reverse=True)
-    expect(page.locator(".home-links a")).to_have_count(6)
+    source_links=page.locator(".home-links a")
+    expect(source_links).to_have_count(15)
+    source_hrefs=source_links.evaluate_all("(links) => links.map(a => a.href)")
+    assert len(source_hrefs) == len(set(source_hrefs)), "Duplicate quick-link URLs found"
+    expected_sources = {
+        "https://eur-lex.europa.eu/oj/direct-access.html?locale=en",
+        "https://eur-lex.europa.eu/",
+        "https://curia.europa.eu/en/content/juris/juris.htm",
+        "https://op.europa.eu/en",
+        "https://ai-act-service-desk.ec.europa.eu/en",
+        "https://energy-efficient-products.ec.europa.eu/product-list_en",
+        "https://eprel.ec.europa.eu/screen/home",
+        "https://commission.europa.eu/strategy-and-policy/policies/consumers/consumer-protection-policy_en",
+        "https://www.edpb.europa.eu/documents_en?type%5Bguidance%5D=guidance",
+        "https://ec.europa.eu/safety-gate/screen/home?lang=en",
+        "https://www.enisa.europa.eu/",
+        "https://have-your-say.ec.europa.eu/",
+        "https://commission.europa.eu/law/tracking-law-making_en",
+        "https://oeil.europarl.europa.eu/oeil/en/find-out-more",
+        "https://www.consilium.europa.eu/en/press/",
+    }
+    assert set(source_hrefs) == expected_sources, "Official source links missing or unexpected"
+    expect(page.locator('[data-source-id="have-your-say"]')).to_have_count(1)
     expect(page.locator("#nav-search")).to_have_count(0)
     expect(page.locator('.home-links a[href="https://eur-lex.europa.eu/oj/direct-access.html?locale=en"]')).to_have_count(1)
     expect(page.locator("#topics-title")).to_have_text("最新专题")

@@ -33,7 +33,39 @@
         <span class="sync-note" id="sync-note">数据来源 EUR-Lex / Cellar</span>
       </div>
     </section>
-    <div id="home-view" hidden><section class="home-panel" aria-labelledby="latest-title"><div class="section-head"><div><h2 id="latest-title">最新动态</h2><p>本库已收录的最新发布法律文件 · 按官方公报发布日期</p></div><a href="#laws" data-view="laws">查看更多 →</a></div><p id="home-update" class="home-meta" role="status">正在读取法规数据</p><div id="latest-list"></div></section><section class="home-panel" aria-labelledby="links-title"><div class="section-head"><div><h2 id="links-title">网址速递</h2><p>欧盟官方立法及监管动态入口</p></div></div><div class="home-links"><a href="https://eur-lex.europa.eu/oj/direct-access.html?locale=en" target="_blank" rel="noopener">欧盟官方公报 <small>正式发布法律文件</small></a><a href="https://eur-lex.europa.eu/" target="_blank" rel="noopener">EUR-Lex <small>法规原文与修订记录</small></a><a href="https://commission.europa.eu/law/tracking-law-making_en" target="_blank" rel="noopener">欧盟委员会立法跟踪 <small>立法及授权、实施法案进程</small></a><a href="https://commission.europa.eu/law/contribute-law-making_en" target="_blank" rel="noopener">公众咨询与意见反馈 <small>拟议立法及征求意见</small></a><a href="https://oeil.europarl.europa.eu/oeil/en/find-out-more" target="_blank" rel="noopener">欧洲议会立法观察站 <small>立法程序及进展</small></a><a href="https://www.consilium.europa.eu/en/press/" target="_blank" rel="noopener">欧盟理事会新闻中心 <small>政策与立法动态</small></a></div></section><section class="home-panel" aria-labelledby="topics-title"><h2 id="topics-title">最新专题</h2><div class="topic-placeholder"></div></section></div><section class="department-section" id="departments" hidden aria-labelledby="department-title">
+    <div id="home-view" hidden><section class="home-panel" aria-labelledby="latest-title"><div class="section-head"><div><h2 id="latest-title">最新动态</h2><p>本库已收录的最新发布法律文件 · 按官方公报发布日期</p></div><a href="#laws" data-view="laws">查看更多 →</a></div><p id="home-update" class="home-meta" role="status">正在读取法规数据</p><div id="latest-list"></div></section><section class="home-panel" aria-labelledby="links-title">
+        <div class="section-head"><div><h2 id="links-title">网址速递</h2><p>官方外部入口，供法规原文、判例、专项合规资料及立法动态核验；列入此处不代表本平台已自动接入该数据源。</p></div></div>
+        <div class="source-link-group">
+          <h3>核心官方法规库</h3>
+          <div class="home-links">
+            <a data-source-id="eurlex-oj" href="https://eur-lex.europa.eu/oj/direct-access.html?locale=en" target="_blank" rel="noopener noreferrer">欧盟官方公报（OJ） <small>正式发布的欧盟法律文件；电子版为现行官方版本</small></a>
+            <a data-source-id="eurlex" href="https://eur-lex.europa.eu/" target="_blank" rel="noopener noreferrer">EUR-Lex <small>条约、法规、指令、决定、合并文本及 CELEX 检索</small></a>
+            <a data-source-id="curia" href="https://curia.europa.eu/en/content/juris/juris.htm" target="_blank" rel="noopener noreferrer">Curia 欧盟法院判例库 <small>欧盟法院及普通法院判决、命令与案件资料</small></a>
+            <a data-source-id="publications-office" href="https://op.europa.eu/en" target="_blank" rel="noopener noreferrer">欧盟出版局（Publications Office） <small>欧盟法律、出版物、数据及官方信息入口</small></a>
+          </div>
+        </div>
+        <div class="source-link-group">
+          <h3>分领域专项法规与合规平台</h3>
+          <div class="home-links">
+            <a data-source-id="ai-act-service-desk" href="https://ai-act-service-desk.ec.europa.eu/en" target="_blank" rel="noopener noreferrer">AI Act Service Desk <small>人工智能法案分章浏览、合规检查及官方问答</small></a>
+            <a data-source-id="dg-ener" href="https://energy-efficient-products.ec.europa.eu/product-list_en" target="_blank" rel="noopener noreferrer">欧委会能源总司：生态设计与能效标签 <small>产品范围、Ecodesign 与 Energy Labelling 要求</small></a>
+            <a data-source-id="eprel" href="https://eprel.ec.europa.eu/screen/home" target="_blank" rel="noopener noreferrer">EPREL 能效产品注册库 <small>能效标签产品型号、参数及产品信息查询</small></a>
+            <a data-source-id="dg-just" href="https://commission.europa.eu/strategy-and-policy/policies/consumers/consumer-protection-policy_en" target="_blank" rel="noopener noreferrer">欧委会消费者保护专题（DG JUST） <small>消费者保护政策、商业行为及消费者权益资料</small></a>
+            <a data-source-id="edpb" href="https://www.edpb.europa.eu/documents_en?type%5Bguidance%5D=guidance" target="_blank" rel="noopener noreferrer">EDPB 欧洲数据保护委员会 <small>GDPR 指南、意见、建议及其他数据保护文件</small></a>
+            <a data-source-id="safety-gate" href="https://ec.europa.eu/safety-gate/screen/home?lang=en" target="_blank" rel="noopener noreferrer">Safety Gate 产品安全预警系统 <small>非食品消费品安全预警、风险及召回信息</small></a>
+            <a data-source-id="enisa" href="https://www.enisa.europa.eu/" target="_blank" rel="noopener noreferrer">ENISA 欧盟网络安全局 <small>网络安全认证、威胁态势及技术指引</small></a>
+          </div>
+        </div>
+        <div class="source-link-group">
+          <h3>立法动态与机构信息</h3>
+          <div class="home-links">
+            <a data-source-id="have-your-say" href="https://have-your-say.ec.europa.eu/" target="_blank" rel="noopener noreferrer">Have Your Say 欧盟立法征询 <small>委员会立法提案、公开咨询及意见反馈</small></a>
+            <a data-source-id="commission-tracking" href="https://commission.europa.eu/law/tracking-law-making_en" target="_blank" rel="noopener noreferrer">欧盟委员会立法跟踪 <small>立法及授权、实施法案进程</small></a>
+            <a data-source-id="oeil" href="https://oeil.europarl.europa.eu/oeil/en/find-out-more" target="_blank" rel="noopener noreferrer">欧洲议会立法观察站 <small>立法程序及进展</small></a>
+            <a data-source-id="council-press" href="https://www.consilium.europa.eu/en/press/" target="_blank" rel="noopener noreferrer">欧盟理事会新闻中心 <small>政策与立法动态</small></a>
+          </div>
+        </div>
+      </section><section class="home-panel" aria-labelledby="topics-title"><h2 id="topics-title">最新专题</h2><div class="topic-placeholder"></div></section></div><section class="department-section" id="departments" hidden aria-labelledby="department-title">
       <div class="section-head"><div><h2 id="department-title">业务板块</h2><p>一部法规可以关联多个部门；部门关联用于检索导航，不代替具体适用性判断。</p></div></div>
       <div class="department-grid" id="department-grid"></div>
     </section>
