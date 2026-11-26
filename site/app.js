@@ -354,9 +354,9 @@ function materialStatus(record,today) {
     non_binding_instrument:"非约束性文件",
     generally_non_binding_instrument:"通常不具约束力",
     non_legislative_document:"非立法文件",
-    not_determined_from_series:"未根据C系列判断效力",
-    not_assessed:"性质待核验"
-  })[record.bindingNature]??"性质待核验";
+    not_determined_from_series:"C系列文件（法律效力依具体文书判断）",
+    not_assessed:"法律性质未分类"
+  })[record.bindingNature]??"法律性质未分类";
 }
 function tag(text,className) { const el=document.createElement("span");el.className="tag "+className;el.textContent=text;return el; }
 const KEY_TERMS = /\b(?:eco[- ]?design|energy labell?ing|energy efficiency|smartphones?|slate tablets?|cybersecurity|cyber resilience|artificial intelligence|data protection|digital services|digital markets|digital product passports?|radio equipment|harmoni[sz]ed standards?|electromagnetic compatibility|batter(?:y|ies)|waste batteries|consumer protection|product safety|market surveillance|due diligence|forced labour|right to repair|packaging|persistent organic pollutants|customs|intellectual property|accessibility|dual-use items|personal data|recycling|repair|recall|charging|USB Type-C)\b/gi;
@@ -378,7 +378,7 @@ function resultRow(record,today,terms=[]) {
   celex.textContent=record.id?"CELEX "+record.id:"CELEX编号待核验";
   en.append(link,celex);
   row.append(en);
-  row.insertCell().textContent=record.entry&&/^\d{4}-\\d{2}-\\d{2}$/.test(record.entry)?record.entry:"-";
+  row.insertCell().textContent=record.entry&&/^\d{4}-\d{2}-\d{2}$/.test(record.entry)?record.entry:"-";
   const statusText=materialStatus(record,today);
   row.insertCell().append(tag(statusText,"status-"+(record.sourceCategory==="EU_LEGISLATION"?status:"material")));
   return row;
