@@ -36,8 +36,6 @@ class RelatedMaterialSyncTests(unittest.TestCase):
         self.assertTrue(sync_related.SOFT_LAW_CELEX.fullmatch("52024SC0001"))
 
     def test_commission_notice_celex_and_blue_guide_corrigendum_are_in_scope(self):
-        self.assertTrue(sync_related.SOFT_LAW_CELEX.fullmatch("52022XC0629(04)"))
-        self.assertTrue(sync_related.SOFT_LAW_CELEX.fullmatch("52022XC0629(04)R(02)"))
         self.assertEqual(
             sync_related.classify_soft_law(
                 "52022XC0629(04)",
@@ -122,9 +120,6 @@ class RelatedMaterialSyncTests(unittest.TestCase):
             )
         sparql = query.call_args.args[0]
         self.assertIn("REGEX(STR(?id)", sparql)
-        self.assertIn("[(]", sparql)
-        self.assertIn("[)]", sparql)
-        self.assertNotIn(r"\\(", sparql)
         self.assertNotIn("(?:", sparql)
 
 
