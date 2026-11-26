@@ -53,30 +53,32 @@
       </div>
       <div class="notice" id="notice" role="status" hidden></div><section id="favorites-panel" class="favorites-panel" hidden><p>个人收藏及备注仅保存于当前浏览器，不会共享给其他用户。</p><label>收藏文件夹 <select id="folder-select"><option value="">选择收藏文件夹</option></select></label><button type="button" id="new-folder" class="outline-button">新建文件夹</button></section>
       <form class="filters" id="filters" aria-label="法规筛选">
-        <label class="search-box">
-          <span class="sr-only">搜索法规中文名称、官方名称、编号或关键词</span><span class="search-icon" aria-hidden="true"></span>
-          <input type="search" id="search" autocomplete="off" placeholder="输入法规名称、简称或编号，例如 AI Act、人工智能法案">
-        </label>
-        <details id="more-filters"><summary>更多检索条件</summary><div class="filter-fields">
-<label><span>检索范围</span><select id="search-scope"><option value="metadata">目录元数据（默认）</option><option value="title">中英文名称</option><option value="english">官方英文名称</option><option value="chinese">中文译名</option></select></label>
-<label><span>包含任一关键词（OR）</span><input id="any-terms" type="text"></label>
-<label><span>精确短语</span><input id="exact-phrase" type="text"></label>
-<label><span>排除关键词（NOT）</span><input id="exclude-terms" type="text"></label>
-<label><span>中文法规名称</span><input id="zh-name" type="text"></label>
-<label><span>官方英文名称</span><input id="en-name" type="text"></label>
-<label><span>法规编号</span><input id="act-number" type="text" placeholder="2023/1669"></label>
-<label><span>CELEX 编号</span><input id="celex-number" type="text"></label>
-<label><span>制定机构（按标题识别）</span><select id="author"><option value="">选择制定机构</option><option value="parliament">欧洲议会与理事会</option><option value="commission">欧盟委员会</option><option value="council">欧盟理事会</option><option value="other">其他</option></select></label>
-</div></details><button class="primary-button" type="submit">检索</button>
-        <div class="filter-fields">
+        <div class="search-row">
+          <label class="search-box">
+            <span class="field-caption">关键词检索</span>
+            <span class="search-control"><span class="search-icon" aria-hidden="true"></span><input type="search" id="search" autocomplete="off" placeholder="输入法规名称、简称或编号，例如 AI Act、人工智能法案"></span>
+          </label>
+          <button class="primary-button search-submit" type="submit">检索</button>
+        </div>
+        <div class="filter-fields primary-filters">
           <label><span>业务部门</span><select id="department"><option value="">选择业务部门</option></select></label>
           <label><span>法律领域部门</span><select id="cross-topic"><option value="">选择法律领域部门</option></select></label>
           <label class="act-level-filter"><span>效力层级</span><select id="type" aria-label="Legal act level"><option value="">选择效力层级</option><option value="legislative">Legislative Acts</option><option value="delegated">Delegated Acts</option><option value="implementing">Implementing Acts</option><option value="guidance">Guidance</option><option value="standards">Harmonised Standards / Common Specifications</option></select><select id="type-subtype" aria-label="Act form" hidden disabled><option value="">Select act form</option></select></label>
-          <label><span>现行状态</span><select id="status"><option value="">选择现行状态</option><option value="pending">尚未生效</option><option value="inactive">已失效</option><option value="active_unknown">现行有效</option><option value="na">不适用</option></select></label>
+          <label><span>现行状态</span><select id="status"><option value="">选择现行状态</option><option value="pending">尚未生效</option><option value="inactive">已失效</option><option value="active_unknown">现行有效</option><option value="na">非立法资料及C系列文件</option></select></label>
         </div>
+        <details id="more-filters"><summary>高级检索条件</summary><div class="filter-fields advanced-fields">
+          <label><span>检索范围</span><select id="search-scope"><option value="metadata">目录元数据（默认）</option><option value="title">中英文名称</option><option value="english">官方英文名称</option><option value="chinese">中文译名</option></select></label>
+          <label><span>包含任一关键词（OR）</span><input id="any-terms" type="text"></label>
+          <label><span>精确短语</span><input id="exact-phrase" type="text"></label>
+          <label><span>排除关键词（NOT）</span><input id="exclude-terms" type="text"></label>
+          <label><span>中文法规名称</span><input id="zh-name" type="text"></label>
+          <label><span>官方英文名称</span><input id="en-name" type="text"></label>
+          <label><span>法规编号</span><input id="act-number" type="text" placeholder="2023/1669"></label>
+          <label><span>CELEX 编号</span><input id="celex-number" type="text"></label>
+          <label><span>制定机构（按标题识别）</span><select id="author"><option value="">选择制定机构</option><option value="parliament">欧洲议会与理事会</option><option value="commission">欧盟委员会</option><option value="council">欧盟理事会</option><option value="other">其他</option></select></label>
+        </div></details>
         <div class="filter-actions"><span class="filter-hint">各条件组合使用；检索标题与元数据，不含法规全文。</span><button class="text-button" id="clear-button" type="button">清除筛选</button></div>
-      </form>
-      <div class="results">
+      </form>      <div class="results">
         <div class="results-head"><p id="result-count" aria-live="polite">正在载入法规数据</p><label class="sort-control"><span class="sr-only">排序方式</span><select id="sort"><option value="relevance" selected>业务相关度优先</option><option value="newest">发布日期从新到旧</option><option value="oldest">发布日期从旧到新</option></select></label></div>
         <div class="table-scroll"><table id="result-table" hidden><thead><tr>
           <th scope="col">收藏</th><th scope="col">文件类型</th><th scope="col">中文名称</th><th scope="col">官方英文名称及编号</th><th scope="col">生效日期</th><th scope="col">效力状态</th>
