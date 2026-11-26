@@ -35,6 +35,24 @@ class RelatedMaterialSyncTests(unittest.TestCase):
         )
         self.assertTrue(sync_related.SOFT_LAW_CELEX.fullmatch("52024SC0001"))
 
+    def test_commission_notice_celex_and_blue_guide_corrigendum_are_in_scope(self):
+        self.assertTrue(sync_related.SOFT_LAW_CELEX.fullmatch("52022XC0629(04)"))
+        self.assertTrue(sync_related.SOFT_LAW_CELEX.fullmatch("52022XC0629(04)R(02)"))
+        self.assertEqual(
+            sync_related.classify_soft_law(
+                "52022XC0629(04)",
+                "Commission notice The Blue Guide on the implementation of EU product rules 2022",
+            ),
+            ("Commission Notice / Guidance", "interpretative_guidance_non_binding"),
+        )
+        self.assertEqual(
+            sync_related.classify_soft_law(
+                "52022XC0629(04)R(02)",
+                "Corrigendum to Commission notice The Blue Guide on the implementation of EU product rules 2022",
+            ),
+            ("Commission Notice / Guidance", "interpretative_guidance_non_binding"),
+        )
+
     def test_official_url_encodes_c_series_celex(self):
         url = sync_related.official_url("C/2025/03118")
         self.assertIn("CELEX%3AC%2F2025%2F03118", url)
