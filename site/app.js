@@ -60,7 +60,7 @@ function showModule(view,department="",reset=true){
  ui["favorites-panel"].hidden=!favoritesView;
  ui.department.disabled=false;
  if(reset){ui.filters.reset();ui.department.value=departmentView;sortExplicit=false;ui.sort.value=defaultSort();page=1;}
- ui["page-title"].textContent="欧盟法规实施跟踪沙盘";
+ ui["page-title"].textContent="欧盟法律法规动态监测平台";
  ui["catalog-title"].textContent=view==="favorites"?"收藏法规":"高级检索";
  for(const link of document.querySelectorAll(".topbar-links [data-view]")){
   if(link.dataset.view===view)link.setAttribute("aria-current","page");else link.removeAttribute("aria-current");
