@@ -61,12 +61,12 @@ with sync_playwright() as p:
     expect(page.locator("label:has(#type) > span")).to_have_text("效力层级")
     expect(page.locator("label:has(#status) > span")).to_have_text("现行状态")
     expect(page.locator("#department option").first).to_have_text("选择业务部门")
-    expect(page.locator("#type option").first).to_have_text("Select legal act level")
+    expect(page.locator("#type option").first).to_have_text("选择效力层级")
     expect(page.locator("#type-subtype")).to_be_hidden()
     expect(page.locator("#type-subtype")).to_be_disabled()
     type_options = page.locator("#type option").evaluate_all("(options) => options.map(option => [option.value, option.textContent.trim()])")
     assert type_options == [
-        ["", "Select legal act level"],
+        ["", "选择效力层级"],
         ["legislative", "Legislative Acts"],
         ["delegated", "Delegated Acts"],
         ["implementing", "Implementing Acts"],
