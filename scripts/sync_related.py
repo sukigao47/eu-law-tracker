@@ -19,7 +19,7 @@ PAGE_SIZE = 1000
 BATCH_SIZE = 80
 SOFT_LAW_DAYS = 5 * 366
 OJ_C_DAYS = 180
-SOFT_LAW_CELEX = re.compile(r"^(3[0-9]{4}[AHGC][0-9]{4,6}|5[0-9]{4}(DC|JC|SC|AA|TA|SA|AB|HB|XB|AE|IE|AC|AR|IR|XR)[0-9]{1,6})$")
+SOFT_LAW_CELEX = re.compile(r"^(3[0-9]{4}[AHGC][0-9]{4,6}(\\([0-9]{1,2}\\))?(R\\([0-9]{2}\\))?|5[0-9]{4}(DC|JC|SC|XC|AA|TA|SA|AB|HB|XB|AE|IE|AC|AR|IR|XR)[0-9]{1,6}(\\([0-9]{1,2}\\))?(R\\([0-9]{2}\\))?)$")
 
 
 def official_url(identifier: str) -> str:
@@ -53,6 +53,10 @@ def classify_soft_law(identifier: str, title: str) -> tuple[str, str]:
             return "Staff Working Document", "non_legislative_document"
         if descriptor == "JC":
             return "Joint Communication", "non_legislative_document"
+        if descriptor == "XC":
+            if "blue guide" in lowered or "guidance" in lowered or "guideline" in lowered:
+                return "Commission Notice / Guidance", "interpretative_guidance_non_binding"
+            return "Commission Notice", "non_legislative_document"
         if descriptor == "DC":
             if "communication" in lowered:
                 return "Commission Communication", "non_legislative_document"
@@ -153,6 +157,7 @@ def hydrate(index: dict[str, dict], category: str) -> list[dict]:
             "sourceCategory": category,
             "officialUrl": official_url(identifier),
             "ojSeries": "C" if category == "OJ_C_SERIES" else None,
+            "ojCitation": {"52022XC0629(04)": "2022/C 247/01", "52022XC0629(04)R(02)": "C/2026/90070"}.get(identifier),
             "metadataCompleteness": "title_available" if title else "title_missing",
         })
     return records
@@ -213,7 +218,7 @@ def sync_related(output: Path, profile: Path, today: date | None = None) -> dict
             "softLawBusinessRelevant": len(soft_catalog["documents"]),
             "ojCSeriesBusinessRelevant": len(oj_catalog["documents"]),
             "businessRelevantUnique": len(combined),
-            "softLawCelexDescriptors": ["3A", "3H", "3G", "3C", "5DC", "5JC", "5SC", "5AA", "5TA", "5SA", "5AB", "5HB", "5XB", "5AE", "5IE", "5AC", "5AR", "5IR", "5XR"],
+            "softLawCelexDescriptors": ["3A", "3H", "3G", "3C", "5DC", "5JC", "5SC", "5XC", "5AA", "5TA", "5SA", "5AB", "5HB", "5XB", "5AE", "5IE", "5AC", "5AR", "5IR", "5XR"],
             "ojCollection": "OJ-C",
         },
         "profile": soft_catalog.get("profile", {}),
