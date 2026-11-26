@@ -122,6 +122,9 @@ class RelatedMaterialSyncTests(unittest.TestCase):
             )
         sparql = query.call_args.args[0]
         self.assertIn("REGEX(STR(?id)", sparql)
+        self.assertIn("[(]", sparql)
+        self.assertIn("[)]", sparql)
+        self.assertNotIn(r"\\(", sparql)
         self.assertNotIn("(?:", sparql)
 
 
