@@ -122,5 +122,378 @@
         }
       ]
     }
+  ],
+  "homepageCategories": [
+    {
+      "id": "core-law",
+      "label": "核心基础法规库",
+      "description": "欧盟法律原文、官方公报、法院判例及成员国法律检索入口。",
+      "sources": [
+        {
+          "id": "eur-lex",
+          "name": "EUR-Lex 欧盟立法原文库",
+          "url": "https://eur-lex.europa.eu/",
+          "owner": "Publications Office of the European Union",
+          "purpose": "检索欧盟条约、条例、指令、决定、修正案、合并文本、立法提案及 CELEX／ELI 标识；正式法律文本以 EUR-Lex 公布版本为准。"
+        },
+        {
+          "id": "publications-cellar",
+          "name": "欧盟官方公报出版局（Publications Office／Cellar）",
+          "url": "https://publications.europa.eu/",
+          "owner": "Publications Office of the European Union",
+          "purpose": "欧盟官方出版物、法律文件、Cellar 元数据及开放数据的统一入口。"
+        },
+        {
+          "id": "official-journal",
+          "name": "欧盟官方公报（Official Journal, OJ）",
+          "url": "https://eur-lex.europa.eu/oj/direct-access.html?locale=en",
+          "owner": "Publications Office of the European Union",
+          "purpose": "核验《欧盟官方公报》L 系列（立法）、C 系列（信息与意见）及 S 系列（采购公告）原始发布内容。"
+        },
+        {
+          "id": "curia",
+          "name": "Curia 欧盟法院判例库",
+          "url": "https://curia.europa.eu/",
+          "owner": "Court of Justice of the European Union",
+          "purpose": "查询欧盟法院与普通法院判决、命令、总法律顾问意见及案件信息；判例解释法律，不等同于立法文件。"
+        },
+        {
+          "id": "n-lex",
+          "name": "N-Lex 欧盟成员国立法统一入口",
+          "url": "https://eur-lex.europa.eu/n-lex/",
+          "owner": "Publications Office of the European Union",
+          "purpose": "从统一入口访问欧盟成员国国家法律数据库，辅助核查指令转化及成员国实施规则。"
+        },
+        {
+          "id": "e-justice",
+          "name": "欧洲司法门户（European e-Justice Portal）",
+          "url": "https://e-justice.europa.eu/",
+          "owner": "European Commission and Member States",
+          "purpose": "查询成员国司法制度、司法程序、法院及跨境司法协作信息。"
+        }
+      ]
+    },
+    {
+      "id": "energy-ecodesign",
+      "label": "能效、生态设计、可持续产品",
+      "description": "能效标签、生态设计要求、产品注册及可持续产品政策。",
+      "sources": [
+        {
+          "id": "eprel",
+          "name": "EPREL 欧洲能效产品注册库",
+          "url": "https://eprel.ec.europa.eu/",
+          "owner": "European Commission",
+          "purpose": "查询已注册能源相关产品的能效标签、型号参数及产品信息。"
+        },
+        {
+          "id": "dg-ener",
+          "name": "欧盟委员会能源总司（DG ENER）：生态设计与能效标签",
+          "url": "https://energy-efficient-products.ec.europa.eu/",
+          "owner": "European Commission · DG Energy",
+          "purpose": "查看产品能效政策、Ecodesign 生态设计要求、Energy Labelling 能源标签措施及相关实施资料。"
+        },
+        {
+          "id": "espr",
+          "name": "欧盟委员会可持续产品政策（ESPR）专题",
+          "url": "https://single-market-economy.ec.europa.eu/industry/sustainability/sustainable-product-policy-ecodesign_en",
+          "owner": "European Commission · DG GROW",
+          "purpose": "了解《可持续产品生态设计条例》（ESPR）框架、工作计划、产品组措施及数字产品护照政策。"
+        }
+      ]
+    },
+    {
+      "id": "consumer-advertising",
+      "label": "消费者保护、广告合规、绿色声明",
+      "description": "消费者权益、商业行为执法协作及环境声明合规。",
+      "sources": [
+        {
+          "id": "dg-just",
+          "name": "欧盟委员会消费者保护专题（DG JUST）",
+          "url": "https://commission.europa.eu/strategy-and-policy/policies/consumers/consumer-protection-policy_en",
+          "owner": "European Commission · DG JUST",
+          "purpose": "消费者保护政策、消费者权利、商业行为监管及相关欧盟执法框架。"
+        },
+        {
+          "id": "cpc",
+          "name": "消费者保护执法协作网（CPC Network）",
+          "url": "https://commission.europa.eu/justice-consumer-protection/consumer-protection/consumer-protection-cooperation-cpc_en",
+          "owner": "European Commission and national consumer authorities",
+          "purpose": "了解欧盟委员会与成员国消费者保护主管机关的跨境执法协作、联合行动及执法信息。"
+        },
+        {
+          "id": "green-claims",
+          "name": "Green Claims 绿色声明专题",
+          "url": "https://commission.europa.eu/justice-consumer-protection/consumer-protection/green-claims_en",
+          "owner": "European Commission",
+          "purpose": "查询绿色声明、环境营销表述及反漂绿政策动态；具体法律义务仍应回到适用法条核验。"
+        }
+      ]
+    },
+    {
+      "id": "data-protection",
+      "label": "数据保护GDPR",
+      "description": "欧盟个人数据保护监管机构、指南、意见及监督资料。",
+      "sources": [
+        {
+          "id": "edpb",
+          "name": "EDPB 欧洲数据保护委员会",
+          "url": "https://www.edpb.europa.eu/",
+          "owner": "European Data Protection Board",
+          "purpose": "查询 GDPR 指南、意见、建议、协调一致性机制及跨境数据保护监管资料。"
+        },
+        {
+          "id": "edps",
+          "name": "EDPS 欧洲数据保护监督员",
+          "url": "https://www.edps.europa.eu/",
+          "owner": "European Data Protection Supervisor",
+          "purpose": "查询欧盟机构和机关个人数据处理的监督意见、调查、指南及数据保护政策资料。"
+        }
+      ]
+    },
+    {
+      "id": "cybersecurity",
+      "label": "网络安全、NIS2、CRA",
+      "description": "产品网络安全、关键实体网络安全义务及欧盟网络安全技术资料。",
+      "sources": [
+        {
+          "id": "enisa",
+          "name": "ENISA 欧盟网络安全局",
+          "url": "https://www.enisa.europa.eu/",
+          "owner": "European Union Agency for Cybersecurity",
+          "purpose": "查询网络安全认证方案（包括 EUCC）、威胁态势、技术报告及 NIS2／CRA 配套资料。"
+        },
+        {
+          "id": "cra",
+          "name": "Cyber Resilience Act（CRA）网络弹性法案专题",
+          "url": "https://digital-strategy.ec.europa.eu/en/policies/cyber-resilience-act",
+          "owner": "European Commission · DG CONNECT",
+          "purpose": "查看 CRA 法案政策说明、制造商义务、漏洞报告、合格评定及实施指引。"
+        },
+        {
+          "id": "nis2",
+          "name": "NIS2 指令专题",
+          "url": "https://digital-strategy.ec.europa.eu/en/policies/nis2-directive",
+          "owner": "European Commission · DG CONNECT",
+          "purpose": "查看 NIS2 指令政策说明、成员国转化进展及网络与信息系统安全要求。"
+        }
+      ]
+    },
+    {
+      "id": "ai-act",
+      "label": "AI Act",
+      "description": "人工智能法案官方政策说明、实施进展及合规支持。",
+      "sources": [
+        {
+          "id": "ai-act",
+          "name": "AI Act Service Desk／欧盟人工智能法案专题",
+          "url": "https://digital-strategy.ec.europa.eu/en/policies/ai-act",
+          "owner": "European Commission · DG CONNECT",
+          "purpose": "查看 AI Act 分章信息、实施时间表、合规支持、常见问题及成员国实施动态；法条原文以 EUR-Lex 为准。"
+        }
+      ]
+    },
+    {
+      "id": "product-safety",
+      "label": "产品安全、市场监管、射频指令",
+      "description": "非食品消费品预警、市场监管和无线电设备合规。",
+      "sources": [
+        {
+          "id": "safety-gate",
+          "name": "Safety Gate 消费品安全预警与召回系统",
+          "url": "https://ec.europa.eu/safety-gate/screen/home?lang=en",
+          "owner": "European Commission",
+          "purpose": "查询非食品消费品安全风险预警、危险产品通报及召回信息。"
+        },
+        {
+          "id": "market-surveillance",
+          "name": "欧盟市场监管条例及产品市场监管专题",
+          "url": "https://single-market-economy.ec.europa.eu/single-market/goods/building-blocks/market-surveillance_en",
+          "owner": "European Commission · DG GROW",
+          "purpose": "了解市场监管条例（EU）2019/1020、经济运营者义务、成员国市场监管及执法协作。"
+        },
+        {
+          "id": "red",
+          "name": "RED 无线电设备指令专题",
+          "url": "https://single-market-economy.ec.europa.eu/sectors/electrical-and-electronic-engineering-industries-eei/radio-equipment_en",
+          "owner": "European Commission · DG GROW",
+          "purpose": "查看无线电设备指令（2014/53/EU）政策说明、设备合规要求及相关资料。"
+        }
+      ]
+    },
+    {
+      "id": "batteries-circularity",
+      "label": "电池、循环经济、化学品、包装",
+      "description": "电池全生命周期、化学品管理、电子废弃物及包装废弃物政策。",
+      "sources": [
+        {
+          "id": "batteries",
+          "name": "欧盟电池法规专题",
+          "url": "https://environment.ec.europa.eu/topics/waste-and-recycling/batteries_en",
+          "owner": "European Commission · DG ENV",
+          "purpose": "查看电池法规（EU）2023/1542、电池可持续性、安全、标签、供应链尽职调查及回收要求。"
+        },
+        {
+          "id": "echa",
+          "name": "ECHA 欧洲化学品管理局",
+          "url": "https://echa.europa.eu/",
+          "owner": "European Chemicals Agency",
+          "purpose": "查询 REACH、CLP、SVHC、限制物质及化学品注册、评估、授权与限制信息。"
+        },
+        {
+          "id": "weee",
+          "name": "WEEE 电子电气设备废弃物专题",
+          "url": "https://environment.ec.europa.eu/topics/waste-and-recycling/waste-electrical-and-electronic-equipment-weee_en",
+          "owner": "European Commission · DG ENV",
+          "purpose": "查询废弃电子电气设备（WEEE）收集、处理、回收及生产者责任政策。"
+        },
+        {
+          "id": "packaging",
+          "name": "包装与包装废弃物专题",
+          "url": "https://environment.ec.europa.eu/topics/waste-and-recycling/packaging-waste_en",
+          "owner": "European Commission · DG ENV",
+          "purpose": "查看包装与包装废弃物法规（PPWR）、包装设计、可回收性、再利用及废弃物管理要求。"
+        }
+      ]
+    },
+    {
+      "id": "digital-services-markets",
+      "label": "数字服务、数字市场",
+      "description": "数字平台、在线中介服务及大型平台竞争监管。",
+      "sources": [
+        {
+          "id": "dsa",
+          "name": "DSA 数字服务法案专题",
+          "url": "https://digital-strategy.ec.europa.eu/en/policies/digital-services-act",
+          "owner": "European Commission · DG CONNECT",
+          "purpose": "查询数字服务法案（DSA）对在线中介服务、平台内容治理、透明度及风险评估的要求。"
+        },
+        {
+          "id": "dma",
+          "name": "DMA 数字市场法案专题",
+          "url": "https://digital-strategy.ec.europa.eu/en/policies/digital-markets-act",
+          "owner": "European Commission · DG CONNECT",
+          "purpose": "查询数字市场法案（DMA）守门人指定、义务、合规报告及执法动态。"
+        }
+      ]
+    },
+    {
+      "id": "legislation-policy",
+      "label": "立法征询、政策动态",
+      "description": "欧盟立法公开咨询、委员会政策发布及欧洲议会委员会工作。",
+      "sources": [
+        {
+          "id": "have-your-say",
+          "name": "Have Your Say 欧盟立法征询平台",
+          "url": "https://ec.europa.eu/info/law/better-regulation/have-your-say_en",
+          "owner": "European Commission",
+          "purpose": "查询立法提案、授权法案与实施法案的公开咨询、反馈窗口及利益相关方意见。"
+        },
+        {
+          "id": "press-corner",
+          "name": "欧盟委员会新闻发布库（Press Corner）",
+          "url": "https://ec.europa.eu/commission/presscorner/home/en",
+          "owner": "European Commission",
+          "purpose": "追踪委员会正式新闻稿、政策公告、立法提案及政策实施动态。"
+        },
+        {
+          "id": "imco",
+          "name": "欧洲议会内部市场与消费者保护委员会（IMCO）",
+          "url": "https://www.europarl.europa.eu/committees/en/imco/home.html",
+          "owner": "European Parliament",
+          "purpose": "追踪内部市场、产品合规、消费者保护及数字市场相关委员会审议、听证和报告。"
+        }
+      ]
+    },
+    {
+      "id": "standards-conformity",
+      "label": "标准、合格评定、TBT通报",
+      "description": "欧洲标准化、公告机构查询及国际技术性贸易壁垒通报。",
+      "sources": [
+        {
+          "id": "cen-cenelec",
+          "name": "CEN-CENELEC 欧洲标准化组织",
+          "url": "https://www.cencenelec.eu/",
+          "owner": "CEN and CENELEC",
+          "purpose": "查询欧洲标准目录、标准化工作及标准状态；标准文本不等同于欧盟法律，是否具有协调标准地位须核对官方公报引用。"
+        },
+        {
+          "id": "nando",
+          "name": "NANDO 公告机构数据库（现转入 Single Market Compliance Space）",
+          "url": "https://webgate.ec.europa.eu/single-market-compliance-space/",
+          "owner": "European Commission",
+          "purpose": "查询欧盟公告机构、指定范围及合格评定机构信息；原 NANDO 入口现重定向至单一市场合规空间。"
+        },
+        {
+          "id": "wto-tbt",
+          "name": "WTO TBT 技术性贸易壁垒通报数据库",
+          "url": "https://docs.wto.org/dol2fe/Pages/SS/directdoc.aspx?filename=q:/TBT/TBTHome.htm",
+          "owner": "World Trade Organization",
+          "purpose": "查询 WTO 成员提交的技术法规、标准及合格评定程序通报；属于国际组织官方资料，并非欧盟立法数据库。"
+        }
+      ]
+    },
+    {
+      "id": "member-state-law",
+      "label": "重点成员国法律官网",
+      "description": "重点欧盟成员国国家法律、法规及官方公报检索入口。",
+      "sources": [
+        {
+          "id": "germany-law",
+          "name": "德国 Gesetze im Internet",
+          "url": "https://www.gesetze-im-internet.de/",
+          "owner": "Federal Ministry of Justice and Federal Office of Justice (Germany)",
+          "purpose": "德国联邦法律法规官方在线检索入口。"
+        },
+        {
+          "id": "france-law",
+          "name": "法国 Légifrance",
+          "url": "https://www.legifrance.gouv.fr/",
+          "owner": "French Government",
+          "purpose": "法国法律、法规、判例及官方公报检索入口。"
+        },
+        {
+          "id": "italy-law",
+          "name": "意大利 Normattiva",
+          "url": "https://www.normattiva.it/",
+          "owner": "Italian Government",
+          "purpose": "意大利现行及历史国家法律法规检索入口。"
+        },
+        {
+          "id": "spain-law",
+          "name": "西班牙 BOE 官方公报",
+          "url": "https://www.boe.es/",
+          "owner": "Spanish Official State Gazette",
+          "purpose": "西班牙国家法律、法规及官方公报检索入口。"
+        },
+        {
+          "id": "netherlands-law",
+          "name": "荷兰 Wettenbank",
+          "url": "https://wetten.overheid.nl/",
+          "owner": "Government of the Netherlands",
+          "purpose": "荷兰国家法律法规官方数据库。"
+        },
+        {
+          "id": "poland-law",
+          "name": "波兰 ISAP 法律信息系统",
+          "url": "https://isap.sejm.gov.pl/",
+          "owner": "Sejm of the Republic of Poland",
+          "purpose": "波兰议会法律信息系统，检索法律、法规及官方公布文本。"
+        }
+      ]
+    },
+    {
+      "id": "trade-sanctions",
+      "label": "贸易制裁配套",
+      "description": "欧盟限制性措施、制裁制度及相关法律文件查询。",
+      "sources": [
+        {
+          "id": "sanctions-map",
+          "name": "EU Sanctions Map 欧盟制裁地图",
+          "url": "https://www.sanctionsmap.eu/#/main",
+          "owner": "European External Action Service and European Commission",
+          "purpose": "按国家、制度及措施查询欧盟制裁框架，并进一步核对相关欧盟法律文件；正式制裁义务以《欧盟官方公报》公布的法律文本为准。"
+        }
+      ]
+    }
   ]
 }

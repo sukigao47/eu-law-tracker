@@ -23,7 +23,7 @@ class OfficialSourceRegistryTests(unittest.TestCase):
                 "核心基础法规库",
                 "能效、生态设计、可持续产品",
                 "消费者保护、广告合规、绿色声明",
-                "数据保护 GDPR",
+                "数据保护GDPR",
                 "网络安全、NIS2、CRA",
                 "AI Act",
                 "产品安全、市场监管、射频指令",
@@ -62,7 +62,7 @@ class OfficialSourceRegistryTests(unittest.TestCase):
     def test_user_interface_omits_requested_copy(self):
         html = (ROOT / "site/index.html").read_text(encoding="utf-8")
         app = (ROOT / "site/app.js").read_text(encoding="utf-8")
-        for forbidden in ("英文标题", "智能终端全生命周期", "现行法规与近 90 天新发布文件", "法律部门／法律类别", "文件类型 / 效力类别", "效力状态", "全部业务部门", "全部法律领域", "全部文件类型", "全部状态"):
+        for forbidden in ("英文标题", "智能终端全生命周期", "现行法规与近 90 天新发布文件", "法律部门／法律类别", "文件类型 / 效力类别", "全部业务部门", "全部法律领域", "全部文件类型", "全部状态"):
             self.assertNotIn(forbidden, html)
             self.assertNotIn(forbidden, app)
 

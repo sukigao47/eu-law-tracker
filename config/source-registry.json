@@ -231,7 +231,7 @@
     },
     {
       "id": "data-protection",
-      "label": "数据保护 GDPR",
+      "label": "数据保护GDPR",
       "description": "欧盟个人数据保护监管机构、指南、意见及监督资料。",
       "sources": [
         {
