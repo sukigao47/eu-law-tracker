@@ -155,7 +155,7 @@ with sync_playwright() as p:
         page.locator("#type-subtype").select_option(form)
         ids = result_ids()
         assert ids, f"{form} should return matching documents"
-        assert all(re.search(pattern, title, re.I) for title in titles()), (form, titles())
+        assert all(re.search(pattern, title, re.I) for title in page.locator("#result-rows .act-title").all_text_contents()), (form, page.locator("#result-rows .act-title").all_text_contents())
         delegated_sets[form] = set(ids)
     assert delegated_sets["delegated-regulation"].isdisjoint(delegated_sets["delegated-directive"])
     assert delegated_sets["delegated-regulation"].isdisjoint(delegated_sets["delegated-decision"])
@@ -175,7 +175,7 @@ with sync_playwright() as p:
         page.locator("#type-subtype").select_option(form)
         ids = result_ids()
         assert ids, f"{form} should return matching documents"
-        assert all(re.search(pattern, title, re.I) for title in titles()), (form, titles())
+        assert all(re.search(pattern, title, re.I) for title in page.locator("#result-rows .act-title").all_text_contents()), (form, page.locator("#result-rows .act-title").all_text_contents())
         implementing_sets[form] = set(ids)
     assert implementing_sets["implementing-regulation"].isdisjoint(implementing_sets["implementing-decision"])
 
