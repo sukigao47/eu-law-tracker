@@ -13,6 +13,8 @@ with sync_playwright() as p:
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.goto(HOME_URL, wait_until="networkidle")
     expect(page.locator("#home-view")).to_be_visible()
+    expect(page.locator("#page-title")).to_have_text("欧盟法律法规动态监测平台")
+    expect(page.locator(".eyebrow")).to_have_count(0)
     expect(page.locator("#catalog")).to_be_hidden()
     expect(page.locator("#latest-list .latest-item")).to_have_count(2)
     latest_dates=page.locator("#latest-list .latest-item").evaluate_all("(rs) => rs.map(r => r.dataset.published)")
