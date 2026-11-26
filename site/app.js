@@ -372,11 +372,18 @@ function advancedMatch(record,terms) {
     &&(!number||referenceNumber(record.id)===number)&&(!ui["celex-number"].value.trim()||normalize(record.id)===normalize(ui["celex-number"].value))
     &&(!ui.author.value||author===ui.author.value);
 }
+function matchesStatus(record,today,value) {
+  if(!value)return true;
+  if(record.sourceCategory!=="EU_LEGISLATION")return value==="na";
+  const status=statusFor(record,today);
+  if(value==="active")return ["active","not_applied","partial","active_unknown"].includes(status);
+  return status===value;
+}
 function matches(record,today,terms) {
   return (!departmentView||record.departments.includes(departmentView))&&(!favoritesView||(!!favorites[record.id]&&(!ui["folder-select"].value||favorites[record.id].folder===ui["folder-select"].value)))&&(!ui.department.value||(ui.department.value==="other"?!record.departments.length:record.departments.includes(ui.department.value)))
     &&(!ui["cross-topic"].value||(record.legalFields??[]).includes(ui["cross-topic"].value))
     &&matchesType(record,ui.type.value)
-    &&(!ui.status.value||((record.sourceCategory==="EU_LEGISLATION"?statusFor(record,today):"na")===ui.status.value))
+    &&matchesStatus(record,today,ui.status.value)
     &&advancedMatch(record,terms);
 }
 
