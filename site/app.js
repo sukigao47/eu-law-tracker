@@ -256,6 +256,27 @@ function buildTaxonomyUI() {
   ui["department-grid"].replaceChildren(grid);
 }
 function referenceNumber(id){const m=/^3(\d{4})[RLD](\d+)$/.exec(id);return m?m[1]+"/"+Number(m[2]):"";}
+const ACT_FORM_OPTIONS = {
+ legislative: [["R","Regulation"],["L","Directive"],["D","Decision"]],
+ delegated: [["delegated-regulation","Delegated Regulation"],["delegated-directive","Delegated Directive"],["delegated-decision","Delegated Decision"]],
+ implementing: [["implementing-regulation","Implementing Regulation"],["implementing-decision","Implementing Decision"]]
+};
+function updateActSubtypeOptions(){
+ const select=ui["type-subtype"], options=ACT_FORM_OPTIONS[ui.type.value]??[];
+ select.replaceChildren(new Option("Select act form",""),...options.map(([value,label])=>new Option(label,value)));
+ select.hidden=options.length===0;
+ select.disabled=options.length===0;
+ if(!options.length)select.value="";
+}
+function selectedTypeFilter(){
+ const parent=ui.type.value, child=ui["type-subtype"].value;
+ if(parent==="legislative")return child;
+ // Delegated and implementing subforms retain the existing parent-level filter;
+ // no catalogue metadata or result-classification rules are changed here.
+ if(parent==="delegated")return child?"delegated":"";
+ if(parent==="implementing")return child?"implementing":"";
+ return parent;
+}
 function matchesType(record,value){
  if(!value)return true;
  const title=String(record.title??"").toLowerCase(), kind=String(record.instrumentClass??"").toLowerCase();
@@ -375,7 +396,7 @@ function advancedMatch(record,terms) {
 function matches(record,today,terms) {
   return (!departmentView||record.departments.includes(departmentView))&&(!favoritesView||(!!favorites[record.id]&&(!ui["folder-select"].value||favorites[record.id].folder===ui["folder-select"].value)))&&(!ui.department.value||(ui.department.value==="other"?!record.departments.length:record.departments.includes(ui.department.value)))
     &&(!ui["cross-topic"].value||(record.legalFields??[]).includes(ui["cross-topic"].value))
-    &&matchesType(record,ui.type.value)
+    &&matchesType(record,selectedTypeFilter())
     &&(!ui.status.value||((record.sourceCategory==="EU_LEGISLATION"?statusFor(record,today):"na")===ui.status.value))
     &&advancedMatch(record,terms);
 }
@@ -444,6 +465,9 @@ function render() {
   ui.previous.disabled=page===1;ui.next.disabled=page===lastPage;
 }
 ui.filters.addEventListener("submit",event=>{event.preventDefault();page=1;render();});
+ui.type.addEventListener("change",()=>{updateActSubtypeOptions();page=1;render();});
+ui.filters.addEventListener("reset",()=>{queueMicrotask(()=>{updateActSubtypeOptions();page=1;render();});});
+updateActSubtypeOptions();
 ui.search.addEventListener("input",()=>{if(!sortExplicit)ui.sort.value=defaultSort();page=1;render();});
 ui.filters.addEventListener("input",()=>{page=1;render();});
 ui.filters.addEventListener("change",()=>{page=1;render();});
