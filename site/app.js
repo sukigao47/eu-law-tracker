@@ -378,7 +378,7 @@ function resultRow(record,today,terms=[]) {
   celex.textContent=record.id?"CELEX "+record.id:"CELEX编号待核验";
   en.append(link,celex);
   row.append(en);
-  row.insertCell().textContent=record.entry&&/^\\d{4}-\\d{2}-\\d{2}$/.test(record.entry)?record.entry:"-";
+  row.insertCell().textContent=record.entry&&/^\d{4}-\\d{2}-\\d{2}$/.test(record.entry)?record.entry:"-";
   const statusText=materialStatus(record,today);
   row.insertCell().append(tag(statusText,"status-"+(record.sourceCategory==="EU_LEGISLATION"?status:"material")));
   return row;
