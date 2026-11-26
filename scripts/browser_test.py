@@ -17,31 +17,30 @@ with sync_playwright() as p:
     expect(page.locator("#latest-list .latest-item")).to_have_count(2)
     latest_dates=page.locator("#latest-list .latest-item").evaluate_all("(rs) => rs.map(r => r.dataset.published)")
     assert latest_dates == sorted(latest_dates, reverse=True)
-    source_links=page.locator(".home-links a")
-    expect(source_links).to_have_count(15)
-    source_hrefs=source_links.evaluate_all("(links) => links.map(a => a.href)")
-    assert len(source_hrefs) == len(set(source_hrefs)), "Duplicate quick-link URLs found"
-    expected_sources = {
-        "https://eur-lex.europa.eu/oj/direct-access.html?locale=en",
-        "https://eur-lex.europa.eu/",
-        "https://curia.europa.eu/en/content/juris/juris.htm",
-        "https://op.europa.eu/en",
-        "https://ai-act-service-desk.ec.europa.eu/en",
-        "https://energy-efficient-products.ec.europa.eu/product-list_en",
-        "https://eprel.ec.europa.eu/screen/home",
-        "https://commission.europa.eu/strategy-and-policy/policies/consumers/consumer-protection-policy_en",
-        "https://www.edpb.europa.eu/documents_en?type%5Bguidance%5D=guidance",
-        "https://ec.europa.eu/safety-gate/screen/home?lang=en",
-        "https://www.enisa.europa.eu/",
-        "https://have-your-say.ec.europa.eu/",
-        "https://commission.europa.eu/law/tracking-law-making_en",
-        "https://oeil.europarl.europa.eu/oeil/en/find-out-more",
-        "https://www.consilium.europa.eu/en/press/",
-    }
-    assert set(source_hrefs) == expected_sources, "Official source links missing or unexpected"
-    expect(page.locator('[data-source-id="have-your-say"]')).to_have_count(1)
+    category_cards=page.locator("#source-category-grid .source-category-card")
+    expect(category_cards).to_have_count(13)
+    expect(page.locator("#source-category-detail")).to_be_hidden()
+    category_titles=category_cards.locator("strong").all_text_contents()
+    assert category_titles == [
+        "核心基础法规库", "能效、生态设计、可持续产品", "消费者保护、广告合规、绿色声明",
+        "数据保护 GDPR", "网络安全、NIS2、CRA", "AI Act", "产品安全、市场监管、射频指令",
+        "电池、循环经济、化学品、包装", "数字服务、数字市场", "立法征询、政策动态",
+        "标准、合格评定、TBT通报", "重点成员国法律官网", "贸易制裁配套",
+    ]
+    category_cards.nth(0).click()
+    expect(page.locator("#source-category-grid")).to_be_hidden()
+    expect(page.locator("#source-detail-title")).to_have_text("核心基础法规库")
+    expect(page.locator("#source-recommendations li")).to_have_count(6)
+    expect(page.locator("#source-recommendations a").first).to_have_text("EUR-Lex 欧盟立法原文库")
+    expect(page.locator("#source-recommendations a[href='https://eur-lex.europa.eu/n-lex/']")).to_have_count(1)
+    page.locator("#source-back").click()
+    expect(page.locator("#source-category-grid")).to_be_visible()
+    category_cards.nth(10).click()
+    expect(page.locator("#source-recommendations li")).to_have_count(3)
+    expect(page.locator("#source-recommendations a[href='https://docs.wto.org/dol2fe/Pages/SS/directdoc.aspx?filename=q:/TBT/TBTHome.htm']")).to_have_count(1)
+    page.locator("#source-back").click()
+    page.locator("#nav-laws").click()
     expect(page.locator("#nav-search")).to_have_count(0)
-    expect(page.locator('.home-links a[href="https://eur-lex.europa.eu/oj/direct-access.html?locale=en"]')).to_have_count(1)
     expect(page.locator("#topics-title")).to_have_text("最新专题")
     page.evaluate("window.__moduleNavigationMarker = true")
     page.locator("#nav-laws").click()
@@ -58,9 +57,15 @@ with sync_playwright() as p:
     expect(page.locator("#result-count")).to_contain_text("匹配", timeout=30000)
     expect(page.locator("#department-grid a")).to_have_count(9)
     expect(page.locator("#catalog-title")).to_have_text("高级检索")
+    expect(page.locator("label:has(#cross-topic) > span")).to_have_text("法律领域")
+    expect(page.locator("label:has(#type) > span")).to_have_text("效力层级")
+    expect(page.locator("label:has(#status) > span")).to_have_text("状态")
+    expect(page.locator("#department option").first).to_have_text("选择业务部门")
+    expect(page.locator("#type option").first).to_have_text("选择效力层级")
+    expect(page.locator("#status option").first).to_have_text("选择状态")
     expect(page.locator("#topic")).to_have_count(0)
     expect(page.locator("#material")).to_have_count(0)
-    expect(page.locator("#cross-topic option").first).to_have_text("全部法律领域")
+    expect(page.locator("#cross-topic option").first).to_have_text("选择法律领域")
     expect(page.locator("#cross-topic option")).to_have_count(11)
     rows = page.locator("#result-rows tr")
     expect(rows.first).to_be_visible()

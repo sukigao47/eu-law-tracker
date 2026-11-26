@@ -34,37 +34,14 @@
       </div>
     </section>
     <div id="home-view" hidden><section class="home-panel" aria-labelledby="latest-title"><div class="section-head"><div><h2 id="latest-title">最新动态</h2><p>本库已收录的最新发布法律文件 · 按官方公报发布日期</p></div><a href="#laws" data-view="laws">查看更多 →</a></div><p id="home-update" class="home-meta" role="status">正在读取法规数据</p><div id="latest-list"></div></section><section class="home-panel" aria-labelledby="links-title">
-        <div class="section-head"><div><h2 id="links-title">网址速递</h2><p>官方外部入口，供法规原文、判例、专项合规资料及立法动态核验；列入此处不代表本平台已自动接入该数据源。</p></div></div>
-        <div class="source-link-group">
-          <h3>核心官方法规库</h3>
-          <div class="home-links">
-            <a data-source-id="eurlex-oj" href="https://eur-lex.europa.eu/oj/direct-access.html?locale=en" target="_blank" rel="noopener noreferrer">欧盟官方公报（OJ） <small>正式发布的欧盟法律文件；电子版为现行官方版本</small></a>
-            <a data-source-id="eurlex" href="https://eur-lex.europa.eu/" target="_blank" rel="noopener noreferrer">EUR-Lex <small>条约、法规、指令、决定、合并文本及 CELEX 检索</small></a>
-            <a data-source-id="curia" href="https://curia.europa.eu/en/content/juris/juris.htm" target="_blank" rel="noopener noreferrer">Curia 欧盟法院判例库 <small>欧盟法院及普通法院判决、命令与案件资料</small></a>
-            <a data-source-id="publications-office" href="https://op.europa.eu/en" target="_blank" rel="noopener noreferrer">欧盟出版局（Publications Office） <small>欧盟法律、出版物、数据及官方信息入口</small></a>
-          </div>
-        </div>
-        <div class="source-link-group">
-          <h3>分领域专项法规与合规平台</h3>
-          <div class="home-links">
-            <a data-source-id="ai-act-service-desk" href="https://ai-act-service-desk.ec.europa.eu/en" target="_blank" rel="noopener noreferrer">AI Act Service Desk <small>人工智能法案分章浏览、合规检查及官方问答</small></a>
-            <a data-source-id="dg-ener" href="https://energy-efficient-products.ec.europa.eu/product-list_en" target="_blank" rel="noopener noreferrer">欧委会能源总司：生态设计与能效标签 <small>产品范围、Ecodesign 与 Energy Labelling 要求</small></a>
-            <a data-source-id="eprel" href="https://eprel.ec.europa.eu/screen/home" target="_blank" rel="noopener noreferrer">EPREL 能效产品注册库 <small>能效标签产品型号、参数及产品信息查询</small></a>
-            <a data-source-id="dg-just" href="https://commission.europa.eu/strategy-and-policy/policies/consumers/consumer-protection-policy_en" target="_blank" rel="noopener noreferrer">欧委会消费者保护专题（DG JUST） <small>消费者保护政策、商业行为及消费者权益资料</small></a>
-            <a data-source-id="edpb" href="https://www.edpb.europa.eu/documents_en?type%5Bguidance%5D=guidance" target="_blank" rel="noopener noreferrer">EDPB 欧洲数据保护委员会 <small>GDPR 指南、意见、建议及其他数据保护文件</small></a>
-            <a data-source-id="safety-gate" href="https://ec.europa.eu/safety-gate/screen/home?lang=en" target="_blank" rel="noopener noreferrer">Safety Gate 产品安全预警系统 <small>非食品消费品安全预警、风险及召回信息</small></a>
-            <a data-source-id="enisa" href="https://www.enisa.europa.eu/" target="_blank" rel="noopener noreferrer">ENISA 欧盟网络安全局 <small>网络安全认证、威胁态势及技术指引</small></a>
-          </div>
-        </div>
-        <div class="source-link-group">
-          <h3>立法动态与机构信息</h3>
-          <div class="home-links">
-            <a data-source-id="have-your-say" href="https://have-your-say.ec.europa.eu/" target="_blank" rel="noopener noreferrer">Have Your Say 欧盟立法征询 <small>委员会立法提案、公开咨询及意见反馈</small></a>
-            <a data-source-id="commission-tracking" href="https://commission.europa.eu/law/tracking-law-making_en" target="_blank" rel="noopener noreferrer">欧盟委员会立法跟踪 <small>立法及授权、实施法案进程</small></a>
-            <a data-source-id="oeil" href="https://oeil.europarl.europa.eu/oeil/en/find-out-more" target="_blank" rel="noopener noreferrer">欧洲议会立法观察站 <small>立法程序及进展</small></a>
-            <a data-source-id="council-press" href="https://www.consilium.europa.eu/en/press/" target="_blank" rel="noopener noreferrer">欧盟理事会新闻中心 <small>政策与立法动态</small></a>
-          </div>
-        </div>
+        <div class="section-head"><div><h2 id="links-title">网址速递</h2><p>按法律领域与监管主题整理的官方法规、机构数据库及政策入口。选择板块后查看推荐网址清单；列入此处不代表本平台已自动接入该数据源。</p></div></div>
+        <div id="source-category-grid" class="source-category-grid" aria-label="官方网址分类"></div>
+        <section id="source-category-detail" class="source-category-detail" hidden aria-live="polite" aria-labelledby="source-detail-title">
+          <button id="source-back" class="source-back" type="button">← 返回网址分类</button>
+          <h3 id="source-detail-title"></h3>
+          <p id="source-detail-description"></p>
+          <ul id="source-recommendations" class="source-recommendations"></ul>
+        </section>
       </section><section class="home-panel" aria-labelledby="topics-title"><h2 id="topics-title">最新专题</h2><div class="topic-placeholder"></div></section></div><section class="department-section" id="departments" hidden aria-labelledby="department-title">
       <div class="section-head"><div><h2 id="department-title">业务板块</h2><p>一部法规可以关联多个部门；部门关联用于检索导航，不代替具体适用性判断。</p></div></div>
       <div class="department-grid" id="department-grid"></div>
@@ -74,14 +51,14 @@
         <div><h2 id="catalog-title">高级检索</h2><p id="catalog-scope">现有目录覆盖范围以数据源说明为准</p></div>
         <a class="source-link" href="https://eur-lex.europa.eu/" target="_blank" rel="noopener">到 EUR-Lex 核对</a>
       </div>
-      <div class="notice" id="notice" role="status" hidden></div><section id="favorites-panel" class="favorites-panel" hidden><p>个人收藏及备注仅保存于当前浏览器，不会共享给其他用户。</p><label>收藏文件夹 <select id="folder-select"><option value="">全部收藏</option></select></label><button type="button" id="new-folder" class="outline-button">新建文件夹</button></section>
+      <div class="notice" id="notice" role="status" hidden></div><section id="favorites-panel" class="favorites-panel" hidden><p>个人收藏及备注仅保存于当前浏览器，不会共享给其他用户。</p><label>收藏文件夹 <select id="folder-select"><option value="">选择收藏文件夹</option></select></label><button type="button" id="new-folder" class="outline-button">新建文件夹</button></section>
       <form class="filters" id="filters" aria-label="法规筛选">
         <label class="search-box">
           <span class="sr-only">搜索法规中文名称、官方名称、编号或关键词</span><span class="search-icon" aria-hidden="true"></span>
           <input type="search" id="search" autocomplete="off" placeholder="输入法规名称、简称或编号，例如 AI Act、人工智能法案">
         </label>
         <details id="more-filters"><summary>更多检索条件</summary><div class="filter-fields">
-<label><span>检索范围</span><select id="search-scope"><option value="metadata">全部目录元数据</option><option value="title">中英文名称</option><option value="english">官方英文名称</option><option value="chinese">中文译名</option></select></label>
+<label><span>检索范围</span><select id="search-scope"><option value="metadata">目录元数据（默认）</option><option value="title">中英文名称</option><option value="english">官方英文名称</option><option value="chinese">中文译名</option></select></label>
 <label><span>包含任一关键词（OR）</span><input id="any-terms" type="text"></label>
 <label><span>精确短语</span><input id="exact-phrase" type="text"></label>
 <label><span>排除关键词（NOT）</span><input id="exclude-terms" type="text"></label>
@@ -89,13 +66,13 @@
 <label><span>官方英文名称</span><input id="en-name" type="text"></label>
 <label><span>法规编号</span><input id="act-number" type="text" placeholder="2023/1669"></label>
 <label><span>CELEX 编号</span><input id="celex-number" type="text"></label>
-<label><span>制定机构（按标题识别）</span><select id="author"><option value="">全部机构</option><option value="parliament">欧洲议会与理事会</option><option value="commission">欧盟委员会</option><option value="council">欧盟理事会</option><option value="other">其他</option></select></label>
+<label><span>制定机构（按标题识别）</span><select id="author"><option value="">选择制定机构</option><option value="parliament">欧洲议会与理事会</option><option value="commission">欧盟委员会</option><option value="council">欧盟理事会</option><option value="other">其他</option></select></label>
 </div></details><button class="primary-button" type="submit">检索</button>
         <div class="filter-fields">
           <label><span>业务部门</span><select id="department"><option value="">全部业务部门</option></select></label>
-          <label><span>法律部门／法律类别</span><select id="cross-topic"><option value="">全部法律领域</option></select></label>
-          <label><span>文件类型 / 效力类别</span><select id="type"><option value="">全部文件类型</option><option value="R">Regulation（条例）</option><option value="L">Directive（指令）</option><option value="D">Decision（决定）</option><option value="delegated">授权法案</option><option value="implementing">实施法案</option><option value="guidance">官方指南（已收录）</option><option value="standards">协调标准引用 / 共同规范文件</option></select></label>
-          <label><span>效力状态</span><select id="status"><option value="">全部状态</option><option value="active">现行有效且已实施（适用）</option><option value="not_applied">现行有效尚未实施（适用）</option><option value="partial">现行有效·分阶段适用</option><option value="pending">尚未生效</option><option value="inactive">已失效</option><option value="active_unknown">现行有效</option><option value="unknown">其他状态</option><option value="na">不适用</option></select></label>
+          <label><span>法律领域</span><select id="cross-topic"><option value="">选择法律领域</option></select></label>
+          <label><span>效力层级</span><select id="type"><option value="">选择效力层级</option><option value="R">Regulation（条例）</option><option value="L">Directive（指令）</option><option value="D">Decision（决定）</option><option value="delegated">授权法案</option><option value="implementing">实施法案</option><option value="guidance">官方指南（已收录）</option><option value="standards">协调标准引用 / 共同规范文件</option></select></label>
+          <label><span>状态</span><select id="status"><option value="">选择状态</option><option value="active">现行有效且已实施（适用）</option><option value="not_applied">现行有效尚未实施（适用）</option><option value="partial">现行有效·分阶段适用</option><option value="pending">尚未生效</option><option value="inactive">已失效</option><option value="active_unknown">现行有效</option><option value="unknown">其他状态</option><option value="na">不适用</option></select></label>
         </div>
         <div class="filter-actions"><span class="filter-hint">各条件组合使用；检索标题与元数据，不含法规全文。</span><button class="text-button" id="clear-button" type="button">清除筛选</button></div>
       </form>

@@ -94,7 +94,7 @@ let folders = readStorage("eu-law-folders-v1", ["默认收藏"]);
 let selectedRecord = null;
 function persist() { try { localStorage.setItem("eu-law-favorites-v1",JSON.stringify(favorites));localStorage.setItem("eu-law-folders-v1",JSON.stringify(folders));return true; } catch { alert("无法保存收藏：浏览器存储不可用。");return false; } }
 function folderOptions() {
-  setSelectOptions(ui["folder-select"],folders.map(x=>({id:x,label:x})),"全部收藏");
+  setSelectOptions(ui["folder-select"],folders.map(x=>({id:x,label:x})),"选择收藏文件夹");
   ui["record-folder"].replaceChildren(...folders.map(x=>new Option(x,x)));
 }
 function openRecord(record) {
@@ -169,6 +169,52 @@ function setSelectOptions(select, items, placeholder) {
   select.replaceChildren(new Option(placeholder,""),...items.map(item=>new Option(item.label,item.id)));
   if (items.some(item=>item.id===selected)) select.value=selected;
 }
+function buildHomepageSourceDirectory() {
+  const grid=document.createDocumentFragment();
+  for (const category of sourceRegistry.homepageCategories ?? []) {
+    const button=document.createElement("button");
+    button.type="button";
+    button.className="source-category-card";
+    button.dataset.sourceCategory=category.id;
+    button.setAttribute("aria-label",category.label+"，"+category.sources.length+"个推荐网址");
+    const heading=document.createElement("strong");heading.textContent=category.label;
+    const description=document.createElement("span");description.textContent=category.description;
+    const count=document.createElement("small");count.textContent=category.sources.length+" 个推荐网址 · 查看清单 →";
+    button.append(heading,description,count);
+    grid.append(button);
+  }
+  ui["source-category-grid"].replaceChildren(grid);
+  showSourceCategoryGrid();
+}
+function showSourceCategoryGrid() {
+  ui["source-category-grid"].hidden=false;
+  ui["source-category-detail"].hidden=true;
+}
+function openSourceCategory(categoryId) {
+  const category=(sourceRegistry.homepageCategories??[]).find(item=>item.id===categoryId);
+  if(!category)return;
+  ui["source-detail-title"].textContent=category.label;
+  ui["source-detail-description"].textContent=category.description;
+  const list=document.createDocumentFragment();
+  for(const source of category.sources??[]){
+    const item=document.createElement("li");item.className="source-recommendation";
+    const head=document.createElement("div");head.className="source-recommendation-head";
+    const link=document.createElement("a");link.href=source.url;link.target="_blank";link.rel="noopener noreferrer";link.textContent=source.name;
+    const owner=document.createElement("span");owner.className="source-owner";owner.textContent=source.owner;
+    head.append(link,owner);
+    const purpose=document.createElement("p");purpose.textContent=source.purpose;
+    item.append(head,purpose);list.append(item);
+  }
+  ui["source-recommendations"].replaceChildren(list);
+  ui["source-category-grid"].hidden=true;
+  ui["source-category-detail"].hidden=false;
+}
+ui["source-category-grid"].addEventListener("click",event=>{
+  const button=event.target.closest("button[data-source-category]");
+  if(button)openSourceCategory(button.dataset.sourceCategory);
+});
+ui["source-back"].addEventListener("click",showSourceCategoryGrid);
+
 function buildSourceDirectory() {
   const grid=document.createDocumentFragment();
   for (const category of sourceRegistry.categories ?? []) {
@@ -195,8 +241,8 @@ function buildSourceDirectory() {
   ui["source-grid"].replaceChildren(grid);
 }
 function buildTaxonomyUI() {
-  setSelectOptions(ui.department,[...taxonomy.departments,{id:"other",label:"其他／通用法规"}],"全部业务部门");
-  setSelectOptions(ui["cross-topic"],taxonomy.legalFields??[],"全部法律领域");
+  setSelectOptions(ui.department,[...taxonomy.departments,{id:"other",label:"其他／通用法规"}],"选择业务部门");
+  setSelectOptions(ui["cross-topic"],taxonomy.legalFields??[],"选择法律领域");
   const grid=document.createDocumentFragment();
   taxonomy.departments.forEach(d=>{
     const button=document.createElement("a");
@@ -263,6 +309,7 @@ async function loadSnapshot(manual=false) {
     buildTaxonomyUI();
     applyView();
     buildSourceDirectory();
+    buildHomepageSourceDirectory();
     renderHome();
     const checkedAt=data.checkedAt;
     ui["sync-time"].dateTime=checkedAt;ui["sync-time"].textContent=Number.isFinite(Date.parse(checkedAt))?chinaTime.format(new Date(checkedAt)):"未标注";
@@ -391,7 +438,7 @@ function render() {
   ui["result-rows"].replaceChildren(...visible.map(record=>resultRow(record,today,[...terms,...normalize(ui["any-terms"].value).split(" ").filter(Boolean),...normalize(ui["exact-phrase"].value).split(" ").filter(Boolean)])));
   ui["result-table"].hidden=!visible.length;ui.empty.hidden=!!visible.length;
   ui["empty-title"].textContent="没有符合条件的资料";
-  ui["empty-detail"].textContent="请尝试其他名称或编号关键词，或调整文件类型、业务部门及法律领域。";
+  ui["empty-detail"].textContent="请尝试其他名称或编号关键词，或调整效力层级、业务部门及法律领域。";
   ui.pagination.hidden=lastPage<=1;ui["result-count"].textContent="匹配 "+numbers.format(filtered.length)+" 项 · 当前目录 "+numbers.format(records.length)+" 项";
   ui["page-count"].textContent="第 "+page+" / "+numbers.format(lastPage)+" 页";
   ui.previous.disabled=page===1;ui.next.disabled=page===lastPage;
