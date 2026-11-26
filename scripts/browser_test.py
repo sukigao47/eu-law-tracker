@@ -92,7 +92,7 @@ with sync_playwright() as p:
     page.locator("#clear-button").click()
     page.locator("#status").select_option("active_unknown")
     expect(rows.first).to_be_visible()
-    assert rows.evaluate_all("(items) => items.every(row => /現行有效/.test(row.querySelector('td:last-child').textContent))"), "現行有效筛选应包含全部已生效、分阶段适用及尚未开始适用的现行法规"
+    assert page.locator("#result-rows tr").evaluate_all("(items) => items.every(row => /现行有效/.test(row.querySelector('td:last-child').textContent))"), "现行有效筛选应包含全部已生效、分阶段适用及尚未开始适用的现行法规"
     page.locator("#clear-button").click()
     expect(page.locator("#search-scope")).to_have_count(0)
     for selector in ("#department", "#cross-topic", "#status", "#type"):
