@@ -23,7 +23,7 @@ with sync_playwright() as p:
     category_titles=category_cards.locator("strong").all_text_contents()
     assert category_titles == [
         "核心基础法规库", "能效、生态设计、可持续产品", "消费者保护、广告合规、绿色声明",
-        "数据保护 GDPR", "网络安全、NIS2、CRA", "AI Act", "产品安全、市场监管、射频指令",
+        "数据保护GDPR", "网络安全、NIS2、CRA", "AI Act", "产品安全、市场监管、射频指令",
         "电池、循环经济、化学品、包装", "数字服务、数字市场", "立法征询、政策动态",
         "标准、合格评定、TBT通报", "重点成员国法律官网", "贸易制裁配套",
     ]
