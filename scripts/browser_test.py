@@ -80,13 +80,31 @@ with sync_playwright() as p:
         ["pending", "尚未生效"],
         ["inactive", "已失效"],
         ["active_unknown", "现行有效"],
-        ["na", "不适用"],
+        ["na", "非立法资料及C系列文件"],
     ], status_options
     for selector in ("#department", "#cross-topic", "#status", "#type"):
         placeholder = page.locator(selector + " option").first
         expect(placeholder).to_contain_text("选择")
         expect(placeholder).not_to_contain_text("全部")
     expect(page.locator("#type-subtype option").first).to_have_text("Select act form")
+    page.locator("#more-filters").evaluate("(el) => el.open = true")
+    control_heights = page.locator("#filters input:visible, #filters select:visible").evaluate_all(
+        "(els) => els.map(el => Math.round(el.getBoundingClientRect().height))"
+    )
+    assert control_heights and all(abs(height - 42) <= 1 for height in control_heights), control_heights
+    reset = lambda: page.locator("#clear-button").click()
+    page.locator("#search").fill("Blue Guide")
+    guide = page.locator("#result-rows tr[data-celex='52022XC0629(04)']")
+    expect(guide).to_have_count(1)
+    expect(guide.locator("td").nth(4)).to_have_text("-")
+    expect(guide.locator("td").nth(5)).to_contain_text("非约束性指导文件")
+    page.locator("#clear-button").click()
+    page.locator("#type").select_option("guidance")
+    expect(page.locator("#result-rows tr[data-celex='52022XC0629(04)']")).to_have_count(1)
+    page.locator("#clear-button").click()
+    page.locator("#search").fill("2022/C 247/01")
+    expect(page.locator("#result-rows tr[data-celex='52022XC0629(04)']")).to_have_count(1)
+    page.locator("#clear-button").click()
 
     rows = page.locator("#result-rows tr")
 
