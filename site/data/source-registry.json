@@ -209,21 +209,21 @@
         {
           "id": "dg-just",
           "name": "欧盟委员会消费者保护专题（DG JUST）",
-          "url": "https://commission.europa.eu/strategy-and-policy/policies/consumers/consumer-protection-policy_en",
+          "url": "https://commission.europa.eu/topics/consumers_en",
           "owner": "European Commission · DG JUST",
           "purpose": "消费者保护政策、消费者权利、商业行为监管及相关欧盟执法框架。"
         },
         {
           "id": "cpc",
           "name": "消费者保护执法协作网（CPC Network）",
-          "url": "https://commission.europa.eu/justice-consumer-protection/consumer-protection/consumer-protection-cooperation-cpc_en",
+          "url": "https://commission.europa.eu/topics/consumers/consumer-rights-and-complaints/enforcement-consumer-protection/consumer-protection-cooperation-network_en",
           "owner": "European Commission and national consumer authorities",
           "purpose": "了解欧盟委员会与成员国消费者保护主管机关的跨境执法协作、联合行动及执法信息。"
         },
         {
           "id": "green-claims",
           "name": "Green Claims 绿色声明专题",
-          "url": "https://commission.europa.eu/justice-consumer-protection/consumer-protection/green-claims_en",
+          "url": "https://commission.europa.eu/topics/consumers/consumer-rights-and-complaints/sustainable-consumption_en",
           "owner": "European Commission",
           "purpose": "查询绿色声明、环境营销表述及反漂绿政策动态；具体法律义务仍应回到适用法条核验。"
         }
