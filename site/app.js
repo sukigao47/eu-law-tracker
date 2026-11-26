@@ -242,7 +242,7 @@ function buildSourceDirectory() {
 }
 function buildTaxonomyUI() {
   setSelectOptions(ui.department,[...taxonomy.departments,{id:"other",label:"其他／通用法规"}],"选择业务部门");
-  setSelectOptions(ui["cross-topic"],taxonomy.legalFields??[],"选择法律领域");
+  setSelectOptions(ui["cross-topic"],taxonomy.legalFields??[],"选择法律领域部门");
   const grid=document.createDocumentFragment();
   taxonomy.departments.forEach(d=>{
     const button=document.createElement("a");
@@ -438,7 +438,7 @@ function render() {
   ui["result-rows"].replaceChildren(...visible.map(record=>resultRow(record,today,[...terms,...normalize(ui["any-terms"].value).split(" ").filter(Boolean),...normalize(ui["exact-phrase"].value).split(" ").filter(Boolean)])));
   ui["result-table"].hidden=!visible.length;ui.empty.hidden=!!visible.length;
   ui["empty-title"].textContent="没有符合条件的资料";
-  ui["empty-detail"].textContent="请尝试其他名称或编号关键词，或调整效力层级、业务部门及法律领域。";
+  ui["empty-detail"].textContent="请尝试其他名称或编号关键词，或调整效力层级、业务部门及法律领域部门。";
   ui.pagination.hidden=lastPage<=1;ui["result-count"].textContent="匹配 "+numbers.format(filtered.length)+" 项 · 当前目录 "+numbers.format(records.length)+" 项";
   ui["page-count"].textContent="第 "+page+" / "+numbers.format(lastPage)+" 页";
   ui.previous.disabled=page===1;ui.next.disabled=page===lastPage;
