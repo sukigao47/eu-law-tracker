@@ -91,7 +91,7 @@ with sync_playwright() as p:
     ), "已失效筛选结果中包含非已失效状态记录"
     page.locator("#clear-button").click()
     page.locator("#status").select_option("active_unknown")
-    expect(rows.first).to_be_visible()
+    expect(page.locator("#result-rows tr").first).to_be_visible()
     assert page.locator("#result-rows tr").evaluate_all("(items) => items.every(row => /现行有效/.test(row.querySelector('td:last-child').textContent))"), "现行有效筛选应包含全部已生效、分阶段适用及尚未开始适用的现行法规"
     page.locator("#clear-button").click()
     expect(page.locator("#search-scope")).to_have_count(0)
