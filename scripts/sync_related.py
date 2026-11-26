@@ -255,7 +255,9 @@ def sync_related(output: Path, profile: Path, today: date | None = None) -> dict
             curated[record["id"]] = record
         else:
             for key, value in record.items():
-                if not current.get(key) and value is not None:
+                if value is None:
+                    continue
+                if key in {"legalType", "instrumentClass", "bindingNature", "ojCitation"} or not current.get(key):
                     current[key] = value
     soft_records = list(curated.values())
     corrigendum = next(
