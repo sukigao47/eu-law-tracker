@@ -53,6 +53,18 @@ class RelatedMaterialSyncTests(unittest.TestCase):
             ("Commission Notice / Guidance", "interpretative_guidance_non_binding"),
         )
 
+    def test_blue_guide_fallback_records_include_original_and_2026_corrigendum(self):
+        records = {row["id"]: row for row in sync_related.curated_blue_guide_records()}
+        self.assertEqual(set(records), {"52022XC0629(04)", "52022XC0629(04)R(02)"})
+        self.assertEqual(records["52022XC0629(04)"]["published"], "2022-06-29")
+        self.assertEqual(records["52022XC0629(04)"]["ojCitation"], "2022/C 247/01")
+        self.assertEqual(records["52022XC0629(04)R(02)"]["published"], "2026-09-24")
+        self.assertEqual(records["52022XC0629(04)R(02)"]["ojCitation"], "C/2026/90070")
+        self.assertEqual(
+            records["52022XC0629(04)"]["bindingNature"],
+            "interpretative_guidance_non_binding",
+        )
+
     def test_official_url_encodes_c_series_celex(self):
         url = sync_related.official_url("C/2025/03118")
         self.assertIn("CELEX%3AC%2F2025%2F03118", url)
