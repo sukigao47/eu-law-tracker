@@ -235,7 +235,13 @@ def details(ids_and_works, in_force_range=False):
                 "concepts": sorted(record.get("concept", ())),
             }
     if ids_and_works and not any(record["title"] for record in result.values()):
-        raise ValueError("Cellar returned no English titles for an entire batch")
+        # Some older CELLAR works have no English expression title. Their
+        # dates, subjects or EuroVoc concepts can still be useful for
+        # classification, so do not abort the entire historical backfill.
+        print(
+            f"Warning: no English titles in a metadata batch of {len(ids_and_works)} acts",
+            flush=True,
+        )
     return result
 
 
