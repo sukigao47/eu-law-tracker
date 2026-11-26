@@ -27,7 +27,7 @@
 ## 当前数据源和覆盖边界
 
 当前自动采集使用欧盟出版局 CELLAR SPARQL 数据，分别维护有约束力法律文件、软法/C系列相关资料和欧盟法院判例三个独立目录：
-- CELLAR 中标记为现行有效的 CELEX 第3部门 Regulation、Directive、Decision 记录；
+- CELLAR 中明确标记为现行有效或非现行的 CELEX 第3部门 Regulation、Directive、Decision 记录（非现行记录可按状态筛选为“已失效”；尚未到生效日期的文件仍单独显示为“尚未生效”）；
 - 最近90天《欧盟官方公报》L系列发布的 Regulation、Directive、Decision；
 - 软法候选：CELEX 描述符 3A、3H、3G、3C，以及 5DC、5JC、5SC 和机构意见/报告类 5AA、5TA、5SA、5AB、5HB、5XB、5AE、5IE、5AC、5AR、5IR、5XR，滚动五年；
 - 官方公报 C 系列：CELLAR OJ-C collection 最近180天记录；
