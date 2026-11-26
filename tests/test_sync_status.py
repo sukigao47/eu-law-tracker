@@ -48,6 +48,20 @@ class NonCurrentLegislationIndexTests(unittest.TestCase):
 
         self.assertIs(record["inForce"], False)
 
+    @patch("sync.select")
+    def test_details_tolerates_historical_work_without_english_title(self, select):
+        work = "https://publications.europa.eu/resource/cellar/01234567-89ab-cdef-0123-456789abcdef"
+        select.return_value = [{
+            "work": work,
+            "field": "subject",
+            "value": "Consumer protection",
+        }]
+
+        result = sync.details([("32000R0002", work)])
+
+        self.assertEqual(result["32000R0002"]["title"], "")
+        self.assertEqual(result["32000R0002"]["subjects"], ["Consumer protection"])
+
     def test_indexed_current_flag_takes_precedence(self):
         record = {"inForce": False}
         index = {"32024R0001": "https://publications.europa.eu/resource/cellar/current"}
