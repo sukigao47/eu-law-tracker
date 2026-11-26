@@ -269,7 +269,7 @@ tbody tr:hover { background: #f6f9fd; }
 .crosscutting-list { display:flex; flex-wrap:wrap; gap:.55rem; }
 .cross-chip { padding:.48rem .8rem; border:1px solid #cbd8e8; border-radius:999px; background:#eef3fa; color:#23466f; font-size:.82rem; }
 .cross-chip:hover { border-color:#7e9fc9; background:#e3edf9; }
-.filter-fields { grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); }
+.filter-fields { grid-template-columns:repeat(4,minmax(0,1fr)); }
 .filter-hint { color:var(--muted); font-size:.82rem; align-self:center; }
 .table-scroll { width:100%; overflow-x:auto; }
 #result-table { min-width:1120px; }
