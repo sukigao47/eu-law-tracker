@@ -59,10 +59,16 @@ with sync_playwright() as p:
     expect(page.locator("#catalog-title")).to_have_text("高级检索")
     expect(page.locator("label:has(#cross-topic) > span")).to_have_text("法律领域部门")
     expect(page.locator("label:has(#type) > span")).to_have_text("效力层级")
-    expect(page.locator("label:has(#status) > span")).to_have_text("状态")
+    expect(page.locator("label:has(#status) > span")).to_have_text("现行状态")
     expect(page.locator("#department option").first).to_have_text("选择业务部门")
     expect(page.locator("#type option").first).to_have_text("选择效力层级")
     expect(page.locator("#status option").first).to_have_text("选择状态")
+    status_options = page.locator("#status option").all_text_contents()
+    assert status_options.count("现行有效") == 1, status_options
+    assert "其他状态" not in status_options, status_options
+    for removed_value in ("not_applied", "partial", "active_unknown", "unknown"):
+        expect(page.locator(f"#status option[value={removed_value}]")).to_have_count(0)
+    expect(page.locator("#status option[value=active]")).to_have_count(1)
     for selector in ("#department", "#cross-topic", "#type", "#status"):
         placeholder = page.locator(selector + " option").first
         expect(placeholder).to_contain_text("选择")
@@ -73,6 +79,15 @@ with sync_playwright() as p:
     expect(page.locator("#cross-topic option")).to_have_count(11)
     rows = page.locator("#result-rows tr")
     expect(rows.first).to_be_visible()
+    expect(page.locator("#sort")).to_have_value("relevance")
+    page.locator("#status").select_option("active")
+    expect(rows.first).to_be_visible()
+    active_status_labels = page.locator("#result-rows tr td:nth-child(6) .tag").all_text_contents()
+    assert active_status_labels and all(label in {
+        "现行有效且已实施（适用）", "现行有效尚未实施（适用）",
+        "现行有效·分阶段适用", "现行有效"
+    } for label in active_status_labels), active_status_labels
+    page.locator("#clear-button").click()
     expect(page.locator("#sort")).to_have_value("relevance")
     page.locator("#sort").select_option("newest")
     dates=rows.evaluate_all("(rs) => rs.map(r => r.dataset.published)")
