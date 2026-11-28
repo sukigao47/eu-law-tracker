@@ -92,6 +92,10 @@ with sync_playwright() as p:
         "(rows) => rows.every(row => row.querySelector('.status-inactive'))"
     ), "已失效筛选结果中包含非已失效状态记录"
     page.locator("#clear-button").click()
+    page.locator("#status").select_option("active_unknown")
+    expect(page.locator("#result-rows tr").first).to_be_visible()
+    assert page.locator("#result-rows tr").evaluate_all("(items) => items.every(row => /现行有效/.test(row.querySelector('td:last-child').textContent))"), "现行有效筛选应包含全部已生效、分阶段适用及尚未开始适用的现行法规"
+    page.locator("#clear-button").click()
     expect(page.locator("#search-scope")).to_have_count(0)
     for selector in ("#department", "#cross-topic", "#status", "#type"):
         placeholder = page.locator(selector + " option").first
@@ -144,11 +148,20 @@ with sync_playwright() as p:
         ["delegated-directive", "Delegated Directive"],
         ["delegated-decision", "Delegated Decision"],
     ]
-    delegated_sets = []
-    for form in ("delegated-regulation", "delegated-directive", "delegated-decision"):
+    delegated_sets = {}
+    for form, pattern in [
+        ("delegated-regulation", r"delegated regulation"),
+        ("delegated-directive", r"delegated directive"),
+        ("delegated-decision", r"delegated decision"),
+    ]:
         page.locator("#type-subtype").select_option(form)
-        delegated_sets.append(result_ids())
-    assert delegated_sets[0] == delegated_sets[1] == delegated_sets[2], delegated_sets
+        ids = result_ids()
+        assert ids, f"{form} should return matching documents"
+        assert all(re.search(pattern, title, re.I) for title in page.locator("#result-rows .act-title").all_text_contents()), (form, page.locator("#result-rows .act-title").all_text_contents())
+        delegated_sets[form] = set(ids)
+    assert delegated_sets["delegated-regulation"].isdisjoint(delegated_sets["delegated-directive"])
+    assert delegated_sets["delegated-regulation"].isdisjoint(delegated_sets["delegated-decision"])
+    assert delegated_sets["delegated-directive"].isdisjoint(delegated_sets["delegated-decision"])
 
     page.locator("#type").select_option("implementing")
     expect(page.locator("#type-subtype")).to_be_visible()
@@ -156,11 +169,17 @@ with sync_playwright() as p:
         ["implementing-regulation", "Implementing Regulation"],
         ["implementing-decision", "Implementing Decision"],
     ]
-    implementing_sets = []
-    for form in ("implementing-regulation", "implementing-decision"):
+    implementing_sets = {}
+    for form, pattern in [
+        ("implementing-regulation", r"implementing regulation"),
+        ("implementing-decision", r"implementing decision"),
+    ]:
         page.locator("#type-subtype").select_option(form)
-        implementing_sets.append(result_ids())
-    assert implementing_sets[0] == implementing_sets[1], implementing_sets
+        ids = result_ids()
+        assert ids, f"{form} should return matching documents"
+        assert all(re.search(pattern, title, re.I) for title in page.locator("#result-rows .act-title").all_text_contents()), (form, page.locator("#result-rows .act-title").all_text_contents())
+        implementing_sets[form] = set(ids)
+    assert implementing_sets["implementing-regulation"].isdisjoint(implementing_sets["implementing-decision"])
 
     page.locator("#type").select_option("guidance")
     expect(page.locator("#type-subtype")).to_be_hidden()
@@ -195,6 +214,9 @@ with sync_playwright() as p:
         reset()
         fill("search", query)
         expect(rows.first).to_contain_text(celex)
+    reset()
+    fill("search", "电池可拆卸")
+    expect(rows.first).to_contain_text("32026R1770")
     reset()
     fill("search", "ecodesign")
     expect(rows.first).to_be_visible()

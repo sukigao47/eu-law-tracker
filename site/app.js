@@ -18,13 +18,79 @@ const LAW_ALIASES = {
 "52022XC0629(04)R(02)":["欧盟蓝皮书勘误","蓝皮书勘误","Blue Guide corrigendum","C/2026/90070"]
 };
 function aliasesFor(record){return LAW_ALIASES[record.id]||[];}
-function searchRank(record,query){
- if(!query)return 0;
- const exact=[record.id,referenceNumber(record.id),...aliasesFor(record),zhTitles[record.id],record.titleZh].map(normalize);
- if(exact.includes(query))return 3;
- if(exact.some(x=>x.includes(query)))return 2;
- if(normalize(record.title).includes(query))return 1;
- return 0;
+function dictionaryGroups(){
+ return asList(searchDictionary.groups).map(group=>({
+  terms:[...new Set(asList(group.terms).map(normalize).filter(Boolean))]
+ })).filter(group=>group.terms.length);
+}
+function expandSearchToken(token){
+ const value=normalize(token);
+ const group=dictionaryGroups().find(item=>item.terms.includes(value));
+ return group?group.terms:[value];
+}
+function queryClauses(query){
+ const value=normalize(query);
+ if(!value)return [];
+ const groups=dictionaryGroups(),clauses=[];
+ const stopWords=new Set(["欧盟","欧盟对","对于","关于","有什么","有哪些","什么","哪些","规定","要求","相关","适用","法规","法律","政策","标准","的","是否","如何","怎么","请问","必须","需要","能否","可以"]);
+ for(const token of value.split(/\s+/).filter(Boolean)){
+  if(!/[\u3400-\u9fff]/.test(token)){
+   clauses.push(expandSearchToken(token));
+   continue;
+  }
+  let cursor=0;
+  while(cursor<token.length){
+   const candidates=[];
+   for(const group of groups)for(const term of group.terms){
+    if(/[\u3400-\u9fff]/.test(term)&&token.startsWith(term,cursor))candidates.push({group,term});
+   }
+   candidates.sort((a,b)=>b.term.length-a.term.length);
+   if(candidates.length){
+    clauses.push(candidates[0].group.terms);
+    cursor+=candidates[0].term.length;
+    continue;
+   }
+   let next=token.length;
+   for(const group of groups)for(const term of group.terms){
+    if(!/[\u3400-\u9fff]/.test(term))continue;
+    const position=token.indexOf(term,cursor+1);
+    if(position>cursor)next=Math.min(next,position);
+   }
+   let unknown=token.slice(cursor,next);
+   for(const stop of stopWords)unknown=unknown.replaceAll(stop,"");
+   if(unknown.length>1&&!/^[，、。；：！？,.!?;:_-]+$/.test(unknown))clauses.push([unknown]);
+   cursor=next;
+  }
+ }
+ return clauses.length?clauses:[[value]];
+}
+function searchRank(record,query,clauses){
+ const q=normalize(query);
+ if(!q)return 0;
+ const id=normalize(record.id),number=normalize(referenceNumber(record.id));
+ if(q===id||q===number)return 1000000000;
+ const aliases=aliasesFor(record).map(normalize);
+ if(aliases.includes(q))return 90000000;
+ const zh=[record.titleZh,record.titleZhFull,zhTitles[record.id]].map(normalize).filter(Boolean);
+ if(zh.some(title=>title===q))return 85000000;
+ const title=normalize(record.title);
+ if(title===q)return 80000000;
+ let score=title.includes(q)?25000+Math.min(5000,q.length*10):0;
+ const fields=[
+  [id,1200],[number,1100],[aliases.join(" "),950],[zh.join(" "),850],
+  [title,750],[normalize(asList(record.keywords).join(" ")),430],
+  [normalize(asList(record.subjects).join(" ")),320],
+  [normalize([...topicLabelsFor(record),...departmentIdsFor(record).map(id=>taxonomy.departments.find(d=>d.id===id)?.label??id)].join(" ")),220],
+  [record.searchText,100]
+ ];
+ for(const clause of clauses){
+  const documentFrequency=records.reduce((count,item)=>count+(clause.some(term=>item.searchText.includes(term))?1:0),0);
+  const idf=Math.log(1+(records.length-documentFrequency+0.5)/(documentFrequency+0.5));
+  let matchedWeight=0;
+  for(const [text,weight] of fields)if(clause.some(term=>text.includes(term)))matchedWeight+=weight;
+  score+=matchedWeight*idf;
+ }
+ return score;
 }
 
 const TYPE_LABELS = { R: "条例 / Regulation", L: "指令 / Directive", D: "决定 / Decision" };
@@ -42,7 +108,7 @@ const chinaTime = new Intl.DateTimeFormat("zh-CN", {timeZone:"Asia/Shanghai",yea
 const collator = new Intl.Collator("zh-CN");
 const numbers = new Intl.NumberFormat("zh-CN");
 const ui = Object.fromEntries(Array.from(document.querySelectorAll("[id]"), el => [el.id,el]));
-let snapshot = null, records = [], taxonomy = {departments:[],legalFields:[]}, zhTitles = {}, sourceRegistry = {categories:[]};
+let snapshot = null, records = [], taxonomy = {departments:[],legalFields:[]}, zhTitles = {}, sourceRegistry = {categories:[]}, searchDictionary = {groups:[]};
 let page = 1, refreshError = false, refreshing = false;
 const params = new URLSearchParams(location.search);
 let departmentView = params.get("department") || "";
@@ -273,16 +339,21 @@ function updateActSubtypeOptions(){
 function selectedTypeFilter(){
  const parent=ui.type.value, child=ui["type-subtype"].value;
  if(parent==="legislative")return child;
- // Delegated and implementing subforms retain the existing parent-level filter;
- // no catalogue metadata or result-classification rules are changed here.
- if(parent==="delegated")return child?"delegated":"";
- if(parent==="implementing")return child?"implementing":"";
+ if(parent==="delegated"||parent==="implementing")return child||parent;
  return parent;
 }
 function matchesType(record,value){
  if(!value)return true;
  const title=String(record.title??"").toLowerCase(), kind=String(record.instrumentClass??"").toLowerCase();
- if(value==="delegated"||value==="implementing")return kind.includes(value)||title.startsWith("commission "+value);
+ const subtype=/^(delegated|implementing)-(regulation|directive|decision)$/.exec(value);
+ if(subtype){
+  const [,level,form]=subtype;
+  return record.sourceCategory==="EU_LEGISLATION"&&(
+   new RegExp("\\b"+level+"\\s+"+form+"\\b").test(title)||
+   new RegExp("\\b"+level+"\\s+"+form+"\\b").test(kind)
+  );
+ }
+ if(value==="delegated"||value==="implementing")return record.sourceCategory==="EU_LEGISLATION"&&(new RegExp("\\b"+value+"\\s+(?:regulation|directive|decision)\\b").test(title)||kind.includes(value));
  if(value==="guidance")return record.sourceCategory!=="EU_LEGISLATION"&&(record.bindingNature==="interpretative_guidance_non_binding"||/guidance|guidelines|guideline|interpretative notice|blue guide/.test(title)||/guidance/i.test(String(record.instrumentClass??record.legalType??"")));
  if(value==="standards")return /harmonised standard|harmonized standard|common specification/.test(title);
  return record.sourceCategory==="EU_LEGISLATION"&&record.legalTypeCode===value;
@@ -310,12 +381,12 @@ async function loadSnapshot(manual=false) {
       try {const response=await fetch(new URL("data/"+name,base),{cache:"no-cache"});if(!response.ok)throw Error("HTTP "+response.status);return await response.json();}
       catch(error){if(required)throw error;console.warn(name,error);return null;}
     }
-    const [data,tax,translations,registry,relatedData]=await Promise.all([
-      read("catalog.json",true),read("business-taxonomy.json"),read("titles-zh.json"),read("source-registry.json"),read("related-materials.json")
+    const [data,tax,translations,registry,relatedData,dictionary]=await Promise.all([
+      read("catalog.json",true),read("business-taxonomy.json"),read("titles-zh.json"),read("source-registry.json"),read("related-materials.json"),read("search-dictionary.json")
     ]);
     if(!Array.isArray(data.documents))throw Error("Invalid catalogue");
     taxonomy=tax??{departments:data.profile?.departments??[],legalFields:[]};
-    zhTitles=translations??{};sourceRegistry=registry??{categories:[]};
+    zhTitles=translations??{};sourceRegistry=registry??{categories:[]};searchDictionary=dictionary??{groups:[]};
     snapshot=data;
     const unique=new Map();
     for(const doc of [...data.documents,...asList(relatedData?.documents)]){
@@ -385,20 +456,26 @@ function resultRow(record,today,terms=[]) {
 function advancedMatch(record,terms) {
   const officialEn=normalize(record.title),en=normalize([record.title,...aliasesFor(record).filter(x=>/[a-z]/i.test(x)&&!/[\u3400-\u9fff]/.test(x))].join(" ")),zh=normalize([record.titleZh,record.titleZhFull,zhTitles[record.id],...aliasesFor(record).filter(x=>/[\u3400-\u9fff]/.test(x))].join(" "));
   const hay=record.searchText;
-  const words=id=>normalize(ui[id].value).split(" ").filter(Boolean);
-  const any=words("any-terms"),excluded=words("exclude-terms"),phrase=normalize(ui["exact-phrase"].value);
+  const any=queryClauses(ui["any-terms"].value),excluded=queryClauses(ui["exclude-terms"].value),phrase=normalize(ui["exact-phrase"].value);
   const number=normalize(ui["act-number"].value).match(/\d{4}\s*\/\s*\d+/)?.[0].replace(/\s/g,"")||normalize(ui["act-number"].value);
   const author=/^commission\b/.test(officialEn)?"commission":/^council\b/.test(officialEn)?"council":/european parliament and (?:of )?the council/.test(officialEn)?"parliament":"other";
-  return terms.every(t=>hay.includes(t))&&(!any.length||any.some(t=>hay.includes(t)))&&excluded.every(t=>!hay.includes(t))&&(!phrase||hay.includes(phrase))
+  return terms.every(clause=>clause.some(term=>hay.includes(term)))&&(!any.length||any.some(clause=>clause.some(term=>hay.includes(term))))&&excluded.every(clause=>clause.every(term=>!hay.includes(term)))&&(!phrase||hay.includes(phrase))
     &&zh.includes(normalize(ui["zh-name"].value))&&en.includes(normalize(ui["en-name"].value))
     &&(!number||referenceNumber(record.id)===number)&&(!ui["celex-number"].value.trim()||normalize(record.id)===normalize(ui["celex-number"].value))
     &&(!ui.author.value||author===ui.author.value);
+}
+function matchesStatus(record,today,value){
+ if(!value)return true;
+ if(record.sourceCategory!=="EU_LEGISLATION")return value==="na";
+ const status=statusFor(record,today);
+ if(value==="active_unknown")return ["active","partial","not_applied","active_unknown"].includes(status);
+ return status===value;
 }
 function matches(record,today,terms) {
   return (!departmentView||record.departments.includes(departmentView))&&(!favoritesView||(!!favorites[record.id]&&(!ui["folder-select"].value||favorites[record.id].folder===ui["folder-select"].value)))&&(!ui.department.value||(ui.department.value==="other"?!record.departments.length:record.departments.includes(ui.department.value)))
     &&(!ui["cross-topic"].value||(record.legalFields??[]).includes(ui["cross-topic"].value))
     &&matchesType(record,selectedTypeFilter())
-    &&(!ui.status.value||((record.sourceCategory==="EU_LEGISLATION"?statusFor(record,today):"na")===ui.status.value))
+    &&matchesStatus(record,today,ui.status.value)
     &&advancedMatch(record,terms);
 }
 
@@ -452,12 +529,12 @@ let sortExplicit=false;
 function defaultSort(){return "relevance";}
 function render() {
   if(!snapshot){ui["result-table"].hidden=true;ui.pagination.hidden=true;ui.empty.hidden=true;ui["result-count"].textContent=refreshError?"法规数据暂不可用":"正在载入法规数据";return;}
-  const today=todayInBrussels(),terms=normalize(ui.search.value).split(" ").filter(Boolean);
+  const today=todayInBrussels(),query=normalize(ui.search.value),terms=queryClauses(query);
   const filtered=records.filter(record=>matches(record,today,terms));
-  filtered.sort((a,b)=>(ui.sort.value==="relevance"?searchRank(b,normalize(ui.search.value))-searchRank(a,normalize(ui.search.value))||(businessRank(b,today)-businessRank(a,today)):0)||(ui.sort.value==="oldest"?(a.published??"").localeCompare(b.published??""):(b.published??"").localeCompare(a.published??"")||b.id.localeCompare(a.id)));
+  filtered.sort((a,b)=>(ui.sort.value==="relevance"?searchRank(b,query,terms)-searchRank(a,query,terms)||(businessRank(b,today)-businessRank(a,today)):0)||(ui.sort.value==="oldest"?(a.published??"").localeCompare(b.published??""):(b.published??"").localeCompare(a.published??"")||b.id.localeCompare(a.id)));
   const lastPage=Math.max(1,Math.ceil(filtered.length/PAGE_SIZE));page=Math.min(page,lastPage);
   const start=(page-1)*PAGE_SIZE,visible=filtered.slice(start,start+PAGE_SIZE);
-  ui["result-rows"].replaceChildren(...visible.map(record=>resultRow(record,today,[...terms,...normalize(ui["any-terms"].value).split(" ").filter(Boolean),...normalize(ui["exact-phrase"].value).split(" ").filter(Boolean)])));
+  ui["result-rows"].replaceChildren(...visible.map(record=>resultRow(record,today,[...terms.flat(),...queryClauses(ui["any-terms"].value).flat(),...normalize(ui["exact-phrase"].value).split(" ").filter(Boolean)])));
   ui["result-table"].hidden=!visible.length;ui.empty.hidden=!!visible.length;
   ui["empty-title"].textContent="没有符合条件的资料";
   ui["empty-detail"].textContent="请尝试其他名称或编号关键词，或调整效力层级、业务部门及法律领域部门。";
