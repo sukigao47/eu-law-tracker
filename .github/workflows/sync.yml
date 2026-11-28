@@ -68,6 +68,7 @@ jobs:
             fi
           done
       - name: 核对 Cellar 数据并筛选业务主题
+        id: catalog_sync
         env:
           REBUILD: ${{ inputs.rebuild }}
         run: |
@@ -75,13 +76,20 @@ jobs:
           if [[ "$REBUILD" == "true" ]]; then
             arguments+=(--rebuild)
           fi
-          if ! python scripts/sync.py "${arguments[@]}"; then
+          if python scripts/sync.py "${arguments[@]}"; then
+            echo "result=updated" >> "$GITHUB_OUTPUT"
+          else
+            echo "result=fallback" >> "$GITHUB_OUTPUT"
             echo "::warning::CELLAR sync failed; retaining previous catalogue snapshot"
             python -c 'import json; d=json.load(open("site/data/catalog.json")); assert d["documents"] and d["checkedAt"]'
           fi
       - name: 同步软法及官方公报 C 系列资料
+        id: related_sync
         run: |
-          if ! timeout 180 python scripts/sync_related.py --profile config/terminal-lifecycle.json --output site/data/related-materials.json; then
+          if timeout 180 python scripts/sync_related.py --profile config/terminal-lifecycle.json --output site/data/related-materials.json; then
+            echo "result=updated" >> "$GITHUB_OUTPUT"
+          else
+            echo "result=fallback" >> "$GITHUB_OUTPUT"
             echo "::warning::Related materials sync failed; retaining previous snapshot"
             python -c 'import json; d=json.load(open("site/data/related-materials.json")); assert d["documents"] and d["checkedAt"]'
           fi
@@ -105,6 +113,55 @@ jobs:
         run: |
           python -m http.server 8765 --directory site &
           python scripts/browser_test.py
+      - name: 生成法规数据更新报告
+        if: always()
+        env:
+          CATALOG_SYNC_RESULT: ${{ steps.catalog_sync.outputs.result || 'not_run' }}
+          RELATED_SYNC_RESULT: ${{ steps.related_sync.outputs.result || 'not_run' }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          def load(path):
+              file = Path(path)
+              if not file.is_file():
+                  return None
+              with file.open(encoding="utf-8") as source:
+                  return json.load(source)
+
+          catalog = load("site/data/catalog.json")
+          related = load("site/data/related-materials.json")
+          lines = [
+              "## 法规数据更新报告",
+              "",
+              f"- 报告生成时间（UTC）：{datetime.now(timezone.utc).isoformat(timespec='seconds')}",
+              f"- EUR-Lex/CELLAR 法规目录同步：{os.environ.get('CATALOG_SYNC_RESULT', 'not_run')}",
+              f"- 软法及官方公报 C 系列同步：{os.environ.get('RELATED_SYNC_RESULT', 'not_run')}",
+          ]
+          if catalog:
+              lines.extend([
+                  f"- 法规目录 checkedAt：{catalog.get('checkedAt', '缺失')}",
+                  f"- 法规目录覆盖日期：{catalog.get('through', '缺失')}",
+                  f"- 法规目录记录数：{len(catalog.get('documents', []))}",
+              ])
+          else:
+              lines.append("- 法规目录：文件缺失")
+          if related:
+              coverage = related.get("coverage", {})
+              lines.extend([
+                  f"- 相关资料 checkedAt：{related.get('checkedAt', '缺失')}",
+                  f"- 相关资料记录数：{len(related.get('documents', []))}",
+                  f"- 软法业务相关记录：{coverage.get('softLawBusinessRelevant', '未知')}",
+                  f"- 官方公报 C 系列业务相关记录：{coverage.get('ojCSeriesBusinessRelevant', '未知')}",
+              ])
+          else:
+              lines.append("- 相关资料目录：文件缺失")
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+              summary.write("\\n".join(lines) + "\\n")
+          PY
       # CJEU case-law ingestion is intentionally disabled per product-owner decision.
       # Official CURIA/EUR-Lex reference links remain available in the source registry.
       - uses: actions/upload-pages-artifact@v4
